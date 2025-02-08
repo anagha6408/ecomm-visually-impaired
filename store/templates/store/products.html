@@ -1,0 +1,43 @@
+{% extends 'store/main.html' %}
+{% load static %}
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/category.css' %}">
+
+<div class="py-3-primary">
+    <div class="container">
+        <a class="text-black" href="{% url 'store:home' %}" data-description="Go to the home page"> Home/ </a>
+        <a class="text-black" href="{% url 'store:collection' %}" data-description="Go to the Category page"> Category/ </a>
+        <a class="text-black" href="{% url 'store:collectionsview' category.slug %}" data-description="Go to the {{category.name}} page"> {{category.name}}/ </a>
+    </div>
+</div>
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <h1>{{ category.name }}</h1>
+            <hr>
+            <div class="row">
+                {% for item in products %}
+                <div class="col-md-3 mb-4" data-description="{{ item.name }}" > <!-- Added mb-4 for spacing -->
+                    <div class="card h-100">
+                        <a href="{% url 'store:productView' item.slug item.name %}">
+                            <div class="card-body text-center">
+                                <div class="category-image">
+                                    <img src="{{ item.product_image.url }}" alt="product_image image" class="w-100">
+                                </div>
+                                    <h4> {{ item.name }} </h4>
+                                    <h5>{{ item.small_description }}</h5>
+                                    <h6>Selling Rate: {{ item.selling_price | stringformat:'d' }}</h6>
+                                    <h6>Original Rate: {{ item.original_price | stringformat:'d' }}</h6>
+                                </div>
+                            </a>
+                    </div>
+                </div>
+                {% endfor %}
+                {% include 'store/voice_control.html' %}
+            </div>
+        </div>
+    </div>
+</div>
+{% include 'store/footer.html' %}
+{% endblock content %}

@@ -1,0 +1,76 @@
+/* General styles */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f8f9fa;
+}
+
+/* Button styles */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 20px;
+    font-size: 16px;
+    font-weight: bold;
+    border: none;
+    border-radius: 5px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+/* Primary Button */
+.btn-primary {
+    background-color: #007bff;
+    color: #fff;
+}
+
+.btn-primary:hover {
+    background-color: #0056b3;
+}
+
+/* Success Button */
+.btn-success {
+    background-color: #28a745;
+    color: #fff;
+}
+
+.btn-success:hover {
+    background-color: #1e7e34;
+}
+
+/* Icons inside buttons */
+.btn i {
+    margin-right: 8px; /* Space between icon and text */
+    font-size: 18px; /* Adjust icon size */
+}
+
+/* Shopping Cart Icon */
+.fas.fa-shopping-cart {
+    color: #fff;
+}
+
+/* Wishlist Icon */
+.fas.fa-heart {
+    color: #fff;
+}
+
+/* Badge styles */
+.badge {
+    display: inline-block;
+    padding: 5px 10px;
+    font-size: 14px;
+    border-radius: 12px;
+}
+
+.badge.bg-success {
+    background-color: #28a745;
+    color: #fff;
+}
+
+.badge.bg-danger {
+    background-color: #dc3545;
+    color: #fff;
+}

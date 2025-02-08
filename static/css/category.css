@@ -1,0 +1,47 @@
+/* Fix the category image container */
+.category-image {
+    height: 250px; /* Fixed height for all image containers */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden; /* Prevents images from overflowing */
+    border-radius: 8px;
+   
+}
+
+/* Scale images proportionally while filling the container */
+.category-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Ensures image fits without distortion */
+}
+
+/* Flexbox grid adjustments */
+.row {
+    display: flex;
+    flex-wrap: wrap; /* Ensure items wrap properly */
+    gap: 16px; /* Add spacing between items */
+}
+
+/* Card styles */
+.card {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Add subtle shadow */
+    transition: transform 0.2s ease, box-shadow 0.2s ease; /* Add hover effect */
+}
+
+/* Hover effect for cards */
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* Adjust text inside cards */
+.card-body {
+    padding: 16px;
+    text-align: center;
+}
+.a{
+    text-decoration: none;
+}

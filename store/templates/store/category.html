@@ -1,0 +1,36 @@
+{% extends 'store/main.html' %}
+{% load static %}
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/category.css' %}">
+<div class="py-3-primary">
+    <div class="container">
+        <a class="text-black" href="{% url 'store:home' %}" data-description="Go to the home page"> Home/ </a>
+        <a class="text-black" href="{% url 'store:collection' %}" data-description="Go to the category page"> Category/ </a>
+    </div>
+</div>
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <h1 class="text-center mb-4">Category Page</h1>
+            <div class="row">
+                {% for item in category %}
+                <div data-description="{{ item.name }}" class="col-md-4 mb-4"> <!-- Adjust card width -->
+                    <div class="card h-100"> <!-- Maintain equal height -->
+                        <a href="{% url 'store:collectionsview' item.slug %}">
+                            <div class="category-image">
+                                <img src="{{ item.image.url }}" alt="category image" class="img-fluid custom-image">
+                            </div>
+                        </a>
+                        <div class="card-body text-center">
+                            <h4 class="card-title"> {{ item.name }} </h4>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+                {% include 'store/voice_control.html' %}
+            </div>
+        </div>
+    </div>
+</div>
+{% include 'store/footer.html' %}
+{% endblock content %}

@@ -1,0 +1,48 @@
+{% load static %}
+ 
+<style>
+    #welcome-message {
+        font-size: 2rem; /* Large font size */
+        font-weight: bold; /* Bold text */
+        color: #000; /* Black color for readability */
+        background-color: #f1f1f1; /* Light background for contrast */
+        padding: 20px;
+        border-radius: 10px;
+        margin: 10px;
+        text-align: center;
+        display: none; /* Initially hidden */
+    }
+</style>
+
+<!-- Welcome Message Content -->
+<div id="welcome-message" class="welcome-msg">
+    Welcome to Halo, an eCommerce website built for visually impaired people. <br>
+    Use the spacebar to play or pause, the left and right arrows to adjust speed, 
+    and the 'R' key to replay the message. <br>
+    Hover over the screen to read or use Up and Down Arrow Keys to navigate through Keyboard.
+</div>
+
+<!-- JavaScript to show message after the page loads -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const welcomeMessageElement = document.getElementById('welcome-message');
+        
+        // Ensure the element exists before interacting with it
+        if (welcomeMessageElement) {
+            welcomeMessageElement.style.display = 'block'; // Show message
+            speakWelcome(); // Speak the message
+        }
+    });
+
+    function speakWelcome() {
+        const welcomeMessageElement = document.getElementById("welcome-message");
+        if (welcomeMessageElement) {
+            const welcomeMessage = welcomeMessageElement.textContent.trim();
+            if (typeof speak === 'function') { 
+                speak(welcomeMessage); 
+            } else {
+                console.warn("speak() function is not defined.");
+            }
+        }
+    }
+</script>
