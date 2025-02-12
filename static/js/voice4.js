@@ -12,7 +12,7 @@ document.addEventListener("DOMContentLoaded", function () {
         isKeyboardMode = savedMode === 'true'; // Convert string back to boolean
         navToggle.checked = isKeyboardMode;
 
-        navModeLabel.textContent = isKeyboardMode ? 'Mouse Navigation' : 'Keyboard Navigation (Default)';
+        navModeLabel.textContent = isKeyboardMode ? 'Keyboard Mouse Navigation' : 'Mouse Navigation';
         
     }
     // Updated selector to include all interactive elements including product view elements
@@ -27,7 +27,8 @@ document.addEventListener("DOMContentLoaded", function () {
         p[data-description],
         h3[data-description],
         .badge[data-description],
-        img[data-description]
+        img[data-description],
+        .toggle-container[data-description]
     `);
 
     // Initial hover listeners
@@ -70,11 +71,24 @@ document.addEventListener("DOMContentLoaded", function () {
         isKeyboardMode = this.checked;
         localStorage.setItem('keyboardMode', isKeyboardMode); // Store the value
         
-        navModeLabel.textContent = isKeyboardMode ? 'Mouse Navigation' : 'Keyboard Navigation (Default)';
+        navModeLabel.textContent = isKeyboardMode ? 'Keyboard Navigation' : 'Mouse Navigation';
     
         if (isKeyboardMode) {
             // If switching to Keyboard Mode, initialize first tab selection and speech
-            const interactiveElements = document.querySelectorAll(`a[data-description], button[data-description], input[data-description]`);
+            const interactiveElements = document.querySelectorAll(`
+                a[data-description], 
+                button[data-description], 
+                input[data-description], 
+                [class*="col-"][data-description],
+                label[data-description],
+                h2[data-description],
+                h6[data-description],
+                p[data-description],
+                h3[data-description],
+                .badge[data-description],
+                img[data-description],
+                .toggle-container[data-description]
+            `);
             if (interactiveElements.length > 0) {
                 // Explicitly select the first tab and speak its description
                 interactiveElements[0].classList.add('selected-tab');
@@ -144,7 +158,8 @@ function navigateTabs(direction) {
         p[data-description],
         h3[data-description],
         .badge[data-description],
-        img[data-description]
+        img[data-description],
+       .toggle-container[data-description]
     `));
     
     let currentTab = document.querySelector('.selected-tab');
