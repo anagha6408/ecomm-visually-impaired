@@ -32,7 +32,7 @@ ALLOWED_HOSTS = []
 
 INSTALLED_APPS = [
     'userauths',
-    'tts',
+    'cart',
     'jazzmin',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -66,6 +66,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'cart.content_processor.cart',
             ],
             
         },

@@ -4,7 +4,6 @@ from django.contrib import messages
 from django.conf import settings
 from .models import CarouselImage
 from .models import *
-from gtts import gTTS
 from django.http import HttpResponse
 
 
@@ -70,3 +69,5 @@ def store_home(request):
 def welcome_msg(request):
     welcome_message = "Welcome to our eCommerce website designed for visually impaired users. We are here to assist you!"
     return render(request, 'home.html', {'welcome_message': welcome_message})
+def editProfile(request):
+	return render(request,"store/editProfile.html")

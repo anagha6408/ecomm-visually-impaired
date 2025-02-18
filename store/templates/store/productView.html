@@ -57,7 +57,7 @@
                                 <div class="col-md-9">
                                     <br />
                                     {% if products.quantity %}
-                                        <button type="button" class="btn btn-primary me-3 float-start" style="border-radius: 10px;" data-description="Add to cart">
+                                        <button type="button" class="btn btn-primary me-3 float-start" value={{products.id}} id="add-cart" style="border-radius: 10px;" data-description="Add to cart">
                                             Add to Cart <i class="fa fa-shopping-cart"></i>
                                         </button>
                                     {% endif %}
@@ -80,6 +80,55 @@
         </div>
     </div>
 </div>
+
+<script>
+    //checking is the add to cart button is pressed
+    $(document).ready(function() {
+        // Handle quantity increment/decrement
+        $('.increment-btn').click(function(e) {
+            e.preventDefault();
+            var qty = $(this).closest('.input-group').find('input');
+            var value = parseInt(qty.val());
+            qty.val(value + 1);
+        });
+    
+        $('.decrement-btn').click(function(e) {
+            e.preventDefault();
+            var qty = $(this).closest('.input-group').find('input');
+            var value = parseInt(qty.val());
+            if (value > 1) {
+                qty.val(value - 1);
+            }
+        });
+    
+        // Handle add to cart
+        $('#add-cart').click(function(e) {
+            e.preventDefault();
+            
+            var product_id = $(this).val();
+            var quantity = $('.input-group').find('input[name="quantity"]').val();
+            
+            $.ajax({
+                type: "POST",
+                url: "/cart/add/",
+                data: {
+                    'product_id': product_id,
+                    'quantity': quantity,
+                    'csrfmiddlewaretoken': $('input[name=csrfmiddlewaretoken]').val(),
+                    'action': 'post'
+                },
+                success: function(response) {
+                    alert("Product added to cart: " + response["product Name"]);
+                },
+                error: function(xhr, errmsg, err) {
+                    console.log(xhr.responseText);
+                    alert("Error adding product to cart. Please try again.");
+                }
+            });
+        });
+    });
+        
+</script>
 
 <!-- Include Voice Control Script -->
 {% include 'store/voice_control.html' %}

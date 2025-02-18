@@ -43,8 +43,7 @@ class Product(models.Model):
 
     def __str__(self):
         return self.name
-
-
+    
 class CarouselImage(models.Model):
     title = models.CharField(max_length=255, blank=True, null=True)  # Optional title for the image
     image_ads  = models.ImageField(upload_to='carousel/')  # Uploads images to `MEDIA_ROOT/carousel/`
