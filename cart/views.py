@@ -1,33 +1,125 @@
-from django.shortcuts import render,get_object_or_404
-from .cart import Cart
-from store.models  import Product
+from django.shortcuts import render
 from django.http import JsonResponse
-def cart_summary(request):
-    return render(request, 'store/cart.html',{})
+import json
+import datetime
+from .models import * 
+from cart.cart import cookieCart, cartData, guestOrder
 
-def cart_add(request):
-    print("Request method:", request.method)  # Debug print
-    print("POST data:", request.POST)  # Debug print
+def store(request):
+	data = cartData(request)
+
+	cartItems = data['cartItems']
+	order = data['order']
+	items = data['items']
+
+	products = Product.objects.all()
+	context = {'products':products, 'cartItems':cartItems}
+	return render(request, 'store/home.html', context)
+
+
+def cart(request):
+    data = cartData(request)  # Ensure this function is working correctly
+    print("HELLOOO IN THE CART FUNCTION of cart.views")  # Debugging
+
+    cartItems = data['cartItems']
+    order = data['order']
+    items = data['items']
+
+    print("Cart Items:", cartItems)  # Debugging
+    print("Order:", order)
+    print("Items:", items)
+
+    context = {'items': items, 'order': order, 'cartItems': cartItems}
+    return render(request, 'store/cart2.html', context)
+
+
+def checkout(request):
+	data = cartData(request)
+	print("Cart Data Passed to Template:", data)
+	cartItems = data['cartItems']
+	order = data['order']
+	items = data['items']
+
+	context = {'items':items, 'order':order, 'cartItems':cartItems}
+	return render(request, 'store/checkout.html', context)
+
+def updateItem(request):
+    data = json.loads(request.body)
+    productId = data['productId']
+    action = data['action']
+    print('Action:', action)
+    print('Product:', productId)
+
+    try:
+        customer = request.user.customer
+    except:
+        customer = Customer.objects.create(
+            user=request.user,
+            name=request.user.username,
+            email=request.user.email
+        )
+
+    product = Product.objects.get(id=productId)
+    order = Order.objects.filter(customer=customer, complete=False).first()
+    if not order:
+        order = Order.objects.create(customer=customer, complete=False)
+
     
-    if request.method == "POST" and request.POST.get("action") == "post":
+    # Use filter().first() instead of get_or_create
+    orderItem = OrderItem.objects.filter(order=order, product=product).first()
+    
+    # If orderItem doesn't exist, create it
+    if orderItem is None:
+        orderItem = OrderItem.objects.create(order=order, product=product, quantity=0)
+    
+    # Get quantity from request
+    quantity = int(data.get('quantity', 1))
+    
+    if action == 'add':
+        orderItem.quantity += quantity
+    elif action == 'remove':
+        orderItem.quantity -= 1
+
+    orderItem.save()
+
+    if orderItem.quantity <= 0:
+        orderItem.delete()
+
+    return JsonResponse('Item was added', safe=False)
+
+def processOrder(request):
+    transaction_id = datetime.datetime.now().timestamp()
+    data = json.loads(request.body)
+
+    if request.user.is_authenticated:
         try:
-            cart = Cart(request)
-            product_id = request.POST.get("product_id")
-            quantity = int(request.POST.get("quantity", 1))
-            
-            print(f"Adding product {product_id} with quantity {quantity}")  # Debug print
-            
-            product = get_object_or_404(Product, id=product_id)
-            cart.add(product=product, quantity=quantity)
-            
-            return JsonResponse({"product Name": product.name, "quantity": quantity})
-        except Exception as e:
-            print(f"Error in cart_add: {e}")  # Debug print
-            return JsonResponse({"error": str(e)}, status=500)
-    
-    return JsonResponse({"error": "Invalid request"}, status=400)
-def cart_delete(request):
-    return render(request, 'store/cart_delete.html')
+            customer = request.user.customer
+        except:
+            # Create a customer for this user if one doesn't exist
+            customer = Customer.objects.create(
+                user=request.user,
+                name=request.user.username,
+                email=request.user.email
+            )
+        order, created = Order.objects.get_or_create(customer=customer, complete=False)
+    else:
+        customer, order = guestOrder(request, data)
 
-def cart_update(request):
-    return render(request, 'store/cart_update.html')
+    total = float(data['form']['total'])
+    order.transaction_id = transaction_id
+
+    if total == order.get_cart_total:
+        order.complete = True
+    order.save()
+
+    if order.shipping == True:
+        ShippingAddress.objects.create(
+        customer=customer,
+        order=order,
+        address=data['shipping']['address'],
+        city=data['shipping']['city'],
+        state=data['shipping']['state'],
+        zipcode=data['shipping']['zipcode'],
+        )
+
+    return JsonResponse('Payment submitted..', safe=False)

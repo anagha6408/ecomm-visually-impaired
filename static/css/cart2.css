@@ -1,0 +1,152 @@
+/* cart2.css - Enhanced shopping cart styling */
+
+/* Overall container styling */
+.row {
+    margin: 20px 0;
+  }
+  
+  /* Box element styling */
+  .box-element {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    background-color: #fff;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+  }
+  
+  /* Button styling */
+  .btn {
+    transition: all 0.3s ease;
+  }
+  
+  .btn-outline-dark {
+    font-weight: 500;
+    padding: 10px 15px;
+  }
+  
+  .btn-outline-dark:hover {
+    background-color: #343a40;
+    color: white;
+  }
+  
+  .btn-success {
+    font-weight: 500;
+    padding: 10px 20px;
+    border-radius: 4px;
+    background-color: #28a745;
+    border-color: #28a745;
+    font-size: 16px;
+  }
+  
+  .btn-success:hover {
+    background-color: #218838;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Table styling */
+  .table {
+    margin-bottom: 0;
+  }
+  
+  .table th {
+    border-top: none;
+  }
+  
+  /* Cart rows styling */
+  .cart-row {
+    display: flex;
+    align-items: center;
+    padding: 15px 0;
+    border-bottom: 1px solid #e9ecef;
+  }
+  
+  .cart-row:last-child {
+    border-bottom: none;
+  }
+  
+  /* Header row styling */
+  .cart-row:first-child {
+    border-bottom: 2px solid #e9ecef;
+    padding-bottom: 10px;
+    font-size: 16px;
+  }
+  
+  /* Product image styling */
+  .row-image {
+    width: 70px;
+    height: 70px;
+    object-fit: cover;
+    border-radius: 6px;
+  }
+  
+  /* Product details styling */
+  .cart-row p {
+    margin-bottom: 0;
+  }
+  
+  /* Container for quantity display and controls */
+  .quantity-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  /* Quantity number display */
+  .quantity {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 5px 0;
+    font-weight: 500;
+  }
+  
+  /* Arrow controls wrapper */
+  .quantity-controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  /* Individual arrow buttons */
+  .chg-quantity {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    margin: 0 5px;
+    transition: all 0.2s;
+  }
+  
+  .chg-quantity:hover {
+    transform: scale(1.2);
+  }
+  
+  /* Price and total emphasis */
+  .cart-row div:nth-child(3) p,
+  .cart-row div:nth-child(5) p {
+    font-weight: 500;
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .cart-row {
+      flex-direction: column;
+      text-align: center;
+      padding: 15px 0;
+    }
+    
+    .cart-row > div {
+      margin: 5px 0;
+      width: 100%;
+    }
+    
+    .cart-row:first-child {
+      display: none;
+    }
+    
+    .row-image {
+      margin: 0 auto;
+      display: block;
+    }
+  }

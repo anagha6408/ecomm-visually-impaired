@@ -13,14 +13,14 @@ def index(request):
 def home(request):
 	context = {}    #to pass data
 	return render(request, 'store/home.html', context)
+#
+#def cart(request):
+#	context = {}
+#	return render(request, 'store/cart2.html', context)
 
-def cart(request):
-	context = {}
-	return render(request, 'store/cart.html', context)
-
-def checkout(request):
-	context = {}
-	return render(request, 'store/checkout.html', context)
+#def checkout(request):
+#	context = {}
+#	return render(request, 'store/checkout.html', context)
 
 def collection(request):
 	category=Category.objects.filter()

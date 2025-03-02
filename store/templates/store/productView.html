@@ -50,17 +50,22 @@
                                     <label for="Quantity" data-description="Quantity selector">Quantity</label>
                                     <div class="input-group text-center mb-3" style="width:150px;">
                                         <button class="input-group-text decrement-btn" data-description="Decrease quantity">-</button>
-                                        <input type="text" name="quantity" class="form-control text-center" value="1" data-description="Current quantity: 1">
+                                        <input type="text" name="quantity" id="quantity" class="form-control text-center qty-input" value="1" data-description="Current quantity: 1">
                                         <button class="input-group-text increment-btn" data-description="Increase quantity">+</button>
                                     </div>
                                 </div>
                                 <div class="col-md-9">
                                     <br />
-                                    {% if products.quantity %}
-                                        <button type="button" class="btn btn-primary me-3 float-start" value={{products.id}} id="add-cart" style="border-radius: 10px;" data-description="Add to cart">
-                                            Add to Cart <i class="fa fa-shopping-cart"></i>
-                                        </button>
-                                    {% endif %}
+                                    <button type="button" class="btn btn-primary me-3 float-start update-cart" 
+                                           data-product="{{products.id}}" data-action="add" 
+                                           
+                                           style="border-radius: 10px;" data-description="Add to cart" 
+                                           onclick="event.preventDefault();">
+                                        Add to Cart <i class="fa fa-shopping-cart"></i>
+                                    </button>
+                                    
+                                    
+                                   
                                     <button type="button" class="btn btn-success float-start" style="border-radius: 10px;" data-description="Add to wishlist">
                                         Add to Wishlist <i class="fa fa-heart"></i>
                                     </button>
@@ -81,53 +86,170 @@
     </div>
 </div>
 
-<script>
-    //checking is the add to cart button is pressed
-    $(document).ready(function() {
-        // Handle quantity increment/decrement
-        $('.increment-btn').click(function(e) {
-            e.preventDefault();
-            var qty = $(this).closest('.input-group').find('input');
-            var value = parseInt(qty.val());
-            qty.val(value + 1);
-        });
+<!-- JavaScript for Cart Functionality -->
+<script type="text/javascript">
+    // Debug message to confirm script is running
+    console.log("Cart script initializing...");
     
-        $('.decrement-btn').click(function(e) {
-            e.preventDefault();
-            var qty = $(this).closest('.input-group').find('input');
-            var value = parseInt(qty.val());
-            if (value > 1) {
-                qty.val(value - 1);
+    // User and CSRF token setup
+    var user = '{{request.user}}';
+    console.log("Current user:", user);
+    
+    // Get CSRF token for secure requests
+    function getToken(name) {
+        var cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            var cookies = document.cookie.split(';');
+            for (var i = 0; i < cookies.length; i++) {
+                var cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    var csrftoken = getToken('csrftoken');
+    console.log("CSRF token obtained");
+    
+    // Get or initialize cart from cookies
+    function getCookie(name) {
+        var cookieArr = document.cookie.split(";");
+        for(var i = 0; i < cookieArr.length; i++) {
+            var cookiePair = cookieArr[i].split("=");
+            if(name == cookiePair[0].trim()) {
+                return decodeURIComponent(cookiePair[1]);
+            }
+        }
+        return null;
+    }
+    
+    // Initialize cart with error handling
+    var cart;
+    try {
+        cart = JSON.parse(getCookie('cart'));
+        if(cart === null) throw new Error("Cart cookie not found");
+    } catch (err) {
+        cart = {};
+        console.log('Creating new cart:', err.message);
+        document.cookie = 'cart=' + JSON.stringify(cart) + ";domain=;path=/";
+    }
+    console.log('Current cart:', cart);
+    
+    // Setup quantity increment/decrement buttons
+    document.querySelector('.increment-btn').addEventListener('click', function() {
+        var input = document.querySelector('.qty-input');
+        var value = parseInt(input.value, 10);
+        value = isNaN(value) ? 1 : value;
+        input.value = value + 1;
+    });
+    
+    document.querySelector('.decrement-btn').addEventListener('click', function() {
+        var input = document.querySelector('.qty-input');
+        var value = parseInt(input.value, 10);
+        if(value > 1) {
+            value = isNaN(value) ? 1 : value;
+            input.value = value - 1;
+        }
+    });
+    
+    // Add to cart functionality
+    function updateUserOrder(productId, action) {
+        console.log("Sending data to server...");
+        
+        var url = "/update_item/";
+        var quantity = document.getElementById('quantity').value;
+        
+        fetch(url, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": csrftoken,
+            },
+            body: JSON.stringify({ 
+                productId: productId, 
+                action: action,
+                quantity: quantity
+            }),
+        })
+        .then((response) => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then((data) => {
+            console.log('Success:', data);
+            updateCartUI(data);
+        })
+        .catch((error) => {
+            console.error('Error:', error);
+            alert('There was an error adding the item to your cart. Please try again.');
+        });
+    }
+    
+    // Add this to your script or replace the existing addCookieItem function
+
+    function addCookieItem(productId, action) {
+        console.log("🔍 Function Called: addCookieItem()");
+        console.log("🛒 Product ID:", productId);
+        console.log("🛠️ Action:", action);
+        console.log("Adding to cookie cart. Product:", productId, "Action:", action);
+        
+        // Get the quantity
+        var quantity = parseInt(document.getElementById('quantity').value) || 1;
+        console.log("Quantity:", quantity);
+        
+        // Make sure cart is properly initialized
+        if (!cart) {
+            cart = {};
+        }
+        
+        if (action == "add") {
+            if (cart[productId] === undefined) {
+                cart[productId] = { "quantity": quantity };
+            } else {
+                cart[productId]["quantity"] += quantity;
+            }
+            console.log("Added to cart:", productId, "Quantity:", cart[productId]["quantity"]);
+        }
+        
+        if (action == "remove") {
+            cart[productId]["quantity"] -= 1;
+            if (cart[productId]["quantity"] <= 0) {
+                delete cart[productId];
+            }
+        }
+        
+        // Save the updated cart cookie
+        document.cookie = "cart=" + JSON.stringify(cart) + ";domain=;path=/;max-age=604800";
+        console.log("Updated cart cookie:", JSON.stringify(cart));
+        
+        // Show visual feedback
+        alert("Item added to cart!");
+        
+        // Reload the page
+        location.reload();
+    }
+    
+    // Setup event listeners for cart buttons
+    var updateBtns = document.getElementsByClassName("update-cart");
+    console.log("Found update buttons:", updateBtns.length);
+    
+    for (var i = 0; i < updateBtns.length; i++) {
+        updateBtns[i].addEventListener("click", function () {
+            var productId = this.dataset.product;
+            var action = this.dataset.action;
+            console.log("productId:", productId, "Action:", action);
+            
+            if (user === "AnonymousUser") {
+                addCookieItem(productId, action);
+            } else {
+                updateUserOrder(productId, action);
             }
         });
-    
-        // Handle add to cart
-        $('#add-cart').click(function(e) {
-            e.preventDefault();
-            
-            var product_id = $(this).val();
-            var quantity = $('.input-group').find('input[name="quantity"]').val();
-            
-            $.ajax({
-                type: "POST",
-                url: "/cart/add/",
-                data: {
-                    'product_id': product_id,
-                    'quantity': quantity,
-                    'csrfmiddlewaretoken': $('input[name=csrfmiddlewaretoken]').val(),
-                    'action': 'post'
-                },
-                success: function(response) {
-                    alert("Product added to cart: " + response["product Name"]);
-                },
-                error: function(xhr, errmsg, err) {
-                    console.log(xhr.responseText);
-                    alert("Error adding product to cart. Please try again.");
-                }
-            });
-        });
-    });
-        
+    }
 </script>
 
 <!-- Include Voice Control Script -->
