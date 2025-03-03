@@ -71,21 +71,27 @@ def updateItem(request):
     # If orderItem doesn't exist, create it
     if orderItem is None:
         orderItem = OrderItem.objects.create(order=order, product=product, quantity=0)
-    
     # Get quantity from request
     quantity = int(data.get('quantity', 1))
     
-    if action == 'add':
-        orderItem.quantity += quantity
-    elif action == 'remove':
+    if action == 'Increase':
+        orderItem.quantity += 1
+        message = "Item quantity increased!"
+    elif action == 'Decrease':
         orderItem.quantity -= 1
+        message = "Item quantity decreased!"
+    elif action == 'delete':
+        orderItem.delete()
+        message = "Item successfully removed from your cart!"
+        return JsonResponse('Item was added', safe=False)
+
 
     orderItem.save()
 
     if orderItem.quantity <= 0:
         orderItem.delete()
 
-    return JsonResponse('Item was added', safe=False)
+    return JsonResponse({'message':message , 'quantity': orderItem.quantity}, safe=False)
 
 def processOrder(request):
     transaction_id = datetime.datetime.now().timestamp()

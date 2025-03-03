@@ -116,7 +116,9 @@
     var csrftoken = "{{ csrf_token }}";
 </script>
   <!-- Make sure to include your cart2.js script at the end of your template -->
-  <script src="{% static 'js/cart2.js' %}"></script>
+  <script src="{% static 'js/cartVoice.js' %}"></script>
+<script src="{% static 'js/cart.js' %}"></script>
+
   </div>
 <!-- Include Voice Control Script -->
 {% include 'store/voice_control.html' %}

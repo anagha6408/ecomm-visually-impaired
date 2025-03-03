@@ -38,14 +38,14 @@
 					<div style="flex:1"><p>${{item.product.selling_price|floatformat:2}}</p></div>
 					<div style="flex:1">
 						<div class="quantity">
-							<img data-product="{{item.product.id}}" data-action="add" class="chg-quantity update-cart" src="{% static  'images/arrow-up.png' %}">
-							<p class="quantity">{{item.quantity}}</p>
-							<img data-product="{{item.product.id}}" data-action="remove" class="chg-quantity update-cart" src="{% static  'images/arrow-down.png' %}">
+							<img data-product="{{item.product.id}}" data-action="Increase" class="chg-quantity update-cart" src="{% static  'images/arrow-up.png' %}">
+							<p class="qty-input">{{item.quantity}}</p>
+							<img data-product="{{item.product.id}}" data-action="Decrease" class="chg-quantity update-cart" src="{% static  'images/arrow-down.png' %}">
 						</div>
 					</div>
 					<div style="flex:1"><p>${{item.get_total|floatformat:2}}</p></div>
 					<div style="flex:0.5">
-						<img data-product="{{item.product.id}}" data-action="remove" class="chg-quantity update-cart" src="{% static 'images/trash-bin.png' %}" style="cursor:pointer; width:20px;">
+						<img data-product="{{item.product.id}}" data-action="delete" class="chg-quantity update-cart" src="{% static 'images/trash-bin.png' %}" style="cursor:pointer; width:20px;">
 					</div>
 					
 				</div>
@@ -53,4 +53,12 @@
 			</div>
 		</div>
 	</div>
+	<script>
+		var csrftoken = "{{ csrf_token }}";
+		var user = "{{ request.user }}";
+	</script>
+	<script src="{% static 'js/cartVoice.js' %}"></script>
+	<script src="{% static 'js/cart.js' %}"></script>
+
+	
 {% endblock content %}
