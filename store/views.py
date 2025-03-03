@@ -45,7 +45,7 @@ def productView(request, pro_slug, pro_name):
 		else:
 			messages.error(request,"No product found")
 			return redirect("collection")
-		return render(request,"store/productView.html",context)
+		return render(request,"store/productView2.html",context)
 
 # to dynamically display the images from the  products folder in the silder
 def carousel_view(request):

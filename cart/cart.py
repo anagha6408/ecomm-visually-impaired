@@ -25,6 +25,7 @@ def cookieCart(request):
 
 	for i in cart:
 		try:
+			cartItems += cart[i]['quantity']
 			product = Product.objects.get(id=i)
 			total = product.selling_price * cart[i]['quantity']
 
@@ -52,22 +53,21 @@ def cookieCart(request):
 	return {'cartItems': cartItems, 'order': order, 'items': items}
 
 def cartData(request):
-	if request.user.is_authenticated:
-		customer = request.user.customer
-		order, created = Order.objects.get_or_create(customer=customer, complete=False)
-		items = order.orderitem_set.all()
-		cartItems = order.get_cart_items
-		print("🟢 Authenticated User Cart Data:", {'cartItems': cartItems, 'order': order, 'items': items})
-	else:
-		print("🔴 User is not logged in. Using cookieCart...")
-		cookieData = cookieCart(request)
-		cartItems = cookieData['cartItems']
-		order = cookieData['order']
-		items = cookieData['items']
+    if request.user.is_authenticated:
+        customer = request.user.customer
+        # Safely retrieve the first incomplete order or create a new one
+        order = Order.objects.filter(customer=customer, complete=False).order_by('-date_ordered').first()
+        if not order:
+            order = Order.objects.create(customer=customer, complete=False)
+        items = order.orderitem_set.all()
+        cartItems = order.get_cart_items  # Ensure this is called as a property
+    else:
+        cookieData = cookieCart(request)
+        cartItems = cookieData['cartItems']
+        order = cookieData['order']
+        items = cookieData['items']
 
-		print("🍪 Guest User Cart Data:", {'cartItems': cartItems, 'order': order, 'items': items})
-
-	return {'cartItems': cartItems, 'order': order, 'items': items}
+    return {'cartItems': cartItems, 'order': order, 'items': items}
 
 	
 def guestOrder(request, data):

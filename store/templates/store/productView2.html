@@ -1,0 +1,124 @@
+{% extends 'store/main2.html' %}
+{% load static %}
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/productView.css' %}">
+
+<!-- Breadcrumb Navigation -->
+<div class="py-3-primary">
+    <div class="container">
+        <a class="text-black" href="{% url 'store:home' %}" data-description="Go to the home page"> Home/ </a>
+        <a class="text-black" href="{% url 'store:collection' %}" data-description="Go to the category page"> Category/ </a>
+        <a class="text-black" href="{% url 'store:collectionsview' products.category.slug %}" data-description="Go to the {{ products.category.name }} section"> {{ products.category.name }}/ </a>
+        <a class="text-black" href="{% url 'store:productView' products.category.slug products.slug %}" data-description="Go to the {{ products.name }} product page"> {{ products.name }}/ </a>
+    </div>
+</div>
+
+<!-- Product Details -->
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card shadow" style="border-radius: 15px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);" >
+                <div class="card-body">
+                    <div class="row">
+                        <!-- Image Section -->
+                        <div class="col-md-4">
+                            <img src="{{ products.product_image.url }}" class="w-100" alt="image" style="border-radius: 15px;" data-description="Image of {{ products.name }}">
+                        </div>
+                        <!-- Product Details Section -->
+                        <div class="col-md-8">
+                            <h2 class="mb-0 d-flex align-items-center" data-description="{{ products.name }}">
+                                {{ products.name }}
+                                {% if products.trending %}
+                                    <label class="trending-tag" style="background-color: red; color: white; padding: 2px 8px; font-size: 14px; border-radius: 5px; margin-left: 10px;" data-description="Trending product">Trending</label>
+                                {% endif %}
+                            </h2>
+                            <h6 data-description="Selling price: {{ products.selling_price | stringformat:'d' }}">Selling Rate: {{ products.selling_price | stringformat:'d' }}</h6>  
+                            <h6 style="text-decoration: line-through;" data-description="Original price: {{ products.original_price | stringformat:'d' }}">Original Rate: {{ products.original_price | stringformat:'d' }}</h6>
+                            <p class="mt-3" data-description="{{ products.small_description }}">{{ products.small_description }}</p>
+                            <hr>
+                            
+                            <!-- Stock Status -->
+                            {% if in_stock %}
+                                <label class="badge bg-success" data-description="In stock">In Stock</label>
+                            {% else %}
+                                <label class="badge bg-danger" data-description="Out of stock">Out of Stock</label>
+                            {% endif %}
+                            
+                            <!-- Quantity and Buttons -->
+                            <div class="row mt-3">
+                                <div class="col-md-3">
+                                    <label for="Quantity" data-description="Quantity selector">Quantity</label>
+                                    <div class="input-group text-center mb-3" style="width:150px;">
+                                        <button class="input-group-text decrement-btn" data-description="Decrease quantity">-</button>
+                                        <input type="text" name="quantity" id="quantity" class="form-control text-center qty-input" value="1" data-description="Current quantity: 1">
+                                        <button class="input-group-text increment-btn" data-description="Increase quantity">+</button>
+                                    </div>
+                                </div>
+                                <div class="col-md-9">
+                                    <br />
+                                    <button type="button" class="btn btn-primary me-3 float-start update-cart" 
+                                           data-product="{{products.id}}" data-action="add" 
+                                           
+                                           style="border-radius: 10px;" data-description="Add to cart" 
+                                          >
+                                        Add to Cart <i class="fa fa-shopping-cart"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-success float-start" style="border-radius: 10px;" data-description="Add to wishlist">
+                                        Add to Wishlist <i class="fa fa-heart"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Product Description -->
+                    <div class="col-md-12 mt-4">
+                        <hr>
+                        <h3 data-description="Product description is Below">Description</h3>
+                        <p class="mt-3" data-description="{{ products.description }}">{{ products.description }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Update your existing popup HTML in productView.html to this: -->
+ <!--
+<div id="loginPopup" class="popup-overlay" style="display: none;">
+    <div class="popup-content">
+      <div class="popup-header">
+        <h3>Login Required</h3>
+        <span class="close-btn" onclick="closePopup()">&times;</span>
+      </div>
+      
+      <div class="popup-body">
+        <p>Please log in to add items to your cart.</p>
+        <div class="popup-buttons">
+          <a href="{% url 'userauth:login' %}" class="btn btn-primary">Login</a>
+          <a href="{% url 'userauth:sign-up' %}" class="btn btn-secondary">Register</a>
+          <button class="btn btn-light" onclick="closePopup()">Continue Shopping</button>
+        </div>
+      </div>
+    </div>
+    
+  </div>
+   -->
+<div id="loginPopup" class="popup-overlay" style="display: none;">
+  <script type="text/javascript">
+    var user = "{{ request.user }}";
+    console.log("User status:", user);
+    {% if request.user.is_authenticated %}
+        user = "{{ request.user.username }}";
+    {% else %}
+        user = "AnonymousUser";
+    {% endif %}
+    console.log("User variable defined as:", user);
+    var csrftoken = "{{ csrf_token }}";
+</script>
+  <!-- Make sure to include your cart2.js script at the end of your template -->
+  <script src="{% static 'js/cart2.js' %}"></script>
+  </div>
+<!-- Include Voice Control Script -->
+{% include 'store/voice_control.html' %}
+{% include 'store/footer.html' %}
+{% endblock content %}

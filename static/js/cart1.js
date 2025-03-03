@@ -1,6 +1,6 @@
-// Replace your existing event listener code with this
-console.log("✅ Cart.js is loaded!");
-var updateBtns = document.getElementsByClassName(".update-cart");
+
+console.log("✅ Cart first.js is loaded!");
+var updateBtns = document.getElementsByClassName("update-cart");
 console.log("Found update buttons:", updateBtns.length);
 
 for (var i = 0; i < updateBtns.length; i++) {
@@ -24,7 +24,7 @@ for (var i = 0; i < updateBtns.length; i++) {
 function updateUserOrder(productId, action) {
     console.log("User is authenticated, sending data...");
 
-    var url = "/update_item/";
+    var url = "/cart/update_item/";
 
     fetch(url, {
         method: "POST",
