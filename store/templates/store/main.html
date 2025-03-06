@@ -59,7 +59,8 @@
                 <a href="{% url 'cart:cart' %}" data-description="Click to go to cart">
                    <img  id="cart-icon" src="{% static 'images/cart.png' %}">
                </a>
-               <p id="cart-total">{{cartItems}}</p>
+               <p id="cart-total">{{cartItems|default:"0"}}</p>
+               &nbsp;&nbsp;&nbsp;&nbsp;
               </div>
             
            <div class="form-inline my-2 my-lg-0">
@@ -91,6 +92,7 @@
           {% block content %}
           {% endblock content %}
       </div>
+      
       
         
   <script type="text/javascript" src="{% static 'js/cart2.js' %}"></script>

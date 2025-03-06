@@ -6,16 +6,15 @@
 		<div class="col-lg-12">
 			<div class="box-element">
 
-				<a  class="btn btn-outline-dark" href="{% url 'store:home' %}">&#x2190; Continue Shopping</a>
-
+				<a class="btn btn-outline-dark" href="{% url 'store:home' %} " data-description="Click here to Continue Shopping" >&#x2190; Continue Shopping</a>
 				<br>
 				<br>
 				<table class="table">
 					<tr>
-						<th><h5>Items: <strong>{{order.get_cart_items}}</strong></h5></th>
-						<th><h5>Total:<strong> ${{order.get_cart_total|floatformat:2}}</strong></h5></th>
+						<th><h5 data-description="Total number of items in the cart is {{order.get_cart_items}} " role="button">Items: <strong>{{order.get_cart_items}}</strong></h5></th>
+						<th><h5 data-description="Total amount of all the items in the cart is {{order.get_cart_total|floatformat:2}} " role="button">Total:<strong> ${{order.get_cart_total|floatformat:2}}</strong></h5></th>
 						<th>
-							<a  style="float:right; margin:5px;" class="btn btn-success" href="{% url 'cart:checkout' %}">Checkout</a>
+							<a style="float:right; margin:5px;" class="btn btn-success" href="{% url 'cart:checkout' %}" data-description="Click here to go to Checkout page ">Checkout</a>
 						</th>
 					</tr>
 				</table>
@@ -33,19 +32,19 @@
 				</div>
 				{% for item in items %}
 				<div class="cart-row">
-					<div style="flex:2"><img class="row-image" src="{{item.product.product_image.url }}"></div>
-					<div style="flex:2"><p>{{item.product.name}}</p></div>
-					<div style="flex:1"><p>${{item.product.selling_price|floatformat:2}}</p></div>
+					<div style="flex:2"><img class="row-image"  data-description=" Image of the product {{item.product.name}}"src="{{item.product.product_image.url }}"></div>
+					<div style="flex:2"><p data-description="Product Name : {{item.product.name}} ">{{item.product.name}}</p></div>
+					<div style="flex:1"><p class="item-price" data-description=" Price of the Product {{item.product.name}} is {{item.product.selling_price|floatformat:2}}">${{item.product.selling_price|floatformat:2}}</p></div>
 					<div style="flex:1">
 						<div class="quantity">
-							<img data-product="{{item.product.id}}" data-action="Increase" class="chg-quantity update-cart" src="{% static  'images/arrow-up.png' %}">
-							<p class="qty-input">{{item.quantity}}</p>
-							<img data-product="{{item.product.id}}" data-action="Decrease" class="chg-quantity update-cart" src="{% static  'images/arrow-down.png' %}">
+							<img data-product="{{item.product.id}}" data-action="Increase" class="chg-quantity update-cart" src="{% static  'images/arrow-up.png' %}" data-description="Click here to Increase the quantity of item ">
+							<p class="qty-input" data-description="Current quantity is {{item.quantity}} ">{{item.quantity}}</p>
+							<img data-product="{{item.product.id}}" data-action="Decrease" class="chg-quantity update-cart" src="{% static  'images/arrow-down.png' %}" data-description="Click here to Decrease the quantity of item ">
 						</div>
 					</div>
-					<div style="flex:1"><p>${{item.get_total|floatformat:2}}</p></div>
+					<div style="flex:1" ><p data-description=" Total price of the product {{item.product.name}} is {{item.get_total|floatformat:2}} ">${{item.get_total|floatformat:2}}</p></div>
 					<div style="flex:0.5">
-						<img data-product="{{item.product.id}}" data-action="delete" class="chg-quantity update-cart" src="{% static 'images/trash-bin.png' %}" style="cursor:pointer; width:20px;">
+						<img data-product="{{item.product.id}}" data-action="delete" class="chg-quantity update-cart" src="{% static 'images/trash-bin.png' %}" style="cursor:pointer; width:20px;" data-description="Click here to Remove the product item from the cart ">
 					</div>
 					
 				</div>
@@ -60,5 +59,6 @@
 	<script src="{% static 'js/cartVoice.js' %}"></script>
 	<script src="{% static 'js/cart.js' %}"></script>
 
-	
+{% include 'store/voice_control.html' %}
+{% include 'store/footer.html' %}	
 {% endblock content %}

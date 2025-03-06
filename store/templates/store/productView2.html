@@ -1,4 +1,4 @@
-{% extends 'store/main2.html' %}
+{% extends 'store/main.html' %}
 {% load static %}
 {% block content %}
 <link rel="stylesheet" href="{% static 'css/productView.css' %}">
@@ -32,7 +32,7 @@
                                     <label class="trending-tag" style="background-color: red; color: white; padding: 2px 8px; font-size: 14px; border-radius: 5px; margin-left: 10px;" data-description="Trending product">Trending</label>
                                 {% endif %}
                             </h2>
-                            <h6 data-description="Selling price: {{ products.selling_price | stringformat:'d' }}">Selling Rate: {{ products.selling_price | stringformat:'d' }}</h6>  
+                            <h6 data-description="Selling price: {{ products.selling_price | floatformat:2 }}">Selling Rate: {{ products.selling_price | floatformat:2 }}</h6>  
                             <h6 style="text-decoration: line-through;" data-description="Original price: {{ products.original_price | stringformat:'d' }}">Original Rate: {{ products.original_price | stringformat:'d' }}</h6>
                             <p class="mt-3" data-description="{{ products.small_description }}">{{ products.small_description }}</p>
                             <hr>
@@ -44,7 +44,7 @@
                                 <label class="badge bg-danger" data-description="Out of stock">Out of Stock</label>
                             {% endif %}
                             
-                            <!-- Quantity and Buttons -->
+                            <!-- Quantity and Buttons 
                             <div class="row mt-3">
                                 <div class="col-md-3">
                                     <label for="Quantity" data-description="Quantity selector">Quantity</label>
@@ -54,11 +54,11 @@
                                         <button class="input-group-text increment-btn" data-description="Increase quantity">+</button>
                                     </div>
                                 </div>
+                                -->
                                 <div class="col-md-9">
                                     <br />
                                     <button type="button" class="btn btn-primary me-3 float-start update-cart" 
                                            data-product="{{products.id}}" data-action="add" 
-                                           
                                            style="border-radius: 10px;" data-description="Add to cart" 
                                           >
                                         Add to Cart <i class="fa fa-shopping-cart"></i>
@@ -117,7 +117,7 @@
 </script>
   <!-- Make sure to include your cart2.js script at the end of your template -->
   <script src="{% static 'js/cartVoice.js' %}"></script>
-<script src="{% static 'js/cart.js' %}"></script>
+<script src="{% static 'js/cart2.js' %}"></script>
 
   </div>
 <!-- Include Voice Control Script -->

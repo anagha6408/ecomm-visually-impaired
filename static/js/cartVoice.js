@@ -65,3 +65,8 @@ function showLoginAlert() {
     showVoiceAlert(message);
 }
 
+function showSuccessAlert() {
+    console.log("showSuccessAlert function called");
+    const message = "Item added to cart successfully.";
+    showVoiceAlert(message);
+}

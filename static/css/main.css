@@ -13,7 +13,12 @@ body {
     position: relative;
     display: inline-block;
 }
-
+#cart-total {
+    color: white !important;
+}
+table p#cart-total {
+    color: white !important;
+}
 .cart-count {
     position: absolute;
     top: -8px; /* Adjust this value to move the number higher */

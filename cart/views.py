@@ -47,9 +47,10 @@ def updateItem(request):
     data = json.loads(request.body)
     productId = data['productId']
     action = data['action']
+    #quantity = int(data.get('quantity', 1))
     print('Action:', action)
     print('Product:', productId)
-
+    #print('quantity: here is ______', quantity)
     try:
         customer = request.user.customer
     except:
@@ -70,20 +71,28 @@ def updateItem(request):
     
     # If orderItem doesn't exist, create it
     if orderItem is None:
-        orderItem = OrderItem.objects.create(order=order, product=product, quantity=0)
+        orderItem = OrderItem.objects.create(order=order, product=product, quantity=1)
     # Get quantity from request
-    quantity = int(data.get('quantity', 1))
+   
     
-    if action == 'Increase':
+    
+    if action == "Increase":
         orderItem.quantity += 1
         message = "Item quantity increased!"
-    elif action == 'Decrease':
+    elif action == "Decrease":
         orderItem.quantity -= 1
         message = "Item quantity decreased!"
-    elif action == 'delete':
+    elif action == "delete":
         orderItem.delete()
-        message = "Item successfully removed from your cart!"
-        return JsonResponse('Item was added', safe=False)
+        return JsonResponse({"message": "Item successfully removed from your cart!"}, safe=False)
+    elif action == "add":
+        message = "Item successfully added to your cart!"
+    else:
+        return JsonResponse({"error": "Invalid action"}, status=400)
+
+    if orderItem.quantity <= 0:
+        orderItem.delete()
+        return JsonResponse({"message": "Item removed due to zero quantity!"}, safe=False)
 
 
     orderItem.save()
@@ -91,7 +100,7 @@ def updateItem(request):
     if orderItem.quantity <= 0:
         orderItem.delete()
 
-    return JsonResponse({'message':message , 'quantity': orderItem.quantity}, safe=False)
+    return JsonResponse({"message": message}, safe=False)
 
 def processOrder(request):
     transaction_id = datetime.datetime.now().timestamp()
