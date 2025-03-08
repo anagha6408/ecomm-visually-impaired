@@ -1,0 +1,48 @@
+{% extends 'store/main.html' %}
+{% load static %}
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/category.css' %}">
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <h1>Search Results</h1>
+            <hr>
+
+            
+            <!-- Display search query -->
+            {% if query %}
+                <h3>Showing results for "{{ query }}"</h3>
+            {% endif %}
+
+            <!-- If there are products, display them -->
+            {% if searched %}
+                <div class="row">
+                    {% for item in searched %}
+                    <div class="col-md-3 mb-4" data-description="{{ item.name }}"> 
+                        <div class="card h-100">
+                            <a href="{% url 'store:productView' item.slug item.name %}">
+                                <div class="card-body text-center">
+                                    <div class="category-image">
+                                        <img src="{{ item.product_image.url }}" alt="Product Image" class="w-100">
+                                    </div>
+                                    <h4> {{ item.name }} </h4>
+                                    <h5>{{ item.small_description }}</h5>
+                                    <h6>Selling Rate: {{ item.selling_price | stringformat:'d' }}</h6>
+                                    <h6>Original Rate: {{ item.original_price | stringformat:'d' }}</h6>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            
+            {% endif %}
+
+            {% include 'store/voice_control.html' %}
+        </div>
+    </div>
+</div>
+
+{% include 'store/footer.html' %}
+{% endblock content %}

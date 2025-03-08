@@ -71,3 +71,33 @@ def welcome_msg(request):
     return render(request, 'home.html', {'welcome_message': welcome_message})
 def editProfile(request):
 	return render(request,"store/editProfile.html")
+
+
+from django.db.models import Q
+def search(request):
+    if request.method == 'POST':
+        query = request.POST.get('searched', '').strip()  # Get the search input safely
+
+        if not query:
+            messages.error(request, "Please enter a search term.")
+            return render(request, 'store/home.html', {})
+
+        # Searching multiple fields using Q
+        searched = Product.objects.filter(
+            Q(name__icontains=query) |
+            Q(description__icontains=query) |
+            Q(small_description__icontains=query) |
+            Q(category__name__icontains=query) |
+            Q(tag__icontains=query) |
+            Q(meta_title__icontains=query) |
+            Q(meta_keywords__icontains=query) |
+            Q(meta_description__icontains=query)
+        ).distinct()
+
+        # If no results, show a message
+        if not searched.exists():
+            messages.warning(request, f'No results found for "{query}".')
+
+        return render(request, 'store/search.html', {'searched': searched, 'query': query})
+
+    return render(request, 'store/home.html', {})

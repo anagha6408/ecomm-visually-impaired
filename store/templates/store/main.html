@@ -17,14 +17,13 @@
     </head>
     <body>
       {% csrf_token %}
-      {% if messages %}
-            {% for message in messages %}
-            <div class="alert alert-warning alert-dismissible fade show" role="alert">
-              {{message}}
-              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-            {% endfor %}
-          {%endif%}
+          {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
         <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
             <a class="navbar-brand" href="{% url 'store:home' %}" data-description="Go to the home page"> &nbsp; Halo &nbsp;</a>
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
@@ -40,8 +39,8 @@
                     <a class="nav-link" href="{% url 'cart:cart' %}" data-description="Go to the Cart page" >Cart <span class="sr-only">(current)</span></a>
                   </li>
               </ul>
-              <form class="form-inline my-2 my-lg-0">
-                
+              <form class="form-inline my-2 my-lg-0"  method="POST" action="{% url 'store:search' %}">
+                {% csrf_token %}
                 <div class="toggle-container" data-description="Toggle between keyboard and mouse navigation mode">
                   <span id="navModeLabel" class="nav-label" tabindex="0">Mouse Navigation</span> 
                   <label class="toggle-switch" for="navToggle" aria-label="Switch between keyboard and mouse navigation">
@@ -50,10 +49,12 @@
                   </label>
                 </div>              
                 &nbsp;
-                <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search" data-description="Enter search terms here">
+                <input class="form-control mr-sm-2" type="search"name="searched" placeholder="Search" aria-label="Search" data-description="Enter search terms here">
                 <button class="btn btn-outline-success my-2 my-sm-0" type="submit" data-description="Click to search for products">Search</button>
+          
               </form>
       
+
               <div class="form-inline my-2 my-lg-0">
                 <a href="{% url 'userauth:sign-up' %}"class="btn btn-warning" data-description="Click to Login">Login</a>
                 <a href="{% url 'cart:cart' %}" data-description="Click to go to cart">
