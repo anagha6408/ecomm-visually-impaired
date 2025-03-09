@@ -4,23 +4,30 @@ from django.contrib.auth import login,authenticate,logout
 from django.contrib import messages
 from django.contrib.auth.forms import AuthenticationForm
 def register_view(request):
-    if request.method=="POST":
-        form=UserRegisterForm(request.POST or None)
+    if request.method == "POST":
+        form = UserRegisterForm(request.POST)  # No need for `or None`
         if form.is_valid():
-            new_user=form.save()
-            username=form.cleaned_data.get("username")
-            messages.success(request,f"welcome {username}, Your account is created")
-            #new_user=authenticate(username=username,password=form.cleaned_data['password1'])
-            new_user=authenticate(username=form.cleaned_data.get("email"),password=form.cleaned_data['password1'])
-            login(request,new_user)
-            return redirect("store:home")
-    else:
-        form=UserRegisterForm()
+            new_user = form.save(commit=False)  # Save user but don't commit yet
+            new_user.set_password(form.cleaned_data['password1'])  # Hash password
+            new_user.save()  # Now save the user with the hashed password
+            
+            username = form.cleaned_data.get("username")
+            messages.success(request, f"Welcome {username}, Your account is created")
+
+            # Authenticate with correct username or email
+            new_user = authenticate(username=username, password=form.cleaned_data['password1'])
+            
+            if new_user:  # Check if authentication was successful
+                login(request, new_user)
+                return redirect("store:home")
+            else:
+                messages.error(request, "Authentication failed. Try logging in manually.")
     
-    context={
-        'form':form,
-    }
-    return render(request,"store/sign-up.html",context)
+    else:
+        form = UserRegisterForm()
+
+    context = {'form': form}
+    return render(request, "store/sign-up.html", context)
 
 def login_view(request):
     if request.method == "POST":
