@@ -33,6 +33,7 @@ ALLOWED_HOSTS = []
 INSTALLED_APPS = [
     'userauths',
     'cart',
+    'payment',
     'jazzmin',
     'django.contrib.admin',
     'django.contrib.auth',

@@ -23,6 +23,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('user/',include('userauths.urls')),
     path('cart/',include('cart.urls')),
+    path('payment/',include('payment.urls')),
 ]
 
 

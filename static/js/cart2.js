@@ -1,9 +1,18 @@
 var updateBtns = document.getElementsByClassName("update-cart");
-console.log("Cart.js loaded!");
+console.log("Cart.js 222222 loaded!");
 
-for (let i = 0; i < updateBtns.length; i++) {
-    updateBtns[i].removeEventListener("click", updateCartHandler); // Prevent duplicate event listeners
-    updateBtns[i].addEventListener("click", updateCartHandler);
+// Set up event listeners only once when the document loads
+document.addEventListener('DOMContentLoaded', function() {
+    setupEventListeners();
+});
+
+// Function to set up event listeners
+function setupEventListeners() {
+    console.log("Setting up event listeners for", updateBtns.length, "buttons");
+    for (let i = 0; i < updateBtns.length; i++) {
+        updateBtns[i].removeEventListener("click", updateCartHandler);
+        updateBtns[i].addEventListener("click", updateCartHandler);
+    }
 }
 
 function updateCartHandler() {
@@ -16,21 +25,31 @@ function updateCartHandler() {
         return;
     }
 
+    // Prevent double-clicks by adding a processing flag
+    if (this.dataset.processing === "true") {
+        console.log("Already processing this request");
+        return;
+    }
+    
+    this.dataset.processing = "true";
+    const button = this;
+
     console.log("productId:", productId, "Action:", action);
     console.log("USER:", user);
 
     if (user.includes("AnonymousUser")) {
         console.log("User is anonymous, showing login alert");
         showLoginAlert();
+        button.dataset.processing = "false";
         return;
     } else {
-        console.log("Inside showSuccessAlert add to cart");
-        updateUserOrder(productId, action);
+        console.log("User is authenticated, updating cart");
+        updateUserOrder(productId, action, button);
     }
 }
 
-function updateUserOrder(productId, action) {
-    console.log("User is authenticated, sending data...");
+function updateUserOrder(productId, action, button) {
+    console.log("Sending data to server...");
 
     var url = "/cart/update_item/";
     fetch(url, {
@@ -41,29 +60,76 @@ function updateUserOrder(productId, action) {
         },
         body: JSON.stringify({ productId, action }),
     })
-    .then((response) => response.json())
+    .then((response) => {
+        if (!response.ok) {
+            throw new Error("Server returned an error");
+        }
+        return response.json();
+    })
     .then((data) => {
-        console.log("Updated Cart Data:", data);
-
-        showVoiceAlert(data.message);
-
-        // Ensure updateCartUI runs once per action
-        setTimeout(() => {
-            updateCartUI(productId, action);
-        }, 100);
+        console.log("Server response:", data);
+        
+        // Always show the alert
+        if (data.message) {
+            showVoiceAlert(data.message);
+        }
+        
+        // Check if we need to reload the page
+        //if (action === "delete" || (action === "Decrease" && data.quantity === 0)) {
+        //    console.log("Item removed, reloading page");
+        //    setTimeout(() => {
+        //        location.reload();
+        //    }, 5500);
+        //    return;
+       // }
+       if (action === "delete") {
+        console.log("Item deleted, updating UI");
+        // Remove the item from the DOM instead of reloading
+        const itemRow = document.querySelector(`.cart-row [data-product="${productId}"]`).closest('.cart-row');
+        if (itemRow) {
+            itemRow.remove();
+            updateCartSummary(); // Update totals
+        }
+        return;
+    }
+        
+        // Handle updates to the UI
+        if (document.querySelector('.cart-row')) {
+            // We're on the cart page
+            updateCartUI(productId, action, data.quantity);
+        } else {
+            // Update cart icon indicator
+            updateCartIndicator(data.total_items);
+            // We're on another page (like product view)
+            console.log("Not on cart page, no UI update needed");
+        }
     })
     .catch(error => {
         console.error("Error updating cart:", error);
         showVoiceAlert("There was an error updating your cart. Please try again.");
+    })
+    .finally(() => {
+        // Always reset the processing flag
+        if (button) {
+            button.dataset.processing = "false";
+        }
     });
 }
 
-function updateCartUI(productId, action) {
-    console.log("Updating cart for product:", productId, "Action:", action);
+function updateCartIndicator(totalItems) {
+    const cartIndicator = document.querySelector('.cart-total');
+    if (cartIndicator) {
+        cartIndicator.textContent = totalItems;
+    }
+}
+
+function updateCartUI(productId, action, serverQuantity) {
+    console.log("Updating cart UI for product:", productId, "Action:", action);
 
     const cartItem = document.querySelector(`.cart-row [data-product="${productId}"]`);
     if (!cartItem) {
-        console.warn(`Product ${productId} is new. Reloading cart...`);
+        console.warn(`Product ${productId} not found in the cart. Reloading page.`);
+        location.reload();
         return;
     }
 
@@ -72,38 +138,45 @@ function updateCartUI(productId, action) {
     const itemPriceElement = cartRow.querySelector('.item-price');
     const totalPriceElement = cartRow.querySelector('div:nth-child(5) p');
 
-    console.log("Quantity Element:", qtyElement);
-    console.log("Item Price Element:", itemPriceElement);
-    console.log("Total Price Element:", totalPriceElement);
+    console.log("Found elements:", qtyElement, itemPriceElement, totalPriceElement);
 
     if (!qtyElement || !itemPriceElement || !totalPriceElement) {
-        console.error("Required elements missing");
+        console.error("Required elements missing. Reloading page.");
+        location.reload();
         return;
     }
 
-    let currentQuantity = parseInt(qtyElement.textContent.trim(), 10) || 0;
     let itemPrice = parseFloat(itemPriceElement.textContent.replace('$', '').trim()) || 0;
-
-    console.log("Before update: Quantity =", currentQuantity, "Price =", itemPrice);
-
-    // Prevent multiple increments per click
-    if (action === 'Increase' && qtyElement.dataset.lastAction !== 'Increase') {
-        currentQuantity++;
-        qtyElement.dataset.lastAction = 'Increase';
-    } else if (action === 'Decrease' && qtyElement.dataset.lastAction !== 'Decrease') {
-        currentQuantity = Math.max(0, currentQuantity - 1);
-        qtyElement.dataset.lastAction = 'Decrease';
-    } else if (action === 'delete') {
-        cartRow.remove();
-        updateCartSummary();
-        return;
+    
+    // Use server quantity if provided
+    if (serverQuantity !== undefined) {
+        console.log("Using server quantity:", serverQuantity);
+        qtyElement.textContent = serverQuantity;
+    } else {
+        // Fallback to local calculation if needed
+        let currentQuantity = parseInt(qtyElement.textContent.trim(), 10) || 0;
+        
+        if (action === 'Increase') {
+            currentQuantity++;
+        } else if (action === 'Decrease') {
+            currentQuantity = Math.max(0, currentQuantity - 1);
+        }
+        
+        console.log("Calculated local quantity:", currentQuantity);
+        qtyElement.textContent = currentQuantity;
     }
-
-    console.log("Updated Quantity:", currentQuantity);
-
-    qtyElement.textContent = currentQuantity;
+    
+    // Update the total price for this item
+    const currentQuantity = parseInt(qtyElement.textContent.trim(), 10) || 0;
     totalPriceElement.textContent = `$${(currentQuantity * itemPrice).toFixed(2)}`;
 
+    // Remove the item if quantity is zero
+    if (currentQuantity === 0) {
+        console.log("Quantity is zero, removing item from cart UI");
+        cartRow.remove();
+    }
+
+    // Update the cart summary
     updateCartSummary();
 }
 

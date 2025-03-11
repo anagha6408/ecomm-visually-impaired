@@ -7,8 +7,11 @@
         <!-- Left Section: User & Shipping Form -->
         <div class="col-md-6">
             <div class="box-element">
-                <form id="form">
+                <form method="POST">
                     <h4>Billing & Shipping Details</h4>
+                    {% csrf_token %}
+                    {{shipping_form.as_p}}
+                    <!--
                     <hr>
                     <div id="user-info">
                         <div class="form-field">
@@ -16,6 +19,9 @@
                         </div>
                         <div class="form-field">
                             <input required class="form-control" type="email" name="email" placeholder="Email">
+                        </div>
+                        <div class="form-field">
+                            <input required class="form-control" type="text" name="phNum" placeholder="Phone Number">
                         </div>
                     </div>
 
@@ -38,6 +44,7 @@
                             <input class="form-control" type="text" name="country" placeholder="Country">
                         </div>
                     </div>
+                    -->
 
                     <button id="form-button" class="btn btn-success btn-block" type="submit">Continue</button>
                 </form>
@@ -108,6 +115,7 @@
         }).render('#paypal-button-container');
     </script>
 
+    <!--
 	<script type="text/javascript">
 		var shipping = '{{order.shipping}}'
 
@@ -175,7 +183,7 @@
 	    	fetch(url, {
 	    		method:'POST',
 	    		headers:{
-	    			'Content-Type':'applicaiton/json',
+	    			'Content-Type':'application/json',
 	    			'X-CSRFToken':csrftoken,
 	    		}, 
 	    		body:JSON.stringify({'form':userFormData, 'shipping':shippingInfo}),
@@ -194,6 +202,7 @@
 				})
 	    }
 	</script>
+    -->
 {% endblock content %}
 
 
