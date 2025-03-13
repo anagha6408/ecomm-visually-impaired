@@ -36,6 +36,7 @@ def cart(request):
 
 
 from django.contrib import messages
+from payment.models import ShippingAddress
 
 def checkout(request):
     data = cartData(request)
@@ -45,7 +46,13 @@ def checkout(request):
     order = data['order']
     items = data['items']
     print("✅ CHECKOUT FUNCTION")  # Debugging
-    
+
+    shipping_form = ShippingForm()
+    user_addresses = None  # Default to None
+
+    if request.user.is_authenticated:
+        user_addresses = ShippingAddress.objects.filter(user=request.user)  # Fetch saved addresses
+
     if request.method == "POST":
         # Only process the form if the user is logged in
         if request.user.is_authenticated:
@@ -72,7 +79,7 @@ def checkout(request):
     else:
         shipping_form = ShippingForm()
 
-    context = {'items': items, 'order': order, 'cartItems': cartItems, 'shipping_form': shipping_form}
+    context = {'items': items, 'order': order, 'cartItems': cartItems, 'shipping_form': shipping_form,'user_addresses': user_addresses,}
     return render(request, 'store/checkout.html', context)
 
 
@@ -84,19 +91,14 @@ def updateItem(request):
     print('Action:', action)
     print('Product:', productId)
     #print('quantity: here is ______', quantity)
-    try:
-        customer = request.user.customer
-    except:
-        customer = Customer.objects.create(
-            user=request.user,
-            name=request.user.username,
-            email=request.user.email
-        )
+    user = request.user
+    if not user.is_authenticated:
+        return JsonResponse({"error": "User not authenticated"}, status=400)
 
     product = Product.objects.get(id=productId)
-    order = Order.objects.filter(customer=customer, complete=False).first()
+    order = Order.objects.filter(user=user, complete=False).first()
     if not order:
-        order = Order.objects.create(customer=customer, complete=False)
+        order = Order.objects.create(user=user, complete=False)
 
     
     # Use filter().first() instead of get_or_create
@@ -121,7 +123,7 @@ def updateItem(request):
         else:
             # Only create a new item if it doesn't exist
             print('new item if it doesnt exist:')
-            orderItem = OrderItem.objects.create(order=order, product=product, quantity=1)
+            orderItem = OrderItem.objects.create(order=order, product=product, quantity=1,user=user,price=product.selling_price)
             message = "Item successfully added to your cart!"
     else:
         return JsonResponse({"error": "Invalid action"}, status=400)
@@ -135,7 +137,8 @@ def updateItem(request):
 
     if orderItem.quantity <= 0:
         orderItem.delete()
-
+    
+    print(f"OrderItem Updated: {orderItem.product.name}, Quantity: {orderItem.quantity}")
     return JsonResponse({"message": message}, safe=False)
 
 def processOrder(request):
@@ -143,29 +146,20 @@ def processOrder(request):
     data = json.loads(request.body)
 
     if request.user.is_authenticated:
-        try:
-            customer = request.user.customer
-        except:
-            # Create a customer for this user if one doesn't exist
-            customer = Customer.objects.create(
-                user=request.user,
-                name=request.user.username,
-                email=request.user.email
-            )
-        order, created = Order.objects.get_or_create(customer=customer, complete=False)
+        user = request.user
+        order, created = Order.objects.get_or_create(user=user, transaction_id=None)
     else:
-        customer, order = guestOrder(request, data)
+        return JsonResponse({"error": "User not authenticated"}, status=400)
 
     total = float(data['form']['total'])
     order.transaction_id = transaction_id
 
-    if total == order.get_cart_total:
-        order.complete = True
-    order.save()
+    if total == order.amount_paid:  # Ensure amount matches
+        order.save()
 
     if order.shipping == True:
         ShippingAddress.objects.create(
-        customer=customer,
+        user=user,
         order=order,
         address=data['shipping']['address'],
         city=data['shipping']['city'],
@@ -174,3 +168,25 @@ def processOrder(request):
         )
 
     return JsonResponse('Payment submitted..', safe=False)
+
+
+from django.contrib.auth.decorators import login_required
+@login_required
+def past_orders(request):
+    user = request.user
+    past_orders = Order.objects.filter(user=user,complete=True).order_by('-date_ordered')  # Latest first
+    print(f"User: {user}")
+    print("Past Orders:", past_orders)
+    return render(request, 'store/past_orders.html', {'past_orders': past_orders})
+
+from django.shortcuts import render, get_object_or_404
+def order_details(request, order_id):
+    order = get_object_or_404(Order, id=order_id)
+    shipping_address = ShippingAddress.objects.filter(user=order.user).order_by('-shipping_date_added').first()
+    
+    context = {
+        'order': order,
+        'shipping_address': shipping_address
+    }
+    
+    return render(request, 'store/order_details.html', context)

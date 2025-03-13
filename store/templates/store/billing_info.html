@@ -1,0 +1,70 @@
+{% extends 'store/main.html' %}
+{% load static %}
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <!-- Left Section: Billing Details -->
+        <div class="col-md-6">
+            <div class="box-element">
+                <h3>Billing Information</h3>
+                <hr>
+
+                {% if shipping_address %}
+                    <p><strong>Name:</strong> {{ shipping_address.shipping_name }}</p>
+                    <p><strong>Address:</strong> {{ shipping_address.shipping_address }}</p>
+                    <p><strong>City:</strong> {{ shipping_address.shipping_city }}</p>
+                    <p><strong>State:</strong> {{ shipping_address.shipping_state }}</p>
+                    <p><strong>Zip Code:</strong> {{ shipping_address.shipping_zipcode }}</p>
+                    <p><strong>Country:</strong> {{ shipping_address.shipping_country }}</p>
+                    <p><strong>Phone:</strong> {{ shipping_address.shipping_phone }}</p>
+                    <p><strong>Email:</strong> {{ shipping_address.shipping_email }}</p>
+                {% else %}
+                    <p>No billing information found. Please go back and enter your details.</p>
+                {% endif %}
+
+                <a class="btn btn-secondary mt-3" href="{% url 'cart:checkout' %}">← Back to Checkout</a>
+            </div>
+        </div>
+
+        <!-- Right Section: Order Summary -->
+        <div class="col-md-6">
+            <div class="box-element">
+                <h3>Order Summary</h3>
+                <hr>
+                {% for item in items %}
+                    <div class="cart-row d-flex align-items-center">
+                        <img class="row-image" src="{{ item.product.product_image.url }}" style="width: 50px; height: 50px;">
+                        <div style="flex: 2; padding-left: 10px;"><p>{{ item.product.name }}</p></div>
+                        <div style="flex: 1;"><p>${{ item.product.selling_price|floatformat:2 }} x {{ item.quantity }} = ${{ item.get_total|floatformat:2 }}</p></div>
+                    </div>
+                {% endfor %}
+                <hr>
+                <h5>Items: {{ order.get_cart_items }}</h5>
+                <h5>Total: ${{ order.get_cart_total|floatformat:2 }}</h5>
+            </div>
+             <!-- Payment Method Selection -->
+             <div class="box-element mt-3">
+                <h3>Select Payment Method</h3>
+                <hr>
+                <form method="POST" action="{% url 'payment:payment_process' %}">
+                    {% csrf_token %}
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="payment_method" value="cod" id="cod" required>
+                        <label class="form-check-label" for="cod">Cash on Delivery (COD)</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="payment_method" value="paypal" id="paypal" required>
+                        <label class="form-check-label" for="paypal">PayPal</label>
+                    </div>
+
+                    <button class="btn btn-success mt-3 float-right" type="submit">Proceed to Payment →</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{% include 'store/voice_control.html' %}
+{% include 'store/footer.html' %}
+{% endblock content %}

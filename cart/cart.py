@@ -52,13 +52,12 @@ def cookieCart(request):
 	print("✅ Final Cookie Cart Data:", {'cartItems': cartItems, 'order': order, 'items': items})
 	return {'cartItems': cartItems, 'order': order, 'items': items}
 
+"""
 def cartData(request):
     if request.user.is_authenticated:
-        customer = request.user.customer
-        # Safely retrieve the first incomplete order or create a new one
-        order = Order.objects.filter(customer=customer, complete=False).order_by('-date_ordered').first()
+        customer, created = Customer.objects.get_or_create(user=request.user)
         if not order:
-            order = Order.objects.create(customer=customer, complete=False)
+            order = Order.objects.create(user=user)
         items = order.orderitem_set.all()
         cartItems = order.get_cart_items  # Ensure this is called as a property
     else:
@@ -69,7 +68,50 @@ def cartData(request):
 
     return {'cartItems': cartItems, 'order': order, 'items': items}
 
-	
+"""
+def cartData(request):
+    if request.user.is_authenticated:
+        user = request.user
+        print("cartData -----user", user)
+
+        # Add debugging to see all orders for this user
+        all_orders = Order.objects.filter(user=user)
+        print(f"All orders for user {user}: {all_orders}")
+
+        order = Order.objects.filter(user=user, complete=False).first()
+        
+        if not order:
+            print("No existing order found. Creating a new order...")
+            order = Order.objects.create(user=user, complete=False)
+        
+        # Print the order ID for debugging
+        print(f"Using order ID: {order.id}")
+        
+        items = OrderItem.objects.filter(order=order)
+        print(f"Items using direct query: {items}")
+        
+        cartItems = order.get_cart_items
+
+        # Debugging
+        print("CartData function ....")
+        print("cartItems:", cartItems)
+        print("Order items count:", items.count())
+        for item in items:
+            print(f"Item: {item.product}, Quantity: {item.quantity}")
+
+    else:
+        cookieData = cookieCart(request)
+        print("Cookie Data:", cookieData)
+        
+        cartItems = cookieData['cartItems']
+        order = cookieData['order']
+        items = cookieData['items']
+
+    return {'cartItems': cartItems, 'order': order, 'items': items}
+
+
+
+
 def guestOrder(request, data):
 	name = data['form']['name']
 	email = data['form']['email']
@@ -85,7 +127,6 @@ def guestOrder(request, data):
 
 	order = Order.objects.create(
 		customer=customer,
-		complete=False,
 		)
 
 	for item in items:

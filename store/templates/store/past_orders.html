@@ -1,0 +1,43 @@
+{% extends 'store/main.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">My Past Orders</h2>
+    
+    {% if past_orders %}
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Order ID</th>
+                        <th>Date</th>
+                        <th>Amount Paid</th>
+                        <th>Payment Method</th>
+                        <th>Details</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for order in past_orders %}
+                    <tr>
+                        <td>{{ order.transaction_id }}</td>
+                        <td>{{ order.date_ordered|date:"Y-m-d H:i" }}</td>
+                        <td>${{ order.amount_paid }}</td>
+                        <td>{{ order.payment_method|default:"Not Specified" }}</td>
+                        <td>
+                            <a href="{% url 'cart:order_details' order.id %}" class="btn btn-primary btn-sm">View Details</a>
+                        </td>                        
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="alert alert-info">No past orders found.</div>
+    {% endif %}
+</div>
+
+{% include 'store/voice_control.html' %}
+{% include 'store/footer.html' %}
+
+{% endblock content %}

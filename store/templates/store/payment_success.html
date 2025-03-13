@@ -1,1 +1,82 @@
-<h1>payment_success</h1>
+{% extends 'store/main.html' %}
+{% load static %}
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="box-element text-center">
+                <h2 class="text-success">🎉 Order Placed Successfully!</h2>
+                <p class="text-muted">Thank you for your purchase. Your order has been successfully placed.</p>
+                <hr>
+
+                <!-- Order Details -->
+                <h4>Order Details</h4>
+                <table class="table table-bordered">
+                    <tr>
+                        <th>Order ID</th>
+                        <td>{{ order.transaction_id }}</td>
+                    </tr>
+                    <tr>
+                        <th>Total Amount</th>
+                        <td>${{ order.get_cart_total|floatformat:2 }}</td>
+                    </tr>
+                    <tr>
+                        <th>Payment Method</th>
+                        <td>{{ order.payment_method }}</td>
+                    </tr>
+                    <tr>
+                        <th>Order Date</th>
+                        <td>{{ order.date_ordered }}</td>
+                    </tr>
+                </table>
+
+                <hr>
+
+                <!-- Shipping Information -->
+                <h4>Shipping Information</h4>
+                <table class="table table-bordered">
+                    <tr><th>Name</th><td>{{ shipping_address.shipping_name }}</td></tr>
+                    <tr><th>Address</th><td>{{ shipping_address.shipping_address }}</td></tr>
+                    <tr><th>City</th><td>{{ shipping_address.shipping_city }}</td></tr>
+                    <tr><th>State</th><td>{{ shipping_address.shipping_state }}</td></tr>
+                    <tr><th>Zip Code</th><td>{{ shipping_address.shipping_zipcode }}</td></tr>
+                    <tr><th>Country</th><td>{{ shipping_address.shipping_country }}</td></tr>
+                    <tr><th>Phone</th><td>{{ shipping_address.shipping_phone }}</td></tr>
+                    <tr><th>Email</th><td>{{ shipping_address.shipping_email }}</td></tr>
+                </table>
+
+                <hr>
+
+                <!-- Ordered Items -->
+                <h4>Items Purchased</h4>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th>Quantity</th>
+                            <th>Price</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in items %}
+                        <tr>
+                            <td>{{ item.product.name }}</td>
+                            <td>{{ item.quantity }}</td>
+                            <td>${{ item.product.selling_price|floatformat:2 }}</td>
+                            <td>${{ item.get_total|floatformat:2 }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+
+                <hr>
+                <p class="text-muted">A confirmation email has been sent to your registered email address.</p>
+                <a href="{% url 'store:home' %}" class="btn btn-primary">Continue Shopping 🛍️</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% include 'store/footer.html' %}
+{% endblock content %}

@@ -43,18 +43,6 @@
                             {% else %}
                                 <label class="badge bg-danger" data-description="Out of stock">Out of Stock</label>
                             {% endif %}
-                            
-                            <!-- Quantity and Buttons 
-                            <div class="row mt-3">
-                                <div class="col-md-3">
-                                    <label for="Quantity" data-description="Quantity selector">Quantity</label>
-                                    <div class="input-group text-center mb-3" style="width:150px;">
-                                        <button class="input-group-text decrement-btn" data-description="Decrease quantity">-</button>
-                                        <input type="text" name="quantity" id="quantity" class="form-control text-center qty-input" value="1" data-description="Current quantity: 1">
-                                        <button class="input-group-text increment-btn" data-description="Increase quantity">+</button>
-                                    </div>
-                                </div>
-                                -->
                                 <div class="col-md-9">
                                     <br />
                                     <button type="button" class="btn btn-primary me-3 float-start update-cart" 
@@ -82,27 +70,6 @@
         </div>
     </div>
 </div>
-<!-- Update your existing popup HTML in productView.html to this: -->
- <!--
-<div id="loginPopup" class="popup-overlay" style="display: none;">
-    <div class="popup-content">
-      <div class="popup-header">
-        <h3>Login Required</h3>
-        <span class="close-btn" onclick="closePopup()">&times;</span>
-      </div>
-      
-      <div class="popup-body">
-        <p>Please log in to add items to your cart.</p>
-        <div class="popup-buttons">
-          <a href="{% url 'userauth:login' %}" class="btn btn-primary">Login</a>
-          <a href="{% url 'userauth:sign-up' %}" class="btn btn-secondary">Register</a>
-          <button class="btn btn-light" onclick="closePopup()">Continue Shopping</button>
-        </div>
-      </div>
-    </div>
-    
-  </div>
-   -->
 <div id="loginPopup" class="popup-overlay" style="display: none;">
   <script type="text/javascript">
     var user = "{{ request.user }}";

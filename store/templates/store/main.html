@@ -38,6 +38,9 @@
                 <li class="nav-item active">
                     <a class="nav-link" href="{% url 'cart:cart' %}" data-description="Go to the Cart page" >Cart <span class="sr-only">(current)</span></a>
                   </li>
+                  {% if user.is_authenticated %}
+                      <li class="nav-item active"><a class="nav-link" data-description="Click here to view Order History" href="{% url 'cart:past_orders' %}">My Orders</a></li>
+                  {% endif %}
               </ul>
               <form class="form-inline my-2 my-lg-0"  method="POST" action="{% url 'store:search' %}">
                 {% csrf_token %}

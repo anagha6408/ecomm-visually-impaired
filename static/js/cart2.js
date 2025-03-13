@@ -1,5 +1,5 @@
 var updateBtns = document.getElementsByClassName("update-cart");
-console.log("Cart.js 222222 loaded!");
+console.log("Cart.js 77777 loaded!");
 
 // Set up event listeners only once when the document loads
 document.addEventListener('DOMContentLoaded', function() {

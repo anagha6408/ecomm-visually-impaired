@@ -1,0 +1,71 @@
+{% extends 'store/main.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">Order Details</h2>
+
+    <div class="card">
+        <div class="card-header bg-dark text-white">
+            Order ID: {{ order.transaction_id }}
+        </div>
+        <div class="card-body">
+            <p><strong>Date Ordered:</strong> {{ order.date_ordered|date:"Y-m-d H:i" }}</p>
+            <p><strong>Amount Paid:</strong> ${{ order.amount_paid }}</p>
+            <p><strong>Payment Method:</strong> {{ order.payment_method|default:"Not Specified" }}</p>
+            
+            <h5 class="mt-3">Shipping Details</h5>
+            {% if shipping_address %}
+                <ul class="list-group mb-4">
+                    <li class="list-group-item"><strong>Name:</strong> {{ shipping_address.shipping_name }}</li>
+                    <li class="list-group-item"><strong>Phone:</strong> {{ shipping_address.shipping_phone }}</li>
+                    <li class="list-group-item"><strong>Email:</strong> {{ shipping_address.shipping_email }}</li>
+                    <li class="list-group-item"><strong>Address:</strong> {{ shipping_address.shipping_address }}, 
+                        {{ shipping_address.shipping_city }}, {{ shipping_address.shipping_state }}, 
+                        {{ shipping_address.shipping_country }} - {{ shipping_address.shipping_zipcode }}</li>
+                </ul>
+            {% else %}
+                <p class="text-danger">No shipping details available.</p>
+            {% endif %}
+
+            <h5 class="mt-3">Items in this Order:</h5>
+            <div class="table-responsive">
+                <table class="table table-bordered">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Product Image</th>
+                            <th>Product Name</th>
+                            <th>Quantity</th>
+                            <th>Price</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in order.orderitem_set.all %}
+                        <tr>
+                            <td>
+                                {% if item.product.product_image %}
+                                    <img src="{{ item.product.product_image.url }}" alt="{{ item.product.name }}" class="img-thumbnail" width="80">
+                                {% else %}
+                                    <img src="{% static 'images/no_image_available.png' %}" alt="No Image" class="img-thumbnail" width="80">
+                                {% endif %}
+                            </td>
+                            <td>{{ item.product.name }}</td>
+                            <td>{{ item.quantity }}</td>
+                            <td>${{ item.price }}</td>
+                            <td>${{ item.get_total }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" class="text-center">No items found.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <a href="{% url 'cart:past_orders' %}" class="btn btn-secondary mt-3">Back to Orders</a>
+        </div>
+    </div>
+</div>
+{% endblock content %}
