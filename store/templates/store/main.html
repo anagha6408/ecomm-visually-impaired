@@ -38,6 +38,11 @@
                 <li class="nav-item active">
                     <a class="nav-link" href="{% url 'cart:cart' %}" data-description="Go to the Cart page" >Cart <span class="sr-only">(current)</span></a>
                   </li>
+                  <li class="nav-item active">
+                    <a href="{% url 'wishlist:view' %}" class="nav-link" data-description="Go to the Wish list page">
+                        Wishlist <span id="wishlist-count" class="badge bg-danger" data-description="Number of products in Wish list is {{ wishlist_count }}">{{ wishlist_count }}</span>
+                    </a>
+                </li>                
                   {% if user.is_authenticated %}
                       <li class="nav-item active"><a class="nav-link" data-description="Click here to view Order History" href="{% url 'cart:past_orders' %}">My Orders</a></li>
                   {% endif %}
@@ -67,41 +72,40 @@
                &nbsp;&nbsp;&nbsp;&nbsp;
               </div>
             
-           <div class="form-inline my-2 my-lg-0">
-            <div class="dropdown">
-                <a href="#" class="btn btn-secondary dropdown-toggle" id="profileDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    <i class="fas fa-user-circle fa-lg"></i> <!-- User Profile Icon -->
-                    {% if user.is_authenticated %}
-                        <span class="ml-2">{{ user.username }}</span>
-                    {% else %}
-                        <span class="ml-2">Guest</span>
-                    {% endif %}
-                </a>
-                <div class="dropdown-menu dropdown-menu-right" aria-labelledby="profileDropdown">
-                    <a class="dropdown-item" href="{% url 'store:editProfile' %}">Edit Profile</a>
-                    {% if user.is_authenticated %}
-                    <a class="dropdown-item" href="{% url 'userauth:logout' %}">Logout</a>
-                    {%else%}
-                    <a class="dropdown-item" href="{% url 'userauth:login' %}">Login</a>
-                    {%endif%}
-                </div>
+           <!-- Profile Dropdown -->
+           <div class="dropdown">
+            <a href="#" class="btn btn-secondary dropdown-toggle" id="profileDropdown"
+               data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
+               role="button" tabindex="0" data-description="User Profile Menu">
+                <i class="fas fa-user-circle fa-lg"></i>
+                {% if user.is_authenticated %}
+                    <span class="ml-2">{{ user.username }}</span>
+                {% else %}
+                    <span class="ml-2">Guest</span>
+                {% endif %}
+            </a>
+            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="profileDropdown">
+                <a class="dropdown-item" href="{% url 'store:editProfile' %}" data-description="Edit your profile" tabindex="-1">Edit Profile</a>
+                {% if user.is_authenticated %}
+                    <a class="dropdown-item" href="{% url 'userauth:logout' %}" data-description="Logout from your account" tabindex="-1">Logout</a>
+                {% else %}
+                    <a class="dropdown-item" href="{% url 'userauth:login' %}" data-description="Login to your account" tabindex="-1">Login</a>
+                {% endif %}
             </div>
         </div>
-        
-            </div>
-          </nav>
-        <hr>
-        
-        <div class="container">
-          {% block content %}
-          {% endblock content %}
-      </div>
-      
-      
-        
-  <script type="text/javascript" src="{% static 'js/cart2.js' %}"></script>
-	<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    </div>
+</nav>
+<hr>
 
-	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
-    </body>
+<div class="container">
+    {% block content %}{% endblock content %}
+</div>
+
+<!-- jQuery and Bootstrap Scripts (Required for Dropdown) -->
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+
+
+</body>
 </html>

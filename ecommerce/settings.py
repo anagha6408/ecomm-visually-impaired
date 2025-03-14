@@ -34,6 +34,7 @@ INSTALLED_APPS = [
     'userauths',
     'cart',
     'payment',
+    'wishlist',
     'jazzmin',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -69,6 +70,7 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 'cart.content_processor.cart',
                 'cart.content_processor.cart_items_processor',
+                'wishlist.context_processors.wishlist_count',
             ],
             
         },
@@ -149,3 +151,6 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 MEDIA_URL='/images/'
 
 MEDIA_ROOT=BASE_DIR / 'static/'
+
+LOGIN_URL = '/user/sign-up/'
+

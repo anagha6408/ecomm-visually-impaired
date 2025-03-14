@@ -8,14 +8,14 @@
         <div class="col-md-6">
             <div class="box-element">
                 <form method="POST" action="{% url 'payment:billing_info' %}">
-                    <h4>Billing & Shipping Details</h4>
+                    <h3 data-description="Billing & Shipping Details">Billing & Shipping Details</h3>
                     {% csrf_token %}
 
                     {% if user_addresses %}
-                    <p>Found {{ user_addresses|length }} saved addresses.</p>
-                    <label for="existing_addresses">Choose a saved address:</label>
+                    <p data-description="Found {{ user_addresses|length }} saved addresses." >Found {{ user_addresses|length }} saved addresses.</p>
+                    <label for="existing_addresses" data-description="Choose a saved address:">Choose a saved address:</label>
                     <select id="existing_addresses" class="form-control mb-3" onchange="fillShippingForm()" name="saved_address">
-                        <option value="">Select an address</option>
+                        <option value="" data-description="Select an address">Select an address</option>
                         {% for address in user_addresses %}
                             <option value="{{ address.id }}" 
                                 data-name="{{ address.shipping_name }}" 
@@ -25,13 +25,13 @@
                                 data-zipcode="{{ address.shipping_zipcode }}" 
                                 data-country="{{ address.shipping_country }}" 
                                 data-phone="{{ address.shipping_phone }}" 
-                                data-email="{{ address.shipping_email }}">
+                                data-email="{{ address.shipping_email }}" data-description="{{ address.shipping_address }}, {{ address.shipping_city }}, {{ address.shipping_state }}">
                                 {{ address.shipping_address }}, {{ address.shipping_city }}, {{ address.shipping_state }}
                             </option>
                         {% endfor %}
                     </select>
                     {% else %}
-                        <p>No saved addresses found.</p>
+                        <p data-description="No saved addresses found." >No saved addresses found.</p>
                     {% endif %}
 
                     <!-- Shipping Form -->
@@ -39,7 +39,7 @@
                         {{ shipping_form.as_p }}
                     </div>
 
-                    <button type="submit" class="btn btn-success btn-block">Save & Continue &#x2192;</button>
+                    <button type="submit" class="btn btn-success btn-block"data-description="Save & Continue" >Save & Continue &#x2192;</button>
                 </form>
             </div>
         </div> <!-- ✅ Closing Left Section Properly Here -->
@@ -47,19 +47,19 @@
             <!-- Right Section: Order Summary -->
             <div class="col-md-6">
                 <div class="box-element">
-                    <a class="btn btn-outline-dark mb-2" href="{% url 'cart:cart' %}">&#x2190; Back to Cart</a>
-                    <h3>Order Summary</h3>
+                    <a class="btn btn-outline-dark mb-2" href="{% url 'cart:cart' %}" data-description="Back to Car">&#x2190; Back to Cart</a>
+                    <h3 data-description="Order Summary" >Order Summary</h3>
                     <hr>
                     {% for item in items %}
                     <div class="cart-row d-flex align-items-center">
-                        <img class="row-image" src="{{item.product.product_image.url}}" style="width: 50px; height: 50px;">
-                        <div style="flex: 2; padding-left: 10px;"><p>{{ item.product.name }}</p></div>
-                        <div style="flex: 1;"><p>${{ item.product.selling_price|floatformat:2 }} x {{ item.quantity }} = ${{ item.get_total|floatformat:2 }}</p></div>
+                        <img class="row-image" src="{{item.product.product_image.url}}" style="width: 50px; height: 50px;"data-description="Image of the product {{ item.product.name }}" >
+                        <div style="flex: 2; padding-left: 10px;" ><p  data-description="Product Name{{ item.product.name }}">{{ item.product.name }}</p></div>
+                        <div style="flex: 1;" ><p data-description="{{ item.product.selling_price|floatformat:2 }} x {{ item.quantity }} = ${{ item.get_total|floatformat:2 }}">${{ item.product.selling_price|floatformat:2 }} x {{ item.quantity }} = ${{ item.get_total|floatformat:2 }}</p></div>
                     </div>
                     {% endfor %}
                     <hr>
-                    <h5>Items: {{ order.get_cart_items }}</h5>
-                    <h5>Total: ${{ order.get_cart_total|floatformat:2 }}</h5>
+                    <h5 data-description="Items: {{ order.get_cart_items }}" >Items: {{ order.get_cart_items }}</h5>
+                    <h5 data-description="Total: ${{ order.get_cart_total|floatformat:2 }}" >Total: ${{ order.get_cart_total|floatformat:2 }}</h5>
                 </div>
             </div> <!-- ✅ Right Section Closing Correctly Here -->
         </div>

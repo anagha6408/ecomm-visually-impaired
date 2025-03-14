@@ -51,9 +51,12 @@
                                           >
                                         Add to Cart <i class="fa fa-shopping-cart"></i>
                                     </button>
-                                    <button type="button" class="btn btn-success float-start" style="border-radius: 10px;" data-description="Add to wishlist">
-                                        Add to Wishlist <i class="fa fa-heart"></i>
-                                    </button>
+                                    <button type="button" class="btn btn-success float-start add-to-wishlist" 
+                                    data-product-id="{{ products.id }}" 
+                                    style="border-radius: 10px;">
+                                    Add to Wishlist <i class="fa fa-heart"></i>
+                                </button>
+                                
                                 </div>
                             </div>
                         </div>
@@ -85,6 +88,7 @@
   <!-- Make sure to include your cart2.js script at the end of your template -->
   <script src="{% static 'js/cartVoice.js' %}"></script>
 <script src="{% static 'js/cart2.js' %}"></script>
+<script src="{% static 'js/wishlist.js' %}"></script>
 
   </div>
 <!-- Include Voice Control Script -->

@@ -1,0 +1,63 @@
+{% extends 'store/main.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">Your Wishlist</h2>
+
+    {% if request.user.is_authenticated %}
+        {% if wishlist_items %}
+            <div class="row">
+                {% for item in wishlist_items %}
+                    <div class="col-md-4">
+                        <div class="card shadow-sm mb-4" style="border-radius: 15px;">
+                            <img src="{{ item.product.product_image.url }}" class="card-img-top" alt="{{ item.product.name }}" style="border-radius: 15px 15px 0 0; height: 250px; object-fit: cover;">
+                            <div class="card-body">
+                                <h5 class="card-title">{{ item.product.name }}</h5>
+                                <p class="card-text">
+                                    <strong>Price:</strong> ₹{{ item.product.selling_price | floatformat:2 }}
+                                </p>
+                                <script>console.log("Product ID for debugging: {{ item.product.id }}");</script>
+                                <!-- Add to Cart Button -->
+                                <button type="button" class="btn btn-primary me-3 float-start update-cart" 
+                                           data-product="{{item.product.id}}" data-action="add" 
+                                           style="border-radius: 10px;" data-description="Add to cart" 
+                                          >
+                                        Add to Cart <i class="fa fa-shopping-cart"></i>
+                                    </button>
+                                <!-- Remove from Wishlist Button -->
+                                <form action="{% url 'wishlist:remove' %}" method="POST" class="d-inline">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="product_id" value="{{ item.product.id }}">
+                                    <button type="submit" class="btn btn-danger" style="border-radius: 10px;">
+                                        Remove <i class="fa fa-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="text-muted">No items in your wishlist.</p>
+        {% endif %}
+    {% else %}
+        <p class="text-danger">You must be logged in to view your wishlist. <a href="{% url 'store:login' %}">Login here</a>.</p>
+    {% endif %}
+</div>
+<script type="text/javascript">
+    var user = "{{ request.user }}";
+    console.log("User status:", user);
+    {% if request.user.is_authenticated %}
+        user = "{{ request.user.username }}";
+    {% else %}
+        user = "AnonymousUser";
+    {% endif %}
+    console.log("User variable defined as:", user);
+    var csrftoken = "{{ csrf_token }}";
+</script>
+<script src="{% static 'js/cartVoice.js' %}"></script>
+<script src="{% static 'js/cart2.js' %}"></script>
+{% include 'store/voice_control.html' %}
+{% include 'store/footer.html' %}
+{% endblock content %}
