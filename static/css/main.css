@@ -1,122 +1,354 @@
-/* General styles */
-body {
-    font-family: Arial, sans-serif;
-    font-size: 1.2rem;
-}
+/* navbar-styles.css - Balanced for accessibility without excessive sizing */
 
-/* Navbar adjustments */
+/* Font import */
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap');
+
+/* Navbar base styling */
 .navbar {
-    padding: 10px;
+  background: linear-gradient(135deg, #2b3035 0%, #121416 100%) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  padding: 0;
+  font-family: 'Montserrat', sans-serif;
 }
 
-.cart-container {
-    position: relative;
-    display: inline-block;
+/* Navbar container */
+.navbar .container-fluid {
+  padding: 0.5rem 1.25rem;
 }
-#cart-total {
-    color: white !important;
+
+/* Brand styling - Moderate but clear */
+.navbar-brand {
+  font-size: 1.6rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  padding: 0.5rem 1rem;
+  margin-right: 1.5rem;
+  color: #ffffff !important;
+  position: relative;
+  text-transform: uppercase;
 }
-table p#cart-total {
-    color: white !important;
+
+.navbar-brand::after {
+  content: '';
+  position: absolute;
+  bottom: -3px;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: linear-gradient(90deg, #ff9966, #ff5e62);
+  transform: scaleX(0);
+  transition: transform 0.3s ease;
 }
-.cart-count {
-    position: absolute;
-    top: -8px; /* Adjust this value to move the number higher */
-    right: -8px; /* Adjust this value to move the number towards the left */
-    background-color: red;
-    color: white;
-    font-size: 14px;
-    font-weight: bold;
-    padding: 3px 7px;
-    border-radius: 50%;
-    min-width: 20px;
-    text-align: center;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
-    z-index: 10; /* Ensures it stays above the cart icon */
+
+.navbar-brand:hover::after {
+  transform: scaleX(1);
+}
+
+/* Navigation items - Balanced font size */
+.navbar-nav {
+  margin-right: 1rem;
+}
+
+.navbar-nav .nav-item {
+  margin: 0 0.3rem;
+  position: relative;
+}
+
+.navbar-nav .nav-link {
+  color: #ffffff !important;
+  font-weight: 500;
+  font-size: 1.05rem;
+  padding: 0.6rem 1rem;
+  position: relative;
+  transition: color 0.3s ease;
+  border-radius: 5px;
+}
+
+.navbar-nav .nav-link:hover {
+  color: #ffffff !important;
+  background-color: rgba(255, 255, 255, 0.15);
+}
+
+.navbar-nav .nav-item.active .nav-link {
+  color: #ffffff !important;
+  position: relative;
+}
+
+.navbar-nav .nav-item.active .nav-link::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 10%;
+  width: 80%;
+  height: 2px;
+  background-color: #ff9966;
+}
+
+/* Wishlist badge */
+#wishlist-count {
+  background-color: #ff5e62;
+  color: white;
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 0.2rem 0.5rem;
+  border-radius: 50%;
+  margin-left: 0.5rem;
+  position: relative;
+  top: -1px;
+}
+
+/* Search form */
+#searchForm {
+  margin: 0 1rem;
+  flex-grow: 1;
+  max-width: 400px;
+  display: flex;
+  align-items: center;
+}
+
+#searchInput {
+  height: 38px;
+  border-radius: 19px 0 0 19px;
+  border: none;
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  padding-left: 1rem;
+  font-size: 1rem;
+  flex-grow: 1;
+}
+
+#searchInput::placeholder {
+  color: #cbd3da;
+}
+
+#searchInput:focus {
+  background-color: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.2);
+  outline: none;
+}
+
+#voiceSearchBtn {
+  height: 38px;
+  border-radius: 0;
+  background-color: #17a2b8;
+  border: none;
+  color: white;
+  font-weight: 500;
+  font-size: 1rem;
+  padding: 0 0.75rem;
+}
+
+#voiceSearchBtn i {
+  margin-right: 0.35rem;
+}
+
+#searchForm .btn-outline-success {
+  height: 38px;
+  border-radius: 0 19px 19px 0;
+  border: none;
+  background-color: #28a745;
+  color: white;
+  font-weight: 500;
+  font-size: 1rem;
+  padding: 0 1rem;
+}
+
+#searchForm .btn-outline-success:hover {
+  background-color: #218838;
+}
+
+/* Toggle container */
+.toggle-container {
+  display: flex;
+  align-items: center;
+  margin: 0 1rem;
+}
+
+.nav-label {
+  color: #ffffff;
+  font-size: 0.9rem;
+  margin-right: 0.5rem;
+}
+
+.toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 46px;
+  height: 24px;
+}
+
+.toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: .4s;
+  border-radius: 24px;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: .4s;
+  border-radius: 50%;
+}
+
+input:checked + .slider {
+  background-color: #ff9966;
+}
+
+input:checked + .slider:before {
+  transform: translateX(22px);
+}
+
+/* Cart and user profile */
+.cart-icon-container {
+  position: relative;
+  display: inline-block;
+  margin: 0 0.5rem;
 }
 
 #cart-icon {
-    width: 40px; /* Adjust as needed */
-    height: auto;
+  width: 26px;
+  height: 26px;
+  transition: transform 0.3s ease;
 }
 
-/* Button styles */
+#cart-icon:hover {
+  transform: scale(1.1);
+}
+
+#cart-total {
+  background-color: #ff9966;
+  color: white;
+  font-weight: 600;
+  font-size: 0.8rem;
+  padding: 0.1rem 0.4rem;
+  border-radius: 50%;
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  margin: 0;
+}
+
+.user-controls {
+  display: flex;
+  align-items: center;
+}
+
 .btn-warning {
-    margin-left: 10px;
-}
-.selected-tab {
-    background-color: red !important;
-    color: white !important;
-}
-/* Container for the toggle switch */
-.toggle-container {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-top: 20px;
+  background-color: #ff9966;
+  border-color: #ff9966;
+  color: white;
+  font-weight: 500;
+  font-size: 1rem;
+  padding: 0.4rem 1rem;
+  border-radius: 18px;
+  transition: all 0.3s ease;
 }
 
-/* Label for the navigation mode */
-#navModeLabel {
-    font-size: 1.2rem;
-    margin-right: 10px;
-    color: white;
-    
+.btn-warning:hover {
+  background-color: #ff7e3d;
+  border-color: #ff7e3d;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(255, 153, 102, 0.3);
 }
 
-/* Styling for the toggle switch */
-.toggle-switch {
-    position: relative;
-    display: inline-block;
-    width: 50px;
-    height: 24px;
+.btn-secondary {
+  background-color: #6c757d;
+  border: none;
+  padding: 0.4rem 1rem;
+  margin-left: 0.75rem;
+  border-radius: 18px;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  transition: all 0.3s ease;
 }
 
-/* Hide the checkbox input */
-.toggle-switch input {
-    opacity: 0;
-    width: 0;
-    height: 0;
+.btn-secondary:hover {
+  background-color: #5a6268;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(108, 117, 125, 0.3);
 }
 
-/* The slider itself */
-.toggle-switch .slider {
-    position: absolute;
-    cursor: pointer;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: #ccc;
-    transition: 0.4s;
-    border-radius: 50px;
+.btn-secondary .fa-user-circle {
+  margin-right: 0.5rem;
 }
 
-/* The circle inside the slider */
-.toggle-switch .slider:before {
-    position: absolute;
-    content: "";
-    height: 16px;
-    width: 16px;
-    border-radius: 50px;
-    left: 4px;
-    bottom: 4px;
-    background-color: white;
-    transition: 0.4s;
+.username {
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-/* When the checkbox is checked */
-.toggle-switch input:checked + .slider {
-    background-color: #4CAF50;
+/* Focus indicators for accessibility */
+a:focus, button:focus, input:focus {
+  outline: 2px solid #4dabf7;
+  outline-offset: 2px;
 }
 
-/* Move the circle when the checkbox is checked */
-.toggle-switch input:checked + .slider:before {
-    transform: translateX(26px);
+/* Responsive adjustments */
+@media (max-width: 992px) {
+  .navbar-brand {
+    margin-right: 0;
+  }
+  
+  .navbar-nav {
+    margin: 0.5rem 0;
+  }
+  
+  .navbar-nav .nav-item {
+    margin: 0.2rem 0;
+  }
+  
+  #searchForm {
+    margin: 0.5rem 0;
+    max-width: 100%;
+  }
+  
+  .toggle-container,
+  .form-inline {
+    margin: 0.5rem 0;
+    justify-content: flex-start;
+  }
+  
+  .btn-secondary {
+    margin: 0.5rem 0;
+  }
+  
+  .user-controls {
+    width: 100%;
+    justify-content: flex-start;
+  }
 }
-.a{
-    font-size: 1.2rem;
+
+/* Fix for spacing on smaller screens */
+@media (max-width: 576px) {
+  .navbar .container-fluid {
+    padding: 0.5rem;
+  }
+  
+  #searchForm {
+    flex-wrap: nowrap;
+  }
+  
+  #searchInput {
+    max-width: 150px;
+  }
 }

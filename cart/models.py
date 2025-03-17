@@ -4,7 +4,14 @@ from django.contrib.auth.models import User
 import random
 from datetime import datetime
 class Order(models.Model):
-	#customer = models.ForeignKey(Customer, on_delete=models.SET_NULL, null=True, blank=True)
+	STATUS_CHOICES = [
+        ("Pending", "Pending"),
+        ("Processing", "Processing"),
+        ("Shipped", "Shipped"),
+        ("Delivered", "Delivered"),
+        ("Cancelled", "Cancelled"),
+		("Out for delivery", "Out for delivery"),
+    ]
 	date_ordered = models.DateTimeField(auto_now_add=True)
 	complete = models.BooleanField(default=False)
 	transaction_id = models.CharField(max_length=100, null=True,unique=True)
@@ -17,6 +24,9 @@ class Order(models.Model):
 	amount_paid = models.DecimalField(max_digits=7, decimal_places=2, null=False,default="0.00")
 	payment_method = models.CharField(max_length=20, null=True, blank=True)
 	#shipping = models.ForeignKey(ShippingAddress, on_delete=models.SET_NULL, null=True, blank=True)
+	order_status = models.CharField(
+        max_length=20, choices=STATUS_CHOICES, default="Pending"
+    )
 	
 	def save(self, *args, **kwargs):
 		if not self.transaction_id:
@@ -24,7 +34,7 @@ class Order(models.Model):
 		super().save(*args, **kwargs)
 
 	def __str__(self):
-		return f"Order {self.id} - {self.transaction_id} - {self.full_name}"
+		return f"Order {self.id} - {self.transaction_id} - {self.full_name} - {self.order_status}"
 		
 	@property
 	def shipping(self):

@@ -1,0 +1,40 @@
+{% extends 'store/main.html' %}
+{% load static %}
+{% block content %}
+<div class="container mt-5">
+    <div class="card">
+        <div class="card-header bg-dark text-white">
+            <h4 class="text-center">My Profile</h4>
+        </div>
+        <div class="card-body">
+            <div class="text-center mb-4">
+                <i class="fas fa-user-circle fa-5x"></i>
+            </div>
+            
+            <table class="table table-bordered">
+                <tr>
+                    <th>Username</th>
+                    <td>{{ user.username }}</td>
+                </tr>
+                <tr>
+                    <th>Email</th>
+                    <td>{{ user.email }}</td>
+                </tr>
+            </table>
+
+            <div class="text-center mt-4">
+                <a href="{% url 'store:editProfile' %}" class="btn btn-primary">
+                    Edit Profile
+                </a>
+                <a href="#" class="btn btn-warning">
+                    Change Password
+                </a>
+                <a href="{% url 'userauth:logout' %}" class="btn btn-danger">
+                    Logout
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% include 'store/footer.html' %}
+{% endblock content %}

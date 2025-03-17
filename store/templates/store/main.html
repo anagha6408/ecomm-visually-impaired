@@ -2,106 +2,102 @@
 {% load static %}
 <html>
     <head>
-        <title>
-            E-commerce
-        </title>
+        <title>E-commerce</title>
         <link rel="stylesheet" type="text/css" href="{% static 'css/main.css' %}">
+        <link rel="stylesheet" type="text/css" href="{% static 'css/navbar-styles.css' %}">
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1" />
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" 
         integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" 
         crossorigin="anonymous">
         <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
         <script src="{% static 'js/voice4.js' %}"></script>
+        <script src="{% static 'js/voice_search.js' %}"></script>
         <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
-        
     </head>
     <body>
-      {% csrf_token %}
-          {% if messages %}
-                {% for message in messages %}
-                    <div class="alert alert-{{ message.tags }}">
-                        {{ message }}
+        {% csrf_token %}
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+        
+        <nav class="navbar navbar-expand-lg navbar-dark">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="{% url 'store:home' %}" data-description="Go to the home page">HALO</a>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+              
+                <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                    <ul class="navbar-nav mr-auto">
+                        <li class="nav-item active">
+                            <a class="nav-link" href="{% url 'store:collection' %}" data-description="Go to the Category page">Category</a>
+                        </li>
+                        <li class="nav-item active">
+                            <a class="nav-link" href="{% url 'cart:cart' %}" data-description="Go to the Cart page">Cart</a>
+                        </li>
+                        <li class="nav-item active">
+                            <a href="{% url 'wishlist:view' %}" class="nav-link" data-description="Go to the Wish list page">
+                                Wishlist <span id="wishlist-count" data-description="Number of products in Wish list is {{ wishlist_count }}">{{ wishlist_count }}</span>
+                            </a>
+                        </li>                
+                        {% if user.is_authenticated %}
+                            <li class="nav-item active">
+                                <a class="nav-link" data-description="Click here to view Order History" href="{% url 'cart:past_orders' %}">My Orders</a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                    
+                    {% csrf_token %} 
+                    <div class="toggle-container" data-description="Toggle between keyboard and mouse navigation mode">
+                        <span id="navModeLabel" class="nav-label" tabindex="0">Mouse Navigation</span> 
+                        <label class="toggle-switch" for="navToggle" aria-label="Switch between keyboard and mouse navigation">
+                            <input type="checkbox" id="navToggle" tabindex="0" aria-checked="false">
+                            <span class="slider"></span>
+                        </label>
                     </div>
-                {% endfor %}
-            {% endif %}
-        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-            <a class="navbar-brand" href="{% url 'store:home' %}" data-description="Go to the home page"> &nbsp; Halo &nbsp;</a>
-            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-              <span class="navbar-toggler-icon"></span>
-            </button>
-          
-            <div class="collapse navbar-collapse" id="navbarSupportedContent">
-              <ul class="navbar-nav mr-auto">
-                <li class="nav-item active">
-                  <a class="nav-link" href="{% url 'store:collection' %}"  data-description="Go to the Category page" >Category <span class="sr-only">(current)</span></a>
-                </li>
-                <li class="nav-item active">
-                    <a class="nav-link" href="{% url 'cart:cart' %}" data-description="Go to the Cart page" >Cart <span class="sr-only">(current)</span></a>
-                  </li>
-                  <li class="nav-item active">
-                    <a href="{% url 'wishlist:view' %}" class="nav-link" data-description="Go to the Wish list page">
-                        Wishlist <span id="wishlist-count" class="badge bg-danger" data-description="Number of products in Wish list is {{ wishlist_count }}">{{ wishlist_count }}</span>
+
+                    <form id="searchForm" method="GET" action="{% url 'store:search' %}">
+                        <input class="form-control" type="search" id="searchInput" name="searched" placeholder="Search for products..." aria-label="Search" data-description="Search for products...">
+                        
+                        <!-- Voice Search Button -->
+                        <button type="button" class="btn" id="voiceSearchBtn" data-description="Click to search using voice">
+                            <i class="fas fa-microphone"></i>
+                        </button>
+                        <button class="btn btn-outline-success" type="submit" data-description="Click here for manual search">Search</button>
+                    </form>
+
+                    <div class="form-inline">
+                        <a href="{% url 'userauth:sign-up' %}" class="btn btn-warning" data-description="Click to Login">
+                            <i class="fas fa-sign-in-alt"></i> Login
+                        </a>
+                        <a href="{% url 'cart:cart' %}" data-description="Click to go to cart" class="cart-icon-container">
+                            <img id="cart-icon" src="{% static 'images/cart.png' %}">
+                            <span id="cart-total">{{cartItems|default:"0"}}</span>
+                        </a>
+                    </div>
+                
+                    <!-- Profile Button -->
+                    <a href="{% url 'store:profile' %}" class="btn btn-secondary" data-description="Go to your profile">
+                        <i class="fas fa-user-circle"></i>
+                        {% if user.is_authenticated %}
+                            {{ user.username }}
+                        {% else %}
+                            Guest
+                        {% endif %}
                     </a>
-                </li>                
-                  {% if user.is_authenticated %}
-                      <li class="nav-item active"><a class="nav-link" data-description="Click here to view Order History" href="{% url 'cart:past_orders' %}">My Orders</a></li>
-                  {% endif %}
-              </ul>
-              <form class="form-inline my-2 my-lg-0"  method="POST" action="{% url 'store:search' %}">
-                {% csrf_token %}
-                <div class="toggle-container" data-description="Toggle between keyboard and mouse navigation mode">
-                  <span id="navModeLabel" class="nav-label" tabindex="0">Mouse Navigation</span> 
-                  <label class="toggle-switch" for="navToggle" aria-label="Switch between keyboard and mouse navigation">
-                    <input type="checkbox" id="navToggle" tabindex="0" aria-checked="false">
-                    <span class="slider"></span>
-                  </label>
-                </div>              
-                &nbsp;
-                <input class="form-control mr-sm-2" type="search"name="searched" placeholder="Search" aria-label="Search" data-description="Enter search terms here">
-                <button class="btn btn-outline-success my-2 my-sm-0" type="submit" data-description="Click to search for products">Search</button>
-          
-              </form>
-      
-
-              <div class="form-inline my-2 my-lg-0">
-                <a href="{% url 'userauth:sign-up' %}"class="btn btn-warning" data-description="Click to Login">Login</a>
-                <a href="{% url 'cart:cart' %}" data-description="Click to go to cart">
-                   <img  id="cart-icon" src="{% static 'images/cart.png' %}">
-               </a>
-               <p id="cart-total">{{cartItems|default:"0"}}</p>
-               &nbsp;&nbsp;&nbsp;&nbsp;
-              </div>
-            
-           <!-- Profile Dropdown -->
-           <div class="dropdown">
-            <a href="#" class="btn btn-secondary dropdown-toggle" id="profileDropdown"
-               data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
-               role="button" tabindex="0" data-description="User Profile Menu">
-                <i class="fas fa-user-circle fa-lg"></i>
-                {% if user.is_authenticated %}
-                    <span class="ml-2">{{ user.username }}</span>
-                {% else %}
-                    <span class="ml-2">Guest</span>
-                {% endif %}
-            </a>
-            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="profileDropdown">
-                <a class="dropdown-item" href="{% url 'store:editProfile' %}" data-description="Edit your profile" tabindex="-1">Edit Profile</a>
-                {% if user.is_authenticated %}
-                    <a class="dropdown-item" href="{% url 'userauth:logout' %}" data-description="Logout from your account" tabindex="-1">Logout</a>
-                {% else %}
-                    <a class="dropdown-item" href="{% url 'userauth:login' %}" data-description="Login to your account" tabindex="-1">Login</a>
-                {% endif %}
+                </div>
             </div>
+        </nav>
+        <br>
+        <div class="container">
+            {% block content %}{% endblock content %}
         </div>
-    </div>
-</nav>
-<hr>
-
-<div class="container">
-    {% block content %}{% endblock content %}
-</div>
-
-<!-- jQuery and Bootstrap Scripts (Required for Dropdown) -->
+        
+        {% include 'store/search_control.html' with hide_voice_button=True %}
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>

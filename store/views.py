@@ -72,32 +72,42 @@ def welcome_msg(request):
 def editProfile(request):
 	return render(request,"store/editProfile.html")
 
-
 from django.db.models import Q
+import re  # Import regex
+
 def search(request):
-    if request.method == 'POST':
-        query = request.POST.get('searched', '').strip()  # Get the search input safely
+    query = request.GET.get('searched', '').strip()
 
-        if not query:
-            messages.error(request, "Please enter a search term.")
-            return render(request, 'store/home.html', {})
+    if not query:
+        messages.error(request, "Please enter a search term.")
+        return redirect('store:home')
 
-        # Searching multiple fields using Q
-        searched = Product.objects.filter(
-            Q(name__icontains=query) |
-            Q(description__icontains=query) |
-            Q(small_description__icontains=query) |
-            Q(category__name__icontains=query) |
-            Q(tag__icontains=query) |
-            Q(meta_title__icontains=query) |
-            Q(meta_keywords__icontains=query) |
-            Q(meta_description__icontains=query)
-        ).distinct()
+    # Remove trailing punctuation (like periods, commas, etc.)
+    query = re.sub(r'[^\w\s]', '', query)  
 
-        # If no results, show a message
-        if not searched.exists():
-            messages.warning(request, f'No results found for "{query}".')
+    # Debugging output
+    print(f"Cleaned Search Query: {query}")
 
-        return render(request, 'store/search.html', {'searched': searched, 'query': query})
+    # Search across multiple fields
+    searched = Product.objects.filter(
+        Q(name__icontains=query) |
+        Q(description__icontains=query) |
+        Q(small_description__icontains=query) |
+        Q(category__name__icontains=query) |
+        Q(tag__icontains=query) |
+        Q(meta_title__icontains=query) |
+        Q(meta_keywords__icontains=query) |
+        Q(meta_description__icontains=query)
+    ).distinct()
 
-    return render(request, 'store/home.html', {})
+    print(f"Results Found: {searched.count()}")  # Debugging output
+
+    if not searched.exists():
+        messages.warning(request, f'No results found for "{query}".')
+
+    return render(request, 'store/search.html', {'searched': searched, 'query': query})
+
+from django.contrib.auth.decorators import login_required
+@login_required(login_url='userauth:login')
+def profile(request):
+    return render(request, 'store/profile.html')

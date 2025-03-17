@@ -13,7 +13,17 @@
             <p><strong>Date Ordered:</strong> {{ order.date_ordered|date:"Y-m-d H:i" }}</p>
             <p><strong>Amount Paid:</strong> ${{ order.amount_paid }}</p>
             <p><strong>Payment Method:</strong> {{ order.payment_method|default:"Not Specified" }}</p>
-            
+            <p><strong>Order Status:</strong>
+            <span class="badge 
+                {% if order.order_status == 'Pending' %} bg-warning 
+                {% elif order.order_status == 'Processing' %} bg-info 
+                {% elif order.order_status == 'Shipped' %} bg-primary 
+                {% elif order.order_status == 'Out for delivery' %} bg-secondary 
+                {% elif order.order_status == 'Delivered' %} bg-success 
+                {% elif order.order_status == 'Cancelled' %} bg-danger {% endif %}">
+                {{ order.order_status }}
+            </span>
+            </p>
             <h5 class="mt-3">Shipping Details</h5>
             {% if shipping_address %}
                 <ul class="list-group mb-4">
@@ -68,4 +78,9 @@
         </div>
     </div>
 </div>
+
+
+{% include 'store/voice_control.html' %}
+{% include 'store/footer.html' %}
+
 {% endblock content %}

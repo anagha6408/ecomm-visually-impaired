@@ -8,6 +8,7 @@
         <div class="col-md-12">
             <h1>Search Results</h1>
             <hr>
+
             <!-- Display search query -->
             {% if query %}
                 <h3>Showing results for "{{ query }}"</h3>
@@ -34,7 +35,12 @@
                     </div>
                     {% endfor %}
                 </div>
-            
+            {% else %}
+                <!-- 🔹 If no products found, show this message -->
+                <div class="alert alert-warning text-center mt-4">
+                    <h4>No results found for "{{ query }}"</h4>
+                    <p>Try searching with a different keyword.</p>
+                </div>
             {% endif %}
 
             {% include 'store/voice_control.html' %}

@@ -17,6 +17,7 @@ urlpatterns = [
     path('carousel_view/',views.carousel_view,name="slider"),
     path('editProfile/',views.editProfile,name="editProfile"),
     path('search/', views.search, name='search'),
+    path('profile/',views.profile,name="profile"),
     
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
