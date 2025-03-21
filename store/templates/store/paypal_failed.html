@@ -1,0 +1,45 @@
+{% extends 'store/main.html' %}
+{% load static %}
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h3 class="text-center mb-0">Payment Failed</h3>
+                </div>
+                <div class="card-body text-center">
+                    <div class="mb-4">
+                        <i class="fas fa-times-circle text-danger" style="font-size: 5rem;"></i>
+                    </div>
+                    <h4>We couldn't process your payment</h4>
+                    <p class="mb-4">Unfortunately, your PayPal payment was not completed successfully.</p>
+                    <p>This could be due to:</p>
+                    <ul class="list-unstyled">
+                        <li>Insufficient funds</li>
+                        <li>Connection issues</li>
+                        <li>The transaction was canceled</li>
+                        <li>Other payment verification problems</li>
+                    </ul>
+                    
+                    <hr class="my-4">
+                    
+                    <p>Your order has not been placed. You can try again or choose a different payment method.</p>
+                    
+                    <div class="d-flex justify-content-center">
+                        <a href="{% url 'cart:checkout' %}" class="btn btn-primary me-2">
+                            Return to Checkout
+                        </a>
+                        <a href="{% url 'cart:cart' %}" class="btn btn-outline-secondary">
+                            View Cart
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% include 'store/voice_control.html' %}
+{% include 'store/footer.html' %}
+{% endblock content %}

@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'store',
+    'paypal.standard.ipn',
 ]
 
 MIDDLEWARE = [
@@ -154,3 +155,5 @@ MEDIA_ROOT=BASE_DIR / 'static/'
 
 LOGIN_URL = '/user/sign-up/'
 
+PAYAL_TEST = True
+PAYPAL_RECEIVER_EMAIL = 'business@anaghatest.com'

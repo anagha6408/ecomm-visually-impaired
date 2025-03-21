@@ -175,8 +175,8 @@ from django.contrib.auth.decorators import login_required
 def past_orders(request):
     user = request.user
     past_orders = Order.objects.filter(user=user,complete=True).order_by('-date_ordered')  # Latest first
-    print(f"User: {user}")
-    print("Past Orders:", past_orders)
+    #print(f"User: {user}")
+    #print("Past Orders:", past_orders)
     return render(request, 'store/past_orders.html', {'past_orders': past_orders})
 
 from django.shortcuts import render, get_object_or_404

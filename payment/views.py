@@ -1,9 +1,17 @@
+import datetime
 from django.contrib import messages
 from django.shortcuts import redirect, render
 from payment.models import ShippingAddress
 from payment.forms import ShippingForm
 from cart.cart import cartData
 from cart.models import Order, OrderItem, Product
+from django.urls import reverse
+from paypal.standard.forms import PayPalPaymentsForm
+from django.conf import settings
+import uuid
+
+
+
 def checkout_view(request):
     shipping_form = ShippingForm()
     
@@ -33,6 +41,20 @@ def billing_info(request):
         cartItems = data['cartItems']
         order = data['order']
         items = data['items']
+        #paypal
+        host=request.get_host()
+        paypal_dict = {
+            'business': settings.PAYPAL_RECEIVER_EMAIL,
+            'amount': order.get_cart_total,
+            'item_name': 'Order {}'.format(order.id),
+            'no_shipping': '1',
+            'invoice': str(uuid.uuid4()),
+            'currency_code': 'USD',
+            'notify_url': 'http://{}/payment/paypal/'.format(host),
+            'return_url': 'http://{}{}'.format(host, reverse('payment:paypal_success')),
+            'cancel_return': 'http://{}{}'.format(host, reverse('payment:paypal_failed')),
+        }
+        paypal_form=PayPalPaymentsForm(initial=paypal_dict)
 
         selected_address_id = request.POST.get("saved_address")
         if selected_address_id:
@@ -59,7 +81,8 @@ def billing_info(request):
             "cartItems": cartItems,
             "order": order,
             "items": items,
-            "shipping_address": shipping_address
+            "shipping_address": shipping_address,
+            'paypal_form':paypal_form,
         })
 
     messages.error(request, "Invalid request method. Please submit the form properly.")
@@ -121,6 +144,7 @@ def payment_process(request):
             
             # Store the current order ID in session
             request.session['current_order_id'] = current_order.id
+            
             
         except ShippingAddress.DoesNotExist:
             messages.error(request, "Please provide shipping information first.")
@@ -209,6 +233,126 @@ def paypal_payment(request):
     return render(request, 'store/paypal_payment.html')
 
 
+def paypal_success(request):
+    user = request.user
+    if not user.is_authenticated:
+        messages.error(request, "You need to log in first.")
+        return redirect('store:home')
+
+    # Get the PayPal transaction ID if available
+    tx_id = request.GET.get('tx')
+    
+    # First check if we already have an order with this transaction ID
+    # This prevents duplicate processing
+    if tx_id:
+        existing_order = Order.objects.filter(transaction_id=tx_id).first()
+        if existing_order:
+            messages.info(request, "This order has already been processed. Thank you!")
+            return render(request, 'store/paypal_success.html', {
+                "order": existing_order,
+                "items": existing_order.orderitem_set.all(),
+                "payment_method": "PayPal",
+                "transaction_id": tx_id,
+            })
+    
+    # Get the order ID from session
+    order_id = request.session.get('current_order_id')
+    
+    if not order_id:
+        # Fallback to getting the most recent incomplete order
+        order = Order.objects.filter(user=user, complete=False).first()
+        if not order:
+            messages.error(request, "No order information found.")
+            return redirect('store:home')
+        order_id = order.id
+    
+    try:
+        # Get the specific order by ID
+        order = Order.objects.get(id=order_id, user=user)
+        
+        # IMPORTANT: Check if this order is already completed to prevent duplicates
+        if order.complete:
+            messages.info(request, "This order has already been processed. Thank you!")
+            return render(request, 'store/paypal_success.html', {
+                "order": order,
+                "items": order.orderitem_set.all(),
+                "payment_method": "PayPal",
+                "transaction_id": order.transaction_id,
+            })
+        
+        # Store order items for display
+        items = order.orderitem_set.all()
+        
+        # Get shipping information
+        selected_address_id = request.session.get('selected_address_id')
+        if selected_address_id:
+            shipping_address = ShippingAddress.objects.get(id=selected_address_id, user=user)
+        else:
+            shipping_address = ShippingAddress.objects.filter(user=user).order_by('-shipping_date_added').first()
+        
+        # Update order fields
+        order.complete = True
+        order.payment_method = "PayPal"
+        order.amount_paid = order.get_cart_total
+        order.status = "Completed"  # Make sure this field exists
+        
+        # Set transaction ID
+        if tx_id:
+            order.transaction_id = tx_id
+        else:
+            # Only generate a new one if we don't have one
+            if not order.transaction_id:
+                order.transaction_id = f"PP-{datetime.datetime.now().timestamp()}"
+        
+        # Update shipping info if available
+        if shipping_address:
+            order.full_name = shipping_address.shipping_name
+            order.email = shipping_address.shipping_email
+            order.phone = shipping_address.shipping_phone
+            order.address = shipping_address.shipping_address
+            # Add other shipping fields as needed
+        
+        # Save the order
+        order.save()
+        
+        # Clear cart and session data - ONLY ONCE
+        order_clear_cart(request)
+        
+        if 'current_order_id' in request.session:
+            del request.session['current_order_id']
+        
+        if 'selected_address_id' in request.session:
+            del request.session['selected_address_id']
+        
+        # Create new empty cart order only if we don't have any incomplete orders
+        if not Order.objects.filter(user=user, complete=False).exists():
+            Order.objects.create(user=user, complete=False)
+        
+        request.session.modified = True
+        
+        messages.success(request, "Your PayPal payment was successful! Thank you for your order.")
+        
+    except Order.DoesNotExist:
+        messages.error(request, "Order not found.")
+        return redirect('store:home')
+    
+    except ShippingAddress.DoesNotExist:
+        shipping_address = None
+        messages.warning(request, "Shipping address not found, but order was processed.")
+
+    transaction_id = order.transaction_id
+    payment_method = "PayPal"
+
+    return render(request, 'store/paypal_success.html', {
+        "order": order,
+        "items": items,
+        "shipping_address": shipping_address,
+        "payment_method": payment_method,
+        "transaction_id": transaction_id,
+    })
+
+def paypal_failed(request):
+    return render(request, 'store/paypal_failed.html')
 
 
 def order_calculate_cart_total(request):

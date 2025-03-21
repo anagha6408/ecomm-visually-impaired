@@ -1,0 +1,50 @@
+{% extends 'store/main.html' %}
+{% load static %}
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card border-success">
+                <div class="card-header bg-success text-white">
+                    <h3 class="text-center mb-0">Payment Successful!</h3>
+                </div>
+                <div class="card-body text-center">
+                    <div class="mb-4">
+                        <i class="fas fa-check-circle text-success" style="font-size: 5rem;"></i>
+                    </div>
+                    <h4>Thank you for your purchase!</h4>
+                    <p class="mb-4">Your payment via PayPal was processed successfully.</p>
+                    <p>We'll process your order right away and send you a confirmation email with all the details.</p>
+                    
+                    <hr class="my-4">
+                    
+                    {% if order %}
+                    <div class="text-left">
+                        <h5>Order Summary</h5>
+                        <p>Order ID: #{{ order.id }}</p>
+                        <p>Date: {{ order.date_ordered|date:"F j, Y" }}</p>
+                        <p>Total Amount: ${{ order.get_cart_total|floatformat:2 }}</p>
+                        <p>Items: {{ order.get_cart_items }}</p>
+                        {% if transaction_id %}
+                        <p>Transaction ID: {{ transaction_id }}</p>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                    
+                    <div class="d-flex justify-content-center">
+                        <a href="{% url 'store:home' %}" class="btn btn-primary me-2">
+                            Continue Shopping
+                        </a>
+                        <a href="{% url 'cart:past_orders' %}" class="btn btn-outline-secondary">
+                            View My Orders
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% include 'store/voice_control.html' %}
+{% include 'store/footer.html' %}
+{% endblock content %}
