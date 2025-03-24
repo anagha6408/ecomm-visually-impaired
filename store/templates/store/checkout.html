@@ -1,7 +1,7 @@
 {% extends 'store/main.html' %}
 {% load static %}
 {% block content %}
-<link rel="stylesheet" type="text/css" href="{% static 'css/chechout.css' %}">
+<link rel="stylesheet" type="text/css" href="{% static 'css/checkout.css' %}">
 <div class="container mt-4">
     <div class="row">
         <!-- Left Section: User & Shipping Form -->
@@ -12,9 +12,9 @@
                     {% csrf_token %}
 
                     {% if user_addresses %}
-                    <p data-description="Found {{ user_addresses|length }} saved addresses." >Found {{ user_addresses|length }} saved addresses.</p>
+                    <p data-description="Found {{ user_addresses|length }} saved addresses.">Found {{ user_addresses|length }} saved addresses.</p>
                     <label for="existing_addresses" data-description="Choose a saved address:">Choose a saved address:</label>
-                    <select id="existing_addresses" class="form-control mb-3" onchange="fillShippingForm()" name="saved_address">
+                    <select id="existing_addresses" class="form-control mb-3" name="saved_address" data-description="Select from your saved addresses" onchange="fillShippingForm()">
                         <option value="" data-description="Select an address">Select an address</option>
                         {% for address in user_addresses %}
                             <option value="{{ address.id }}" 
@@ -25,68 +25,62 @@
                                 data-zipcode="{{ address.shipping_zipcode }}" 
                                 data-country="{{ address.shipping_country }}" 
                                 data-phone="{{ address.shipping_phone }}" 
-                                data-email="{{ address.shipping_email }}" data-description="{{ address.shipping_address }}, {{ address.shipping_city }}, {{ address.shipping_state }}">
+                                data-email="{{ address.shipping_email }}" 
+                                data-description="{{ address.shipping_address }}, {{ address.shipping_city }}, {{ address.shipping_state }}">
                                 {{ address.shipping_address }}, {{ address.shipping_city }}, {{ address.shipping_state }}
                             </option>
                         {% endfor %}
                     </select>
                     {% else %}
-                        <p data-description="No saved addresses found." >No saved addresses found.</p>
+                        <p data-description="No saved addresses found.">No saved addresses found.</p>
                     {% endif %}
 
                     <!-- Shipping Form -->
                     <div id="shipping-form">
-                        {{ shipping_form.as_p }}
+                        {% for field in shipping_form %}
+                            <div class="form-group">
+                                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                                {{ field }}
+                            </div>
+                        {% endfor %}
                     </div>
 
-                    <button type="submit" class="btn btn-success btn-block"data-description="Save & Continue" >Save & Continue &#x2192;</button>
+                    <!-- Accessibility Instructions -->
+                    <div class="sr-only" aria-live="polite" id="instructions">
+                        Press Tab to navigate between form fields. Each field has a voice input button you can activate with Enter.
+                        Press Alt+H at any time to hear these instructions again.
+                    </div>
+
+                    <button type="submit" id="saveContinueBtn" class="btn btn-success btn-block" data-description="Save & Continue">Save & Continue &#x2192;</button>
                 </form>
             </div>
-        </div> <!-- ✅ Closing Left Section Properly Here -->
+        </div>
 
-            <!-- Right Section: Order Summary -->
-            <div class="col-md-6">
-                <div class="box-element">
-                    <a class="btn btn-outline-dark mb-2" href="{% url 'cart:cart' %}" data-description="Back to Car">&#x2190; Back to Cart</a>
-                    <h3 data-description="Order Summary" >Order Summary</h3>
-                    <hr>
-                    {% for item in items %}
-                    <div class="cart-row d-flex align-items-center">
-                        <img class="row-image" src="{{item.product.product_image.url}}" style="width: 50px; height: 50px;"data-description="Image of the product {{ item.product.name }}" >
-                        <div style="flex: 2; padding-left: 10px;" ><p  data-description="Product Name{{ item.product.name }}">{{ item.product.name }}</p></div>
-                        <div style="flex: 1;" ><p data-description="{{ item.product.selling_price|floatformat:2 }} x {{ item.quantity }} = ${{ item.get_total|floatformat:2 }}">${{ item.product.selling_price|floatformat:2 }} x {{ item.quantity }} = ${{ item.get_total|floatformat:2 }}</p></div>
-                    </div>
-                    {% endfor %}
-                    <hr>
-                    <h5 data-description="Items: {{ order.get_cart_items }}" >Items: {{ order.get_cart_items }}</h5>
-                    <h5 data-description="Total: ${{ order.get_cart_total|floatformat:2 }}" >Total: ${{ order.get_cart_total|floatformat:2 }}</h5>
+        <!-- Right Section: Order Summary -->
+        <div class="col-md-6">
+            <div class="box-element">
+                <a class="btn btn-outline-dark mb-2" href="{% url 'cart:cart' %}" data-description="Back to Cart">&#x2190; Back to Cart</a>
+                <h3 data-description="Order Summary">Order Summary</h3>
+                <hr>
+                {% for item in items %}
+                <div class="cart-row d-flex align-items-center">
+                    <img class="row-image" src="{{ item.product.product_image.url }}" style="width: 50px; height: 50px;" data-description="Image of the product {{ item.product.name }}">
+                    <div style="flex: 2; padding-left: 10px;"><p data-description="{{ item.product.name }}">{{ item.product.name }}</p></div>
+                    <div style="flex: 1;"><p data-description="${{ item.product.selling_price|floatformat:2 }} x {{ item.quantity }} = ${{ item.get_total|floatformat:2 }}">${{ item.product.selling_price|floatformat:2 }} x {{ item.quantity }} = ${{ item.get_total|floatformat:2 }}</p></div>
                 </div>
-            </div> <!-- ✅ Right Section Closing Correctly Here -->
+                {% endfor %}
+                <hr>
+                <h5 data-description="Items: {{ order.get_cart_items }}">Items: {{ order.get_cart_items }}</h5>
+                <h5 data-description="Total: ${{ order.get_cart_total|floatformat:2 }}">Total: ${{ order.get_cart_total|floatformat:2 }}</h5>
+            </div>
         </div>
     </div>
 
-	<script>
+    <!-- JavaScript Files -->
+    <script src="{% static 'js/shipping_voice.js' %}"></script>
+    <script src="{% static 'js/voice4.js' %}"></script>
 
-
-        function fillShippingForm() {
-            console.error("fillShippingForm is called");
-            var selectedAddress = document.getElementById("existing_addresses");
-            var selectedOption = selectedAddress.options[selectedAddress.selectedIndex];
-    
-            if (selectedOption.value !== "") {
-                document.querySelector("[name='shipping_name']").value = selectedOption.dataset.name;
-                document.querySelector("[name='shipping_address']").value = selectedOption.dataset.address;
-                document.querySelector("[name='shipping_city']").value = selectedOption.dataset.city;
-                document.querySelector("[name='shipping_state']").value = selectedOption.dataset.state;
-                document.querySelector("[name='shipping_zipcode']").value = selectedOption.dataset.zipcode;
-                document.querySelector("[name='shipping_country']").value = selectedOption.dataset.country;
-                document.querySelector("[name='shipping_phone']").value = selectedOption.dataset.phone;
-                document.querySelector("[name='shipping_email']").value = selectedOption.dataset.email;
-            }
-        }
-    </script>
-
-
-{% include 'store/voice_control.html' %}
-{% include 'store/footer.html' %}
+    <!-- Include Footer -->
+    {% include 'store/voice_control.html' %}
+    {% include 'store/footer.html' %}
 {% endblock content %}

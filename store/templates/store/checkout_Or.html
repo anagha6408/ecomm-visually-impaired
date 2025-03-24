@@ -7,203 +7,99 @@
         <!-- Left Section: User & Shipping Form -->
         <div class="col-md-6">
             <div class="box-element">
-                <form method="POST">
-                    <h4>Billing & Shipping Details</h4>
+                <form method="POST" action="{% url 'payment:billing_info' %}">
+                    <h3 data-description="Billing & Shipping Details">Billing & Shipping Details</h3>
                     {% csrf_token %}
-                    {{shipping_form.as_p}}
-                    <!--
-                    <hr>
-                    <div id="user-info">
-                        <div class="form-field">
-                            <input required class="form-control" type="text" name="name" placeholder="Name">
-                        </div>
-                        <div class="form-field">
-                            <input required class="form-control" type="email" name="email" placeholder="Email">
-                        </div>
-                        <div class="form-field">
-                            <input required class="form-control" type="text" name="phNum" placeholder="Phone Number">
-                        </div>
-                    </div>
 
-                    <div id="shipping-info">
-                        <hr>
-                        <h5>Shipping Information</h5>
-                        <div class="form-field">
-                            <input class="form-control" type="text" name="address" placeholder="Address">
-                        </div>
-                        <div class="form-field">
-                            <input class="form-control" type="text" name="city" placeholder="City">
-                        </div>
-                        <div class="form-field">
-                            <input class="form-control" type="text" name="state" placeholder="State">
-                        </div>
-                        <div class="form-field">
-                            <input class="form-control" type="text" name="zipcode" placeholder="Zip Code">
-                        </div>
-                        <div class="form-field">
-                            <input class="form-control" type="text" name="country" placeholder="Country">
-                        </div>
-                    </div>
-                    -->
+                    {% if user_addresses %}
+                    <p data-description="Found {{ user_addresses|length }} saved addresses." >Found {{ user_addresses|length }} saved addresses.</p>
+                    <label for="existing_addresses" data-description="Choose a saved address:">Choose a saved address:</label>
+                    <select id="existing_addresses" class="form-control mb-3" onchange="fillShippingForm()" name="saved_address" data-description="Select from your saved addresses">
+                        <option value="" data-description="Select an address">Select an address</option>
+                        {% for address in user_addresses %}
+                            <option value="{{ address.id }}" 
+                                data-name="{{ address.shipping_name }}" 
+                                data-address="{{ address.shipping_address }}" 
+                                data-city="{{ address.shipping_city }}" 
+                                data-state="{{ address.shipping_state }}" 
+                                data-zipcode="{{ address.shipping_zipcode }}" 
+                                data-country="{{ address.shipping_country }}" 
+                                data-phone="{{ address.shipping_phone }}" 
+                                data-email="{{ address.shipping_email }}" data-description="{{ address.shipping_address }}, {{ address.shipping_city }}, {{ address.shipping_state }}">
+                                {{ address.shipping_address }}, {{ address.shipping_city }}, {{ address.shipping_state }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                    {% else %}
+                        <p data-description="No saved addresses found." >No saved addresses found.</p>
+                    {% endif %}
 
-                    <button id="form-button" class="btn btn-success btn-block" type="submit">Continue</button>
+                    <!-- Shipping Form 
+                    <div id="shipping-form">
+                        {{ shipping_form.as_p }}
+                    </div>
+                -->
+                <div id="shipping-form">
+                    {% for field in shipping_form %}
+                        <div class="form-group">
+                            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                            {{ field }}
+                        </div>
+                    {% endfor %}
+                </div>
+                <!-- Add this right after your form to provide keyboard instructions -->
+                <div class="sr-only" aria-live="polite" id="instructions">
+                    Press Tab to navigate between form fields. Each field has a voice input button you can activate with Enter.
+                    Press Alt+H at any time to hear these instructions again.
+                </div>
+
+                    <button type="submit" class="btn btn-success btn-block"data-description="Save & Continue" >Save & Continue &#x2192;</button>
                 </form>
             </div>
+        </div> <!-- ✅ Closing Left Section Properly Here -->
 
-            <!-- Payment Section -->
-            <div class="box-element hidden mt-3" id="payment-info">
-                <h5>Payment</h5>
-                <small>PayPal Options</small>
-                <div id="paypal-button-container"></div>
-            </div>
-        </div>
-
-        <!-- Right Section: Order Summary -->
-        <div class="col-md-6">
-            <div class="order-summary">
-                <a class="btn btn-outline-dark mb-2" href="{% url 'cart:cart' %}">&#x2190; Back to Cart</a>
-                <h3>Order Summary</h3>
-                <hr>
-                {% for item in items %}
-                <div class="cart-row">
-                    <img class="row-image" src="{{item.product.product_image.url}}">
-					&nbsp;
-                    <div style="flex:2"><p>{{item.product.name}}</p></div>
-                    <div style="flex:1"><p>${{item.product.selling_price|floatformat:2}} x {{item.quantity}} = ${{item.get_total|floatformat:2}}</p></div>
+            <!-- Right Section: Order Summary -->
+            <div class="col-md-6">
+                <div class="box-element">
+                    <a class="btn btn-outline-dark mb-2" href="{% url 'cart:cart' %}" data-description="Back to Car">&#x2190; Back to Cart</a>
+                    <h3 data-description="Order Summary" >Order Summary</h3>
+                    <hr>
+                    {% for item in items %}
+                    <div class="cart-row d-flex align-items-center">
+                        <img class="row-image" src="{{item.product.product_image.url}}" style="width: 50px; height: 50px;"data-description="Image of the product {{ item.product.name }}" >
+                        <div style="flex: 2; padding-left: 10px;" ><p  data-description="Product Name{{ item.product.name }}">{{ item.product.name }}</p></div>
+                        <div style="flex: 1;" ><p data-description="{{ item.product.selling_price|floatformat:2 }} x {{ item.quantity }} = ${{ item.get_total|floatformat:2 }}">${{ item.product.selling_price|floatformat:2 }} x {{ item.quantity }} = ${{ item.get_total|floatformat:2 }}</p></div>
+                    </div>
+                    {% endfor %}
+                    <hr>
+                    <h5 data-description="Items: {{ order.get_cart_items }}" >Items: {{ order.get_cart_items }}</h5>
+                    <h5 data-description="Total: ${{ order.get_cart_total|floatformat:2 }}" >Total: ${{ order.get_cart_total|floatformat:2 }}</h5>
                 </div>
-                {% endfor %}
-                <hr>
-                <h5>Items: {{order.get_cart_items}}</h5>
-                <h5>Total: ${{order.get_cart_total|floatformat:2}}</h5>
-            </div>
+            </div> <!-- ✅ Right Section Closing Correctly Here -->
         </div>
     </div>
-</div>
-
-
-	<script src="https://www.paypal.com/sdk/js?client-id=YOUR-CLIENT-ID&currency=USD&disable-funding=credit"></script>
 
 	<script>
-		var total = '{{order.get_cart_total}}'
-        // Render the PayPal button into #paypal-button-container
-        paypal.Buttons({
-
-        	style: {
-                color:  'blue',
-                shape:  'rect',
-            },
-
-            // Set up the transaction
-            createOrder: function(data, actions) {
-                return actions.order.create({
-                    purchase_units: [{
-                        amount: {
-                            value:parseFloat(total).toFixed(2)
-                        }
-                    }]
-                });
-            },
-
-            // Finalize the transaction
-            onApprove: function(data, actions) {
-                return actions.order.capture().then(function(details) {
-                    // Show a success message to the buyer
-                    submitFormData()
-                });
+        
+        function fillShippingForm() {
+            console.error("fillShippingForm is called");
+            var selectedAddress = document.getElementById("existing_addresses");
+            var selectedOption = selectedAddress.options[selectedAddress.selectedIndex];
+    
+            if (selectedOption.value !== "") {
+                document.querySelector("[name='shipping_name']").value = selectedOption.dataset.name;
+                document.querySelector("[name='shipping_address']").value = selectedOption.dataset.address;
+                document.querySelector("[name='shipping_city']").value = selectedOption.dataset.city;
+                document.querySelector("[name='shipping_state']").value = selectedOption.dataset.state;
+                document.querySelector("[name='shipping_zipcode']").value = selectedOption.dataset.zipcode;
+                document.querySelector("[name='shipping_country']").value = selectedOption.dataset.country;
+                document.querySelector("[name='shipping_phone']").value = selectedOption.dataset.phone;
+                document.querySelector("[name='shipping_email']").value = selectedOption.dataset.email;
             }
-
-        }).render('#paypal-button-container');
+        }
     </script>
-
-    <!--
-	<script type="text/javascript">
-		var shipping = '{{order.shipping}}'
-
-		if (shipping == 'False'){
-		 	document.getElementById('shipping-info').innerHTML = ''
-		}
-
-		if (user != 'AnonymousUser'){
-		 	document.getElementById('user-info').innerHTML = ''
-		 }
-
-		if (shipping == 'False' && user != 'AnonymousUser'){
-			//Hide entire form if user is logged in and shipping is false
-				document.getElementById('form-wrapper').classList.add("hidden");
-				//Show payment if logged in user wants to buy an item that does not require shipping
-			    document.getElementById('payment-info').classList.remove("hidden");
-		}
-
-		var form = document.getElementById('form')
-		form.addEventListener('submit', function(e){
-	    	e.preventDefault()
-	    	console.log('Form Submitted...')
-	    	document.getElementById('form-button').classList.add("hidden");
-	    	document.getElementById('payment-info').classList.remove("hidden");
-	    })
-
-		/*
-	    document.getElementById('make-payment').addEventListener('click', function(e){
-	    	submitFormData()
-	    })
-	    */
-
-	    function submitFormData(){
-	    	console.log('Payment button clicked')
-
-	    	var userFormData = {
-				'name':null,
-				'email':null,
-				'total':total,
-			}
-
-			var shippingInfo = {
-				'address':null,
-				'city':null,
-				'state':null,
-				'zipcode':null,
-			}
-
-			if (shipping != 'False'){
-	    		shippingInfo.address = form.address.value
-		    	shippingInfo.city = form.city.value
-		    	shippingInfo.state = form.state.value
-		    	shippingInfo.zipcode = form.zipcode.value
-	    	}
-
-	    	if (user == 'AnonymousUser'){
-	    		userFormData.name = form.name.value
-	    		userFormData.email = form.email.value
-	    	}
-
-	    	console.log('Shipping Info:', shippingInfo)
-	    	console.log('User Info:', userFormData)
-
-	    	var url = "cart/process_order/"
-	    	fetch(url, {
-	    		method:'POST',
-	    		headers:{
-	    			'Content-Type':'application/json',
-	    			'X-CSRFToken':csrftoken,
-	    		}, 
-	    		body:JSON.stringify({'form':userFormData, 'shipping':shippingInfo}),
-	    		
-	    	})
-	    	.then((response) => response.json())
-	    	.then((data) => {
-				console.log('Success:', data);
-				alert('Transaction completed');  
-
-				cart = {}
-				document.cookie ='cart=' + JSON.stringify(cart) + ";domain=;path=/"
-
-				window.location.href = "{% url 'store:home' %}"
-
-				})
-	    }
-	</script>
-    -->
+    <script src="{% static 'js/shipping_voice.js' %}"></script>
+    <script src="{% static 'js/voice4.js' %}"></script>
+{% include 'store/voice_control.html' %}
+{% include 'store/footer.html' %}
 {% endblock content %}
-
-
- 

@@ -76,7 +76,7 @@ def cartData(request):
 
         # Add debugging to see all orders for this user
         all_orders = Order.objects.filter(user=user)
-        print(f"All orders for user {user}: {all_orders}")
+        #print(f"All orders for user {user}: {all_orders}")
 
         order = Order.objects.filter(user=user, complete=False).first()
         
