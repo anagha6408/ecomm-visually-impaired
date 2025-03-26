@@ -3,82 +3,108 @@
 
 {% block content %}
 <div class="container mt-4">
-    <h2 class="mb-4">Order Details</h2>
+    <h2 class="mb-4" data-description="Detailed view of your specific order">Order Details</h2>
 
     <div class="card">
-        <div class="card-header bg-dark text-white">
+        <div class="card-header bg-dark text-white" data-description="Order identification number">
             Order ID: {{ order.transaction_id }}
         </div>
         <div class="card-body">
-            <p><strong>Date Ordered:</strong> {{ order.date_ordered|date:"Y-m-d H:i" }}</p>
-            <p><strong>Amount Paid:</strong> ${{ order.amount_paid }}</p>
-            <p><strong>Payment Method:</strong> {{ order.payment_method|default:"Not Specified" }}</p>
-            <p><strong>Order Status:</strong>
-            <span class="badge 
-                {% if order.order_status == 'Pending' %} bg-warning 
-                {% elif order.order_status == 'Processing' %} bg-info 
-                {% elif order.order_status == 'Shipped' %} bg-primary 
-                {% elif order.order_status == 'Out for delivery' %} bg-secondary 
-                {% elif order.order_status == 'Delivered' %} bg-success 
-                {% elif order.order_status == 'Cancelled' %} bg-danger {% endif %}">
-                {{ order.order_status }}
-            </span>
+            <p data-description="Date when the order was placed">
+                <strong>Date Ordered:</strong> {{ order.date_ordered|date:"Y-m-d H:i" }}
             </p>
-            <h5 class="mt-3">Shipping Details</h5>
+            <p data-description="Total amount paid for this order">
+                <strong>Amount Paid:</strong> ${{ order.amount_paid }}
+            </p>
+            <p data-description="Payment method used for this purchase">
+                <strong>Payment Method:</strong> {{ order.payment_method|default:"Not Specified" }}
+            </p>
+            <p data-description="Current status of your order">
+                <strong>Order Status:</strong>
+                <span class="badge 
+                    {% if order.order_status == 'Pending' %} bg-warning 
+                    {% elif order.order_status == 'Processing' %} bg-info 
+                    {% elif order.order_status == 'Shipped' %} bg-primary 
+                    {% elif order.order_status == 'Out for delivery' %} bg-secondary 
+                    {% elif order.order_status == 'Delivered' %} bg-success 
+                    {% elif order.order_status == 'Cancelled' %} bg-danger {% endif %}"
+                    data-description="Order is currently {{ order.order_status }}">
+                    {{ order.order_status }}
+                </span>
+            </p>
+
+            <h5 class="mt-3" data-description="Shipping address and contact information">Shipping Details</h5>
             {% if shipping_address %}
                 <ul class="list-group mb-4">
-                    <li class="list-group-item"><strong>Name:</strong> {{ shipping_address.shipping_name }}</li>
-                    <li class="list-group-item"><strong>Phone:</strong> {{ shipping_address.shipping_phone }}</li>
-                    <li class="list-group-item"><strong>Email:</strong> {{ shipping_address.shipping_email }}</li>
-                    <li class="list-group-item"><strong>Address:</strong> {{ shipping_address.shipping_address }}, 
-                        {{ shipping_address.shipping_city }}, {{ shipping_address.shipping_state }}, 
-                        {{ shipping_address.shipping_country }} - {{ shipping_address.shipping_zipcode }}</li>
+                    <li class="list-group-item" data-description="Recipient's full name">
+                        <strong>Name:</strong> {{ shipping_address.shipping_name }}
+                    </li>
+                    <li class="list-group-item" data-description="Contact phone number">
+                        <strong>Phone:</strong> {{ shipping_address.shipping_phone }}
+                    </li>
+                    <li class="list-group-item" data-description="Email address for communication">
+                        <strong>Email:</strong> {{ shipping_address.shipping_email }}
+                    </li>
+                    <li class="list-group-item" data-description="Complete delivery address">
+                        <strong>Address:</strong> {{ shipping_address.shipping_address }}
+                    </li>
                 </ul>
             {% else %}
-                <p class="text-danger">No shipping details available.</p>
+                <p class="text-danger" data-description="No shipping information is available for this order">
+                    No shipping details available.
+                </p>
             {% endif %}
 
-            <h5 class="mt-3">Items in this Order:</h5>
+            <h5 class="mt-3" data-description="List of products in this order">Items in this Order:</h5>
             <div class="table-responsive">
-                <table class="table table-bordered">
+                <table class="table table-bordered" data-description="Detailed breakdown of order items">
                     <thead class="table-dark">
                         <tr>
-                            <th>Product Image</th>
-                            <th>Product Name</th>
-                            <th>Quantity</th>
-                            <th>Price</th>
-                            <th>Total</th>
+                            <th data-description="Product image thumbnail">Product Image</th>
+                            <th data-description="Name of the product">Product Name</th>
+                            <th data-description="Number of items purchased">Quantity</th>
+                            <th data-description="Price per item">Price</th>
+                            <th data-description="Total price for this product">Total</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for item in order.orderitem_set.all %}
                         <tr>
-                            <td>
+                            <td data-description="Image of {{ item.product.name }}">
                                 {% if item.product.product_image %}
                                     <img src="{{ item.product.product_image.url }}" alt="{{ item.product.name }}" class="img-thumbnail" width="80">
                                 {% else %}
                                     <img src="{% static 'images/no_image_available.png' %}" alt="No Image" class="img-thumbnail" width="80">
                                 {% endif %}
                             </td>
-                            <td>{{ item.product.name }}</td>
-                            <td>{{ item.quantity }}</td>
-                            <td>${{ item.price }}</td>
-                            <td>${{ item.get_total }}</td>
+                            <td data-description="Product name: {{ item.product.name }}">{{ item.product.name }}</td>
+                            <td data-description="Quantity of {{ item.product.name }}: {{ item.quantity }}">{{ item.quantity }}</td>
+                            <td data-description="Price of {{ item.product.name }}: ${{ item.price }}">
+                                ${{ item.price }}
+                            </td>
+                            <td data-description="Total price for {{ item.product.name }}: ${{ item.get_total }}">
+                                ${{ item.get_total }}
+                            </td>
                         </tr>
                         {% empty %}
                         <tr>
-                            <td colspan="5" class="text-center">No items found.</td>
+                            <td colspan="5" class="text-center" data-description="No items found in this order">
+                                No items found.
+                            </td>
                         </tr>
                         {% endfor %}
                     </tbody>
                 </table>
             </div>
 
-            <a href="{% url 'cart:past_orders' %}" class="btn btn-secondary mt-3">Back to Orders</a>
+            <a href="{% url 'cart:past_orders' %}" 
+               class="btn btn-secondary mt-3" 
+               data-description="Return to the list of past orders">
+                Back to Orders
+            </a>
         </div>
     </div>
 </div>
-
 
 {% include 'store/voice_control.html' %}
 {% include 'store/footer.html' %}

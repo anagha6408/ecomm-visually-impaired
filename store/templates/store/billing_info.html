@@ -6,69 +6,68 @@
         <!-- Left Section: Billing Details -->
         <div class="col-md-6">
             <div class="box-element">
-                <h3>Billing Information</h3>
+                <h3 data-description="Billing Information">Billing Information</h3>
                 <hr>
 
                 {% if shipping_address %}
-                    <p><strong>Name:</strong> {{ shipping_address.shipping_name }}</p>
-                    <p><strong>Address:</strong> {{ shipping_address.shipping_address }}</p>
-                    <p><strong>City:</strong> {{ shipping_address.shipping_city }}</p>
-                    <p><strong>State:</strong> {{ shipping_address.shipping_state }}</p>
-                    <p><strong>Zip Code:</strong> {{ shipping_address.shipping_zipcode }}</p>
-                    <p><strong>Country:</strong> {{ shipping_address.shipping_country }}</p>
-                    <p><strong>Phone:</strong> {{ shipping_address.shipping_phone }}</p>
-                    <p><strong>Email:</strong> {{ shipping_address.shipping_email }}</p>
+                    <p data-description="{{ shipping_address.shipping_name }}"><strong>Name:</strong> {{ shipping_address.shipping_name }}</p>
+                    <p data-description="{{ shipping_address.shipping_address }}"><strong>Address:</strong> {{ shipping_address.shipping_address }}</p>
+                    <p data-description="{{ shipping_address.shipping_city }}"><strong>City:</strong> {{ shipping_address.shipping_city }}</p>
+                    <p data-description="{{ shipping_address.shipping_state }}"><strong>State:</strong> {{ shipping_address.shipping_state }}</p>
+                    <p data-description="{{ shipping_address.shipping_zipcode }}"><strong>Zip Code:</strong> {{ shipping_address.shipping_zipcode }}</p>
+                    <p data-description="{{ shipping_address.shipping_country }}"><strong>Country:</strong> {{ shipping_address.shipping_country }}</p>
+                    <p data-description=" {{ shipping_address.shipping_phone }}"><strong>Phone:</strong> {{ shipping_address.shipping_phone }}</p>
+                    <p data-description="{{ shipping_address.shipping_email }}"><strong>Email:</strong> {{ shipping_address.shipping_email }}</p>
                 {% else %}
                     <p>No billing information found. Please go back and enter your details.</p>
                 {% endif %}
 
-                <a class="btn btn-secondary mt-3" href="{% url 'cart:checkout' %}">← Back to Checkout</a>
+                <a class="btn btn-secondary mt-3" href="{% url 'cart:checkout' %}"data-description="Click here to go Back to Checkout">← Back to Checkout</a>
             </div>
         </div>
 
         <!-- Right Section: Order Summary -->
         <div class="col-md-6">
             <div class="box-element">
-                <h3>Order Summary</h3>
+                <h3 data-description="Order Summary is below">Order Summary</h3>
                 <hr>
                 {% for item in items %}
                     <div class="cart-row d-flex align-items-center">
-                        <img class="row-image" src="{{ item.product.product_image.url }}" style="width: 50px; height: 50px;">
-                        <div style="flex: 2; padding-left: 10px;"><p>{{ item.product.name }}</p></div>
-                        <div style="flex: 1;"><p>${{ item.product.selling_price|floatformat:2 }} x {{ item.quantity }} = ${{ item.get_total|floatformat:2 }}</p></div>
+                        <img class="row-image" src="{{ item.product.product_image.url }}" style="width: 50px; height: 50px;" data-description="Image of the product {{ item.product.name }}">
+                        <div style="flex: 2; padding-left: 10px;"><p data-description"product name {{ item.product.name }}">{{ item.product.name }}</p></div>
+                        <div style="flex: 1;"><p data-description="${{ item.product.selling_price|floatformat:2 }} x {{ item.quantity }} = ${{ item.get_total|floatformat:2 }}">${{ item.product.selling_price|floatformat:2 }} x {{ item.quantity }} = ${{ item.get_total|floatformat:2 }}</p></div>
                     </div>
                 {% endfor %}
                 <hr>
-                <h5>Items: {{ order.get_cart_items }}</h5>
-                <h5>Total: ${{ order.get_cart_total|floatformat:2 }}</h5>
+                <h5 data-description="Items: {{ order.get_cart_items }}">Items: {{ order.get_cart_items }}</h5>
+                <h5 data-description="Total: ${{ order.get_cart_total|floatformat:2 }}">Total: ${{ order.get_cart_total|floatformat:2 }}</h5>
             </div>
             <!-- Payment Method Selection -->
             <div class="box-element mt-3">
-                <h3>Select Payment Method</h3>
+                <h3 data-description="Select Payment Method from below">Select Payment Method</h3>
                 <hr>
                 
                 <!-- COD Section -->
                 <form method="POST" action="{% url 'payment:payment_process' %}" id="codForm">
                     {% csrf_token %}
                     <div class="form-check mb-4">
-                        <input class="form-check-input" type="radio" name="payment_method" value="cod" id="cod" checked>
+                        <input class="form-check-input" type="radio" name="payment_method" value="cod" id="cod" checked data-description="Cash on Delivery Pay when your order is delivered">
                         <label class="form-check-label" for="cod">Cash on Delivery (COD)</label>
                         <p class="text-muted small mt-1 ms-4">Pay when your order is delivered.</p>
                     </div>
                     
                     <div class="d-flex justify-content-end">
-                        <button class="btn btn-success" type="submit">Complete Order with COD →</button>
+                        <button class="btn btn-success" type="submit" data-description="Click here to complete order with COD">Complete Order with COD →</button>
                     </div>
                 </form>
                 
                 <!-- PayPal Section -->
                 <hr class="my-4">
                 <h5>Or pay with PayPal:</h5>
-                <div id="paypal-button-container" class="mt-3 text-center">
+                <div id="paypal-button-container" class="mt-3 text-center" data-description="Click here to complete order using PayPal" tabindex="0">
                     {{ paypal_form.render }}
-                </div>
+                </div>                             
             </div>
-
             <style>
                 /* Ensure PayPal button is properly aligned */
                 #paypal-button-container {

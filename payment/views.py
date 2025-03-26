@@ -9,7 +9,7 @@ from django.urls import reverse
 from paypal.standard.forms import PayPalPaymentsForm
 from django.conf import settings
 import uuid
-
+from store.views import send_order_confirmation_email
 
 
 def checkout_view(request):
@@ -151,6 +151,7 @@ def payment_process(request):
             return redirect('cart:checkout')
 
         if payment_method == "cod":
+            send_order_confirmation_email(current_order)
             messages.success(request, "Order placed successfully with Cash on Delivery!")
             return redirect('payment:payment_success')
         elif payment_method == "paypal":
@@ -314,6 +315,7 @@ def paypal_success(request):
         
         # Save the order
         order.save()
+        send_order_confirmation_email(order)
         
         # Clear cart and session data - ONLY ONCE
         order_clear_cart(request)

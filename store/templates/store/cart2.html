@@ -5,7 +5,6 @@
 		<link rel="stylesheet" href="{% static 'css/cart2.css' %}">
 		<div class="col-lg-12">
 			<div class="box-element">
-
 				<a class="btn btn-outline-dark" href="{% url 'store:home' %} " data-description="Click here to Continue Shopping" >&#x2190; Continue Shopping</a>
 				<br>
 				<br>
@@ -18,24 +17,26 @@
 						</th>
 					</tr>
 				</table>
-
 			</div>
 
 			<br>
 			<div class="box-element">
-				<div class="cart-row">
+				<div class="cart-row cart-header" style="display: flex; align-items: center; justify-content: space-between;">
 					<div style="flex:2"></div>
 					<div style="flex:2"><strong>Item</strong></div>
 					<div style="flex:1"><strong>Price</strong></div>
 					<div style="flex:1"><strong>Quantity</strong></div>
 					<div style="flex:1"><strong>Total</strong></div>
 					<div style="flex:0.5"></div>
+					<div style="flex:0.5"></div>
 				</div>
 				{% for item in items %}
 				<div class="cart-row">
-					<div style="flex:2"><img class="row-image"  data-description=" Image of the product {{item.product.name}}"src="{{item.product.product_image.url }}"></div>
-					<div style="flex:2"><p data-description="Product Name : {{item.product.name}} ">{{item.product.name}}</p></div>
-					<div style="flex:1"><p class="item-price" data-description=" Price of the Product {{item.product.name}} is {{item.product.selling_price|floatformat:2}}">${{item.product.selling_price|floatformat:2}}</p></div>
+					<div style="flex:2"><img class="row-image" data-description="Image of the product {{item.product.name}}" src="{{item.product.product_image.url }}"></div>
+					<div style="flex:2">
+						<p data-description="Product Name : {{item.product.name}} ">{{item.product.name}}</p>
+					</div>
+					<div style="flex:1"><p class="item-price" data-description="Price of the Product {{item.product.name}} is {{item.product.selling_price|floatformat:2}}">${{item.product.selling_price|floatformat:2}}</p></div>
 					<div style="flex:1">
 						<div class="quantity">
 							<img data-product="{{item.product.id}}" data-action="Increase" class="chg-quantity update-cart" src="{% static  'images/arrow-up.png' %}" data-description="Click here to Increase the quantity of item ">
@@ -43,11 +44,15 @@
 							<img data-product="{{item.product.id}}" data-action="Decrease" class="chg-quantity update-cart" src="{% static  'images/arrow-down.png' %}" data-description="Click here to Decrease the quantity of item ">
 						</div>
 					</div>
-					<div style="flex:1" ><p data-description=" Total price of the product {{item.product.name}} is {{item.get_total|floatformat:2}} ">${{item.get_total|floatformat:2}}</p></div>
+					<div style="flex:1" ><p data-description="Total price of the product {{item.product.name}} is {{item.get_total|floatformat:2}} ">${{item.get_total|floatformat:2}}</p></div>
 					<div style="flex:0.5">
 						<img data-product="{{item.product.id}}" data-action="delete" class="chg-quantity update-cart" src="{% static 'images/trash-bin.png' %}" style="cursor:pointer; width:20px;" data-description="Click here to Remove the product item from the cart ">
 					</div>
-					
+					<button type="button" class="btn add-to-wishlist" 
+                        data-product-id="{{item.product.id}}" 
+                        data-description="Add to Wishlist">
+                        <i class="fa fa-heart"></i>
+                    </button>
 				</div>
 				{% endfor %}
 			</div>

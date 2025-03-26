@@ -1,0 +1,122 @@
+{% extends 'store/main.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-6 col-md-8">
+            <div class="card shadow-lg">
+                <div class="card-header bg-dark text-white">
+                    <h2 class="mb-0" data-description="Edit your profile information">
+                        Edit Profile
+                    </h2>
+                </div>
+                <div class="card-body">
+                    <form method="POST" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        
+                        <div class="text-center mb-4">
+                            <img src="{{ profile.profile_picture.url|default:'/static/images/default-profile.png' }}" 
+                                 alt="Profile Picture" 
+                                 class="img-fluid rounded-circle mb-3" 
+                                 id="profileImagePreview"
+                                 style="width: 150px; height: 150px; object-fit: cover;">
+                            
+                            <div class="mt-2">
+                                <input type="file" 
+                                       class="form-control d-none" 
+                                       id="profilePicture" 
+                                       name="profile_picture"
+                                       accept="image/*">
+                                <label for="profilePicture" 
+                                       class="btn btn-secondary btn-sm"
+                                       data-description="Upload a new profile picture">
+                                    Change Picture
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label for="email">Email Address <small class="text-muted">(Optional)</small></label>
+                            <input type="email" 
+                                   class="form-control" 
+                                   id="email" 
+                                   name="email" 
+                                   value="{{ request.user.email }}"
+                                   placeholder="Enter email address" 
+                                   data-description="Enter your email address">
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label for="phone">Phone Number <small class="text-muted">(Optional)</small></label>
+                            <input type="tel" 
+                                   class="form-control" 
+                                   id="phone" 
+                                   name="phone" 
+                                   value="{{ profile.phone|default:'' }}"
+                                   placeholder="Enter phone number" data-description="Enter your phone number">
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="state">State <small class="text-muted">(Optional)</small></label>
+                                <input type="text" 
+                                       class="form-control" 
+                                       id="state" 
+                                       name="state" 
+                                       value="{{ profile.state|default:'' }}"
+                                       placeholder="Enter state" data-description="Enter your state">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="city">City <small class="text-muted">(Optional)</small></label>
+                                <input type="text" 
+                                       class="form-control" 
+                                       id="city" 
+                                       name="city" 
+                                       value="{{ profile.city|default:'' }}"
+                                       placeholder="Enter city" data-description="Enter your city">
+                            </div>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label for="country">Country <small class="text-muted">(Optional)</small></label>
+                            <select class="form-control" 
+                                    id="country" 
+                                    name="country">
+                                <option value="">Select Country (Optional)</option>
+                                <option value="US" {% if profile.country == 'US' %}selected{% endif %}>United States</option>
+                                <option value="CA" {% if profile.country == 'CA' %}selected{% endif %}>Canada</option>
+                                <!-- Add more countries as needed -->
+                            </select>
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <button type="submit" class="btn btn-primary" data-description="Click here to Save changes"> Save Changes</button>
+                            <a href="{% url 'store:profile' %}" class="btn btn-secondary" data-description="Click here to Cancel">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('profilePicture').addEventListener('change', function(event) {
+    const file = event.target.files[0];
+    const preview = document.getElementById('profileImagePreview');
+    
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            preview.src = e.target.result;
+        }
+        reader.readAsDataURL(file);
+    }
+});
+</script>
+
+{% include 'store/voice_control.html' %}
+{% include 'store/footer.html' %}
+{% endblock content %}
+```

@@ -1,7 +1,7 @@
 {% extends 'store/main.html' %}
 {% load static %}
 {% block content %}
-<link rel="stylesheet" type="text/css" href="{% static 'css/checkout.css' %}">
+<link rel="stylesheet" type="text/css" href="{% static 'css/main.css' %}">
 <div class="container mt-4">
     <div class="row">
         <!-- Left Section: User & Shipping Form -->
@@ -14,7 +14,7 @@
                     {% if user_addresses %}
                     <p data-description="Found {{ user_addresses|length }} saved addresses.">Found {{ user_addresses|length }} saved addresses.</p>
                     <label for="existing_addresses" data-description="Choose a saved address:">Choose a saved address:</label>
-                    <select id="existing_addresses" class="form-control mb-3" name="saved_address" data-description="Select from your saved addresses" onchange="fillShippingForm()">
+                    <select id="existing_addresses" class="form-control mb-3" name="saved_address" data-description="Select from your saved addresses" onchange="fillShippingFormWithAddress(this.value)">
                         <option value="" data-description="Select an address">Select an address</option>
                         {% for address in user_addresses %}
                             <option value="{{ address.id }}" 

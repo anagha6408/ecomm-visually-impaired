@@ -6,36 +6,89 @@
         <div class="col-md-8">
             <div class="card border-success">
                 <div class="card-header bg-success text-white">
-                    <h3 class="text-center mb-0">Payment Successful!</h3>
+                    <h3 class="text-center mb-0" data-description="Payment Successful Page">Payment Successful!</h3>
                 </div>
                 <div class="card-body text-center">
                     <div class="mb-4">
                         <i class="fas fa-check-circle text-success" style="font-size: 5rem;"></i>
                     </div>
-                    <h4>Thank you for your purchase!</h4>
-                    <p class="mb-4">Your payment via PayPal was processed successfully.</p>
-                    <p>We'll process your order right away and send you a confirmation email with all the details.</p>
+                    <h4 data-description="Thank you for the purchase!">Thank you for your purchase!</h4>
+                    <p class="mb-4" data-description="Your payment via PayPal was processed successfully">Your payment via PayPal was processed successfully.</p>
+                    <p data-description="We'll process your order right away and send you a confirmation email with all the details.">
+                        We'll process your order right away and send you a confirmation email with all the details.
+                    </p>
                     
                     <hr class="my-4">
                     
                     {% if order %}
                     <div class="text-left">
-                        <h5>Order Summary</h5>
-                        <p>Order ID: #{{ order.id }}</p>
-                        <p>Date: {{ order.date_ordered|date:"F j, Y" }}</p>
-                        <p>Total Amount: ${{ order.get_cart_total|floatformat:2 }}</p>
-                        <p>Items: {{ order.get_cart_items }}</p>
-                        {% if transaction_id %}
-                        <p>Transaction ID: {{ transaction_id }}</p>
+                        <h5 data-description="Order Summary is below">Order Summary</h5>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6>Order Details</h6>
+                                <p data-description="Order ID is #{{order.id}}"><strong>Order ID:</strong> #{{ order.id }}</p>
+                                <p data-description="Date is {{order.date_ordered|date:'F j, Y'}}"><strong>Date:</strong> {{ order.date_ordered|date:"F j, Y" }}</p>
+                                <p data-description="Total Amount is ${{ order.get_cart_total|floatformat:2 }}"><strong>Total Amount:</strong> ${{ order.get_cart_total|floatformat:2 }}</p>
+                                <p data-description="Total Items is {{ order.get_cart_items }}"><strong>Total Items:</strong> {{ order.get_cart_items }}</p>
+                                {% if transaction_id %}
+                                <p data-description="Transaction ID: {{ transaction_id }}"><strong>Transaction ID:</strong> {{ transaction_id }}</p>
+                                {% endif %}
+                            </div>
+                            
+                            {% if shipping_address %}
+                                <div class="col-md-6">
+                                    <h6>Shipping Information</h6>
+                                    <p>
+                                        <strong>Name:</strong> {{ shipping_address.shipping_name }}<br>
+                                        <strong>Address:</strong> {{ shipping_address.shipping_address }}<br>
+                                        {{ shipping_address.shipping_city }}, 
+                                        {{ shipping_address.shipping_state }} 
+                                        {{ shipping_address.shipping_zipcode }}<br>
+                                        {{ shipping_address.shipping_country }}
+                                    </p>
+                                </div>
+                            {% else %}
+                            <div class="col-md-6">
+                                <h6>Shipping Information</h6>
+                                <p class="alert alert-warning">
+                                    Shipping details are not available for this order. 
+                                    Please contact customer support for more information.
+                                </p>
+                            </div>
                         {% endif %}
+                        </div>
+    
+                        <hr>
+    
+                        <h6>Order Items</h6>
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Product</th>
+                                    <th>Quantity</th>
+                                    <th>Price</th>
+                                    <th>Subtotal</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in order.orderitem_set.all %}
+                                <tr>
+                                    <td>{{ item.product.name }}</td>
+                                    <td>{{ item.quantity }}</td>
+                                    <td>${{ item.product.price|floatformat:2 }}</td>
+                                    <td>${{ item.get_total|floatformat:2 }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
                     </div>
                     {% endif %}
                     
                     <div class="d-flex justify-content-center">
-                        <a href="{% url 'store:home' %}" class="btn btn-primary me-2">
+                        <a href="{% url 'store:home' %}" class="btn btn-primary me-2" data-description="Click here to Continue Shopping">
                             Continue Shopping
                         </a>
-                        <a href="{% url 'cart:past_orders' %}" class="btn btn-outline-secondary">
+                        <a href="{% url 'cart:past_orders' %}" class="btn btn-outline-secondary" data-description="Click here to View My Orders">
                             View My Orders
                         </a>
                     </div>

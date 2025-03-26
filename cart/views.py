@@ -182,7 +182,15 @@ def past_orders(request):
 from django.shortcuts import render, get_object_or_404
 def order_details(request, order_id):
     order = get_object_or_404(Order, id=order_id)
-    shipping_address = ShippingAddress.objects.filter(user=order.user).order_by('-shipping_date_added').first()
+     # Create a shipping address-like context directly from the order
+    shipping_address = {
+        'shipping_name': order.full_name,
+        'shipping_address': order.address,
+        'shipping_email': order.email,
+        'shipping_phone': order.phone,
+        
+        # You can add more fields as needed
+    }
     
     context = {
         'order': order,

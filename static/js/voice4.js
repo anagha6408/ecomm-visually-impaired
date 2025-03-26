@@ -1,4 +1,4 @@
-let currentUtterance = null;
+ let currentUtterance = null;
 let speechSpeed = 1;
 let isPaused = false;
 let isKeyboardMode = false;
@@ -70,7 +70,13 @@ document.addEventListener("DOMContentLoaded", function () {
         img[data-description],
         .toggle-container[data-description],
         select[data-description],
-        select
+        select,
+        div[data-description][tabindex="0"],
+        tr[data-description],
+        th[data-description],
+        td[data-description],
+        h4[data-description],
+        li[data-description]
     `);
 
     // Initial hover listeners
@@ -134,7 +140,13 @@ document.addEventListener("DOMContentLoaded", function () {
                 img[data-description],
                 .toggle-container[data-description],
                 select[data-description],
-                select
+                select,
+                div[data-description][tabindex="0"],
+                tr[data-description],
+                th[data-description],
+                td[data-description],
+                h4[data-description],
+                li[data-description]
             `);
             if (interactiveElements.length > 0) {
                 // Explicitly select the first tab and speak its description
@@ -212,7 +224,13 @@ function navigateTabs(direction) {
         img[data-description],
        .toggle-container[data-description],
        select[data-description],
-       select
+       select,
+       div[data-description][tabindex="0"],
+       tr[data-description],
+       th[data-description],
+       td[data-description],
+       h4[data-description],
+       li[data-description]
     `));
 
     let currentTab = document.querySelector('.selected-tab');
@@ -301,7 +319,7 @@ function speakSelected() {
 function activateSelectedTab() {
     const selectedTab = document.querySelector('.selected-tab');
     if (!selectedTab) return;
-
+    
     if (selectedTab.tagName === 'INPUT') {
         selectedTab.focus();
     } else if (selectedTab.tagName === 'SELECT') {
@@ -319,8 +337,13 @@ function activateSelectedTab() {
         selectedTab.click();
     } else if (selectedTab.classList.contains('decrement-btn')) {
         selectedTab.click();
-    }
-}
+    }else if (selectedTab.tagName === 'DIV' && selectedTab.id === 'paypal-button-container') {
+        // Find the form inside the div and submit it
+        const form = selectedTab.querySelector('form');
+        if (form) {
+            form.submit();
+        }
+}}
 
 function resetNavigation() {
     // Stop any ongoing speech
@@ -345,7 +368,13 @@ function resetNavigation() {
         .badge[data-description],
         img[data-description],
         .toggle-container[data-description],
-        select[data-description]
+        select[data-description],
+        div[data-description][tabindex="0"],
+        tr[data-description],
+        th[data-description],
+        td[data-description],
+        h4[data-description],
+        li[data-description]
     `));
 
     if (interactiveElements.length > 0) {

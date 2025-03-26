@@ -2,34 +2,60 @@
 {% load static %}
 {% block content %}
 <div class="container mt-5">
-    <div class="card">
+    <div class="card" data-description="User profile information">
         <div class="card-header bg-dark text-white">
-            <h4 class="text-center">My Profile</h4>
+            <h4 class="text-center" data-description="Profile Heading">My Profile</h4>
         </div>
         <div class="card-body">
-            <div class="text-center mb-4">
-                <i class="fas fa-user-circle fa-5x"></i>
+            <div class="text-center mb-4" data-description="Profile picture section">
+                {% if profile.profile_picture %}
+                    <img src="{{ profile.profile_picture.url }}" 
+                         alt="Profile Picture" 
+                         class="img-fluid rounded-circle mb-3" 
+                         style="width: 150px; height: 150px; object-fit: cover;">
+                {% else %}
+                    <i class="fas fa-user-circle fa-5x" data-description="Default profile icon"></i>
+                {% endif %}
             </div>
             
-            <table class="table table-bordered">
+            <table class="table table-bordered" data-description="User details table">
                 <tr>
-                    <th>Username</th>
-                    <td>{{ user.username }}</td>
+                    <th data-description="Username label">Username</th>
+                    <td data-description="Displayed username">{{ user.username }}</td>
                 </tr>
                 <tr>
-                    <th>Email</th>
-                    <td>{{ user.email }}</td>
+                    <th data-description="Email label">Email</th>
+                    <td data-description="Displayed email">{{ user.email }}</td>
+                </tr>
+                <tr>
+                    <th data-description="Phone number label">Phone</th>
+                    <td data-description="Displayed phone number">{{ profile.phone|default:'Not provided' }}</td>
+                </tr>
+                <tr>
+                    <th data-description="City label">City</th>
+                    <td data-description="Displayed city">{{ profile.city|default:'Not provided' }}</td>
+                </tr>
+                <tr>
+                    <th data-description="State label">State</th>
+                    <td data-description="Displayed state">{{ profile.state|default:'Not provided' }}</td>
+                </tr>
+                <tr>
+                    <th data-description="Country label">Country</th>
+                    <td data-description="Displayed country">{{ profile.country|default:'Not provided' }}</td>
                 </tr>
             </table>
 
             <div class="text-center mt-4">
-                <a href="{% url 'store:editProfile' %}" class="btn btn-primary">
+                <a href="{% url 'store:edit_profile' %}" class="btn btn-primary" 
+                   data-description="Edit profile button">
                     Edit Profile
                 </a>
-                <a href="#" class="btn btn-warning">
+                <a href="{% url 'store:change_password' %}" class="btn btn-warning" 
+                   data-description="Change password button">
                     Change Password
                 </a>
-                <a href="{% url 'userauth:logout' %}" class="btn btn-danger">
+                <a href="{% url 'userauth:logout' %}" class="btn btn-danger" 
+                   data-description="Logout button">
                     Logout
                 </a>
             </div>

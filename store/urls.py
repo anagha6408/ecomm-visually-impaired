@@ -15,9 +15,9 @@ urlpatterns = [
     path('collections/<str:slug>',views.collectionsview,name="collectionsview"),
     path('collections/<str:pro_slug>/<str:pro_name>/',views.productView,name="productView"),
     path('carousel_view/',views.carousel_view,name="slider"),
-    path('editProfile/',views.editProfile,name="editProfile"),
+    path('edit_profile/',views.edit_profile,name="edit_profile"),
     path('search/', views.search, name='search'),
     path('profile/',views.profile,name="profile"),
-    
+    path('change_password/', views.change_password, name='change_password'),
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

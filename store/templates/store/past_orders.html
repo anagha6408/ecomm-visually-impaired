@@ -3,28 +3,32 @@
 
 {% block content %}
 <div class="container mt-4">
-    <h2 class="mb-4">My Past Orders</h2>
+    <h2 class="mb-4" data-description="My past orders page showing all previous purchases">My Past Orders</h2>
     
     {% if past_orders %}
         <div class="table-responsive">
-            <table class="table table-bordered table-striped">
+            <table class="table table-bordered table-striped" data-description="Table displaying past order details">
                 <thead class="table-dark">
                     <tr>
-                        <th>Order ID</th>
-                        <th>Date</th>
-                        <th>Amount Paid</th>
-                        <th>Payment Method</th>
-                        <th>Order Status</th>
-                        <th>Details</th>
+                        <th data-description="Unique identifier for each order">Order ID</th>
+                        <th data-description="Date and time when the order was placed">Date</th>
+                        <th data-description="Total amount paid for the order">Amount Paid</th>
+                        <th data-description="Payment method used for the order">Payment Method</th>
+                        <th data-description="Current status of the order">Order Status</th>
+                        <th data-description="View more information about the order">Details</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for order in past_orders %}
                     <tr>
-                        <td>{{ order.transaction_id }}</td>
-                        <td>{{ order.date_ordered|date:"Y-m-d H:i" }}</td>
-                        <td>${{ order.amount_paid }}</td>
-                        <td>{{ order.payment_method|default:"Not Specified" }}</td>
+                        <td data-description="Order number {{ order.transaction_id }}">{{ order.transaction_id }}</td>
+                        <td data-description="Order placed on {{ order.date_ordered|date:'Y-m-d H:i' }}">{{ order.date_ordered|date:"Y-m-d H:i" }}</td>
+                        <td data-description="Total order amount of {{ order.amount_paid }} dollars">
+                            ${{ order.amount_paid }}
+                        </td>
+                        <td data-description="{{ order.payment_method|default:'Payment method not specified' }}">
+                            {{ order.payment_method|default:"Not Specified" }}
+                        </td>
                         <td>
                             <span class="badge 
                                 {% if order.order_status == 'Pending' %} bg-warning 
@@ -32,12 +36,17 @@
                                 {% elif order.order_status == 'Shipped' %} bg-primary 
                                 {% elif order.order_status == 'Out for delivery' %} bg-secondary 
                                 {% elif order.order_status == 'Delivered' %} bg-success 
-                                {% elif order.order_status == 'Cancelled' %} bg-danger {% endif %}">
+                                {% elif order.order_status == 'Cancelled' %} bg-danger {% endif %}"
+                                data-description="Order status is {{ order.order_status }}">
                                 {{ order.order_status }}
                             </span>
                         </td>
                         <td>
-                            <a href="{% url 'cart:order_details' order.id %}" class="btn btn-primary btn-sm">View Details</a>
+                            <a href="{% url 'cart:order_details' order.id %}" 
+                               class="btn btn-primary btn-sm" 
+                               data-description="View detailed information for order {{ order.transaction_id }}">
+                                View Details
+                            </a>
                         </td>                        
                     </tr>
                     {% endfor %}
@@ -45,7 +54,9 @@
             </table>
         </div>
     {% else %}
-        <div class="alert alert-info">No past orders found.</div>
+        <div class="alert alert-info" data-description="No previous orders have been found in your account">
+            No past orders found.
+        </div>
     {% endif %}
 </div>
 

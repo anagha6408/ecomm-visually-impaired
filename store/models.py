@@ -68,3 +68,31 @@ class CarouselImage(models.Model):
 
     def __str__(self):
         return self.title
+    
+
+from django.db import models
+from django.contrib.auth.models import User
+from store.models import Customer  # Assuming Customer model is in the store app
+
+class Profile(models.Model):
+    """
+    Separate Profile model linked to Customer
+    """
+    customer = models.OneToOneField(Customer, on_delete=models.CASCADE, related_name='profile')
+    phone = models.CharField(max_length=20, null=True, blank=True)
+    state = models.CharField(max_length=100, null=True, blank=True)
+    city = models.CharField(max_length=100, null=True, blank=True)
+    country = models.CharField(max_length=100, null=True, blank=True)
+    profile_picture = models.ImageField(
+        upload_to='profile_pics/', 
+        null=True, 
+        blank=True, 
+        default='default_profile.png'
+    )
+    
+    def __str__(self):
+        return f"{self.customer.name}'s Profile"
+
+    class Meta:
+        verbose_name = 'Customer Profile'
+        verbose_name_plural = 'Customer Profiles'

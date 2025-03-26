@@ -157,3 +157,31 @@ LOGIN_URL = '/user/sign-up/'
 
 PAYAL_TEST = True
 PAYPAL_RECEIVER_EMAIL = 'business@anaghatest.com'
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'  # Use your email provider's SMTP server
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_USE_SSL = False
+EMAIL_HOST_USER = 'anna8ben123@gmail.com'  # Your email address
+EMAIL_HOST_PASSWORD = 'jwzu rxcc mjpc jxlc'  # Use App Password if using Gmail
+
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'file': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': 'debug.log',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['file'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+    },
+}

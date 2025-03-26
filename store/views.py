@@ -69,8 +69,6 @@ def store_home(request):
 def welcome_msg(request):
     welcome_message = "Welcome to our eCommerce website designed for visually impaired users. We are here to assist you!"
     return render(request, 'home.html', {'welcome_message': welcome_message})
-def editProfile(request):
-	return render(request,"store/editProfile.html")
 
 from django.db.models import Q
 import re  # Import regex
@@ -110,4 +108,160 @@ def search(request):
 from django.contrib.auth.decorators import login_required
 @login_required(login_url='userauth:login')
 def profile(request):
-    return render(request, 'store/profile.html')
+    try:
+        customer = Customer.objects.get(user=request.user)
+        profile, created = Profile.objects.get_or_create(customer=customer)
+        
+        return render(request, 'store/profile.html', {
+            'customer': customer,
+            'profile': profile
+        })
+    except Customer.DoesNotExist:
+        messages.error(request, 'Customer profile not found.')
+        return redirect('store:home')
+
+from django.core.validators import validate_email
+from django.core.exceptions import ValidationError
+def edit_profile(request):
+    try:
+        # Get or create the profile for the current customer
+        customer = Customer.objects.get(user=request.user)
+        profile, created = Profile.objects.get_or_create(customer=customer)
+        print(f"Profile created: {created}")
+        print("edit profile try inside")
+
+        if request.method == 'POST':
+            # Debugging: Print out all POST data
+            print("POST request received")
+            print("POST Data:", request.POST)
+            print("FILES Data:", request.FILES)
+            
+            # Update email for the user
+            if request.POST.get('email', '').strip():
+                try:
+                    # Validate email format
+                    validate_email(request.POST.get('email'))
+                    
+                    # Check if email already exists
+                    existing_user = User.objects.exclude(pk=request.user.pk).filter(email=request.POST.get('email')).exists()
+                    if existing_user:
+                        messages.error(request, 'This email is already in use by another account.')
+                        return render(request, 'store/edit_profile.html', {'profile': profile})
+                    
+                    # Update email
+                    request.user.email = request.POST.get('email').strip()
+                    request.user.save()
+                except ValidationError:
+                    messages.error(request, 'Invalid email format.')
+                    return render(request, 'store/edit_profile.html', {'profile': profile})
+
+            # Update other profile fields
+            profile.phone = request.POST.get('phone', '').strip() or profile.phone
+            profile.state = request.POST.get('state', '').strip() or profile.state
+            profile.city = request.POST.get('city', '').strip() or profile.city
+            profile.country = request.POST.get('country', '').strip() or profile.country
+            
+            # Handle profile picture
+            if request.FILES.get('profile_picture'):
+                profile.profile_picture = request.FILES.get('profile_picture')
+            
+            try:
+                profile.save()
+                messages.success(request, 'Profile updated successfully!')
+                return redirect('store:profile')
+            except Exception as e:
+                # More detailed error logging
+                print(f"Error saving profile: {e}")
+                messages.error(request, f'Error updating profile: {e}')
+    
+    except Customer.DoesNotExist:
+        messages.error(request, 'Customer profile not found.')
+        return redirect('store:home')
+    except Exception as e:
+        # Catch any other unexpected errors
+        print(f"Unexpected error: {e}")
+        messages.error(request, 'An unexpected error occurred.')
+    
+    # If something goes wrong, render the edit profile page
+    return render(request, 'store/edit_profile.html', {'profile': profile})
+
+from django.contrib.auth import update_session_auth_hash
+from django.contrib.auth.forms import PasswordChangeForm
+def change_password(request):
+    if request.method == 'POST':
+        form = PasswordChangeForm(request.user, request.POST)
+        if form.is_valid():
+            user = form.save()
+            update_session_auth_hash(request, user)  # Important!
+            messages.success(request, 'Your password was successfully updated!')
+            return redirect('store:profile')  # Redirect to the profile page
+        else:
+            messages.error(request, 'Please correct the error below.')
+    else:
+        form = PasswordChangeForm(request.user)
+    
+    return render(request, 'store/change_password.html', {
+        'form': form
+    })
+
+from django.core.mail import send_mail
+from django.template.loader import render_to_string
+from django.utils.html import strip_tags
+from django.conf import settings
+import logging
+from cart.models import Order
+
+logger = logging.getLogger(__name__)
+
+def send_order_confirmation_email(order):
+    """
+    Send order confirmation email with comprehensive error handling
+    
+    :param order: Order instance to send confirmation for
+    :return: Boolean indicating email sending success
+    """
+    try:
+        # Validate order and user
+        if not order:
+            logger.error("Invalid order - cannot send confirmation email")
+            return False
+
+        # Prepare context for email template
+        context = {
+            'order': order,
+        }
+
+        # Render email template
+        html_message = render_to_string('store/order_confirmation.html', context)
+        plain_message = strip_tags(html_message)
+
+        # Logging for debugging
+        logger.info(f"Sending order confirmation for Order #{order.id}")
+        logger.info(f"Recipient Email: {order.email}")
+        logger.info(f"Total Order Items: {order.orderitem_set.count()}")
+
+        # Send email
+        send_mail(
+            f'Order Confirmation - Order #{order.id}',
+            plain_message,
+            settings.DEFAULT_FROM_EMAIL,
+            [order.email],  # Use the email from the order
+            html_message=html_message,
+        )
+
+        logger.info(f"Order confirmation email sent successfully to {order.email}")
+        return True
+
+    except Exception as e:
+        # Comprehensive error logging
+        logger.error(f"Error sending order confirmation email: {str(e)}")
+        logger.error(f"Order Details - ID: {order.id}, Email: {order.email}")
+        return False
+
+# Example usage in a view
+def order_confirmation_view(request, order_id):
+    try:
+        order = Order.objects.get(id=order_id)
+        send_order_confirmation_email(order)
+    except Order.DoesNotExist:
+        logger.error(f"Order with ID {order_id} not found")

@@ -1,6 +1,5 @@
-// Form Voice Input Extension with Fixes
-// Function to add voice input buttons to form fields
-console.log('Shipping voice js .. file.');
+// Function to add voice input buttons to form fields and handle address selection
+console.log('Shipping voice js loaded...');
 function setupFormVoiceInput() {
     const formFields = document.querySelectorAll('#shipping-form input, #shipping-form select');
     
@@ -47,6 +46,9 @@ function setupFormVoiceInput() {
             .voice-input-btn {
                 position: relative;
             }
+            .field-highlight {
+                transition: background-color 0.5s ease;
+            }
         `;
         document.head.appendChild(styleSheet);
     }
@@ -62,7 +64,7 @@ function setupFormVoiceInput() {
         voiceBtn.type = 'button';
         voiceBtn.className = 'voice-input-btn';
         voiceBtn.textContent = '🎤';
-        voiceBtn.setAttribute('data-description', 'Click to speak your ' + (field.previousElementSibling ? field.previousElementSibling.textContent : 'information'));
+        voiceBtn.setAttribute('data-description', 'Click to speak your ' + (field.placeholder || field.previousElementSibling?.textContent || 'information'));
         voiceBtn.style.marginLeft = '10px';
         
         // Make the button easily discoverable
@@ -99,12 +101,15 @@ function setupFormVoiceInput() {
     // Special handling for address dropdown
     const addressDropdown = document.getElementById('existing_addresses');
     if (addressDropdown) {
-        // Add voice feedback for selected addresses
+        // Add voice feedback and form filling for selected addresses
         addressDropdown.addEventListener('change', function() {
             const selectedOption = this.options[this.selectedIndex];
             if (selectedOption.value !== "") {
                 const addressText = selectedOption.textContent.trim();
                 speak("Selected address: " + addressText);
+                
+                // Fill the shipping form with the selected address data
+                fillShippingFormWithAddress(selectedOption.value);
                 
                 // Auto-scroll to the shipping form
                 setTimeout(() => {
@@ -122,12 +127,100 @@ function setupFormVoiceInput() {
         // Alt+H to hear instructions
         if (e.key === 'h') {
             e.preventDefault();
-            speak(document.getElementById('instructions').textContent);
+            speak(document.getElementById('instructions')?.textContent || "Press arrow keys to navigate, Enter to select, Space to toggle speech, R to replay speech");
         }
         
         // Add arrow key navigation
         handleArrowNavigation(e);
     });
+}
+
+// Function to fill the shipping form with the selected address data
+// Function to fill the shipping form with the selected address data
+function fillShippingFormWithAddress(addressId) {
+    // Get the selected option element
+    const addressDropdown = document.getElementById('existing_addresses');
+    const selectedOption = addressDropdown.options[addressDropdown.selectedIndex];
+    
+    if (!selectedOption || selectedOption.value === "") {
+        speak("No address selected.");
+        return;
+    }
+    
+    // Get all the form fields
+    const form = document.getElementById('shipping-form');
+    if (!form) return;
+    
+    // Get address data directly from the data attributes of the selected option
+    const fieldMappings = {
+        'shipping_name': selectedOption.getAttribute('data-name'),
+        'shipping_address': selectedOption.getAttribute('data-address'),
+        'shipping_city': selectedOption.getAttribute('data-city'),
+        'shipping_state': selectedOption.getAttribute('data-state'),
+        'shipping_zipcode': selectedOption.getAttribute('data-zipcode'),
+        'shipping_country': selectedOption.getAttribute('data-country'),
+        'shipping_phone': selectedOption.getAttribute('data-phone'),
+        'shipping_email': selectedOption.getAttribute('data-email')
+    };
+    
+    // Fill each field
+    for (const [fieldName, value] of Object.entries(fieldMappings)) {
+        const field = form.querySelector(`[name="${fieldName}"]`);
+        if (field && value) {
+            field.value = value;
+            
+            // Add class for highlighting
+            field.classList.add('field-highlight');
+            field.style.backgroundColor = '#f0f8ff'; // Light blue background
+            
+            // Trigger any necessary event listeners (like change or input events)
+            const event = new Event('input', { bubbles: true });
+            field.dispatchEvent(event);
+            
+            // Reset highlighting after a delay
+            setTimeout(() => {
+                field.style.backgroundColor = '';
+                field.classList.remove('field-highlight');
+            }, 1000);
+        }
+    }
+    
+    // Announce form is filled
+    // Modified part at the end of fillShippingFormWithAddress function
+    const addressOption = document.getElementById('existing_addresses').options[document.getElementById('existing_addresses').selectedIndex];
+    const addressSummary = `${addressOption.getAttribute('data-name')}, ${addressOption.getAttribute('data-address')}, ${addressOption.getAttribute('data-city')}, ${addressOption.getAttribute('data-state')} ${addressOption.getAttribute('data-zipcode')}`;
+    speak(`Form filled with address for ${addressSummary}. You can now save and continue by skipping through tab.`);
+}
+
+// Simulated function to get address data by ID
+// In a real implementation, this would fetch data from your backend or localStorage
+function getAddressById(addressId) {
+    // Sample address data - replace with your actual data source
+    const addressDatabase = {
+        '1': {
+            fullName: 'John Doe',
+            address: '123 Main St, Apt 4B',
+            city: 'Anytown',
+            state: 'CA',
+            zipcode: '12345',
+            country: 'USA',
+            phone: '(555) 123-4567',
+            email: 'john.doe@example.com'
+        },
+        '2': {
+            fullName: 'Jane Smith',
+            address: '456 Oak Ave',
+            city: 'Somewhere',
+            state: 'NY',
+            zipcode: '67890',
+            country: 'USA',
+            phone: '(555) 987-6543',
+            email: 'jane.smith@example.com'
+        }
+        // Add more addresses as needed
+    };
+    
+    return addressDatabase[addressId];
 }
 
 // Function to handle arrow key navigation
@@ -172,11 +265,18 @@ function handleArrowNavigation(e) {
         nextElement.focus();
         nextElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
         
-        // If it's a field with a label, announce it
+        // If it's a field with a label or placeholder, announce it
+        let announcement = "";
         if (nextElement.labels && nextElement.labels.length > 0) {
-            announceToScreenReader("Moved to: " + nextElement.labels[0].textContent);
+            announcement = "Moved to: " + nextElement.labels[0].textContent;
         } else if (nextElement.getAttribute('data-description')) {
-            announceToScreenReader("Moved to: " + nextElement.getAttribute('data-description'));
+            announcement = "Moved to: " + nextElement.getAttribute('data-description');
+        } else if (nextElement.placeholder) {
+            announcement = "Moved to: " + nextElement.placeholder;
+        }
+        
+        if (announcement) {
+            announceToScreenReader(announcement);
         }
     }
 }
@@ -190,8 +290,8 @@ function startVoiceInput(field, voiceBtn) {
         recognition.continuous = false;
         recognition.lang = 'en-US';
         
-        // Use only the base prompt without additional instructions
-        const basePrompt = "Please speak your " + (field.previousElementSibling ? field.previousElementSibling.textContent : 'information');
+        // Use the placeholder or label as the prompt
+        const basePrompt = "Please speak your " + (field.placeholder || field.previousElementSibling?.textContent || 'information');
         speak(basePrompt);
         
         // Auto-scroll to keep the field in view
@@ -219,16 +319,16 @@ function startVoiceInput(field, voiceBtn) {
             
             // Process the transcript based on field type
             let processedValue;
-            const fieldType = determineFieldType(field);
+            const fieldName = field.name || "";
             
-            if (fieldType === 'phone') {
+            if (fieldName.includes('phone')) {
                 processedValue = processPhoneNumber(transcript);
-            } else if (fieldType === 'zipcode') {
+            } else if (fieldName.includes('zipcode')) {
                 processedValue = processZipCode(transcript);
-            } else if (fieldType === 'name') {
-                // FIX: Remove commas and dots from name fields
+            } else if (fieldName.includes('name')) {
+                // Remove commas and dots from name fields
                 processedValue = transcript.replace(/[,\.]/g, '').trim();
-            } else if (fieldType === 'email') {
+            } else if (fieldName.includes('email')) {
                 // Special handling for email to ensure proper format and remove extra commas/dots
                 processedValue = processEmail(transcript);
             } else {
@@ -237,7 +337,7 @@ function startVoiceInput(field, voiceBtn) {
             }
             
             field.value = processedValue;
-            speak("You said: " + formatForSpeech(processedValue, fieldType));
+            speak("You said: " + formatForSpeech(processedValue, fieldName));
             
             // Reset visual feedback
             voiceBtn.classList.remove('voice-recording');
@@ -290,26 +390,7 @@ function findNextField(currentField) {
     return null;
 }
 
-// Determine field type based on name or other attributes
-function determineFieldType(field) {
-    const name = field.name ? field.name.toLowerCase() : '';
-    const type = field.type ? field.type.toLowerCase() : '';
-    const id = field.id ? field.id.toLowerCase() : '';
-    
-    if (name.includes('phone') || id.includes('phone')) {
-        return 'phone';
-    } else if (name.includes('zipcode') || name.includes('postal') || id.includes('zip')) {
-        return 'zipcode';
-    } else if (name.includes('name') || id.includes('name')) {
-        return 'name';
-    } else if (name.includes('email') || type === 'email' || id.includes('email')) {
-        return 'email';
-    }
-    
-    return 'text';
-}
-
-// Process email addresses - new function
+// Process email addresses
 function processEmail(text) {
     // Check if the text already looks like an email
     if (text.includes('@') && text.includes('.')) {
@@ -396,14 +477,11 @@ function processZipCode(text) {
 
 // Format values for speech feedback
 function formatForSpeech(value, fieldType) {
-    switch (fieldType) {
-        case 'phone':
-        case 'zipcode':
-            // Read phone numbers and zip codes digit by digit
-            return value.replace(/\D/g, '').split('').join(' ');
-        default:
-            return value;
+    if (fieldType.includes('phone') || fieldType.includes('zipcode')) {
+        // Read phone numbers and zip codes digit by digit
+        return value.replace(/\D/g, '').split('').join(' ');
     }
+    return value;
 }
 
 // Announce messages to screen readers
@@ -426,10 +504,20 @@ function announceToScreenReader(message) {
     }
 }
 
+// Function to speak text (from voice.js)
+function speak(text) {
+    if (window.speechSynthesis) {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.rate = speechSpeed || 1;
+        window.speechSynthesis.speak(utterance);
+    }
+}
+
 // Call this function when the checkout page loads
 document.addEventListener('DOMContentLoaded', function() {
     // Check if we're on the checkout page
-    console.log('Shipping voice js ...');
+    console.log('Shipping voice js initializing...');
     if (document.getElementById('shipping-form')) {
         // Add screen reader announcer if not already present
         if (!document.getElementById('sr-announcer')) {
@@ -438,6 +526,11 @@ document.addEventListener('DOMContentLoaded', function() {
             announcer.setAttribute('aria-live', 'polite');
             announcer.className = 'sr-only';
             document.body.appendChild(announcer);
+        }
+        
+        // Define speechSpeed if not already defined
+        if (typeof speechSpeed === 'undefined') {
+            window.speechSpeed = 1;
         }
         
         setupFormVoiceInput();
