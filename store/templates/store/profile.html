@@ -21,27 +21,27 @@
             <table class="table table-bordered" data-description="User details table">
                 <tr>
                     <th data-description="Username label">Username</th>
-                    <td data-description="Displayed username">{{ user.username }}</td>
+                    <td data-description="{{ user.username }}">{{ user.username }}</td>
                 </tr>
                 <tr>
                     <th data-description="Email label">Email</th>
-                    <td data-description="Displayed email">{{ user.email }}</td>
+                    <td data-description="{{ user.email }}">{{ user.email }}</td>
                 </tr>
                 <tr>
                     <th data-description="Phone number label">Phone</th>
-                    <td data-description="Displayed phone number">{{ profile.phone|default:'Not provided' }}</td>
+                    <td data-description="{% for digit in profile.phone %}{{ digit }} {% endfor %}">{{ profile.phone|default:'Not provided' }}</td>
                 </tr>
                 <tr>
                     <th data-description="City label">City</th>
-                    <td data-description="Displayed city">{{ profile.city|default:'Not provided' }}</td>
+                    <td data-description="{{ profile.city|default:'Not provided' }}">{{ profile.city|default:'Not provided' }}</td>
                 </tr>
                 <tr>
                     <th data-description="State label">State</th>
-                    <td data-description="Displayed state">{{ profile.state|default:'Not provided' }}</td>
+                    <td data-description="{{ profile.state|default:'Not provided' }}">{{ profile.state|default:'Not provided' }}</td>
                 </tr>
                 <tr>
                     <th data-description="Country label">Country</th>
-                    <td data-description="Displayed country">{{ profile.country|default:'Not provided' }}</td>
+                    <td data-description="{{ profile.country|default:'Not provided' }}">{{ profile.country|default:'Not provided' }}</td>
                 </tr>
             </table>
 

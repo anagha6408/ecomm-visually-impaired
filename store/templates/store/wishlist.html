@@ -3,7 +3,7 @@
 
 {% block content %}
 <div class="container mt-4">
-    <h2 class="mb-4">Your Wishlist</h2>
+    <h2 class="mb-4" data-description="Your Wishlist Page. Items are found below">Your Wishlist</h2>
 
     {% if request.user.is_authenticated %}
         {% if wishlist_items %}
@@ -13,26 +13,32 @@
                         <div class="card shadow-sm mb-4" style="border-radius: 15px;">
                             <img src="{{ item.product.product_image.url }}" class="card-img-top" alt="{{ item.product.name }}" style="border-radius: 15px 15px 0 0; height: 250px; object-fit: cover;">
                             <div class="card-body">
-                                <h5 class="card-title">{{ item.product.name }}</h5>
-                                <p class="card-text">
-                                    <strong>Price:</strong> ₹{{ item.product.selling_price | floatformat:2 }}
+                                <h5 class="card-title" data-description="{{item.product.name}}">{{ item.product.name }}</h5>
+                                <p class="card-text" data-description="{{item.product.selling_price | floatformat:2}}">
+                                    <strong>Price:</strong> ${{ item.product.selling_price | floatformat:2 }}
                                 </p>
                                 <script>console.log("Product ID for debugging: {{ item.product.id }}");</script>
-                                <!-- Add to Cart Button -->
-                                <button type="button" class="btn btn-primary me-3 float-start update-cart" 
-                                           data-product="{{item.product.id}}" data-action="add" 
-                                           style="border-radius: 10px;" data-description="Add to cart" 
-                                          >
-                                        Add to Cart <i class="fa fa-shopping-cart"></i>
+                                <div class="d-flex justify-content-between align-items-center mt-3">
+                                    <a href="{% url 'store:productView' item.product.slug item.product.name %}" 
+                                       class="btn btn-primary" style="border-radius: 10px;" data-description="View product details">
+                                        View <i class="fa fa-eye"></i>
+                                    </a>
+                                
+                                    <button type="button" class="btn btn-primary update-cart" 
+                                            data-product="{{item.product.id}}" data-action="add" 
+                                            style="border-radius: 10px;" data-description="Add to cart">
+                                        Cart <i class="fa fa-shopping-cart"></i>
                                     </button>
-                                <!-- Remove from Wishlist Button -->
-                                <form action="{% url 'wishlist:remove' %}" method="POST" class="d-inline">
-                                    {% csrf_token %}
-                                    <input type="hidden" name="product_id" value="{{ item.product.id }}">
-                                    <button type="submit" class="btn btn-danger" style="border-radius: 10px;">
-                                        Remove <i class="fa fa-trash"></i>
-                                    </button>
-                                </form>
+                                
+                                    <form action="{% url 'wishlist:remove' %}" method="POST" class="d-inline">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="product_id" value="{{ item.product.id }}">
+                                        <button type="submit" class="btn btn-danger" style="border-radius: 10px;" data-description="Remove from wishlist">
+                                            Remove <i class="fa fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                                
                             </div>
                         </div>
                     </div>

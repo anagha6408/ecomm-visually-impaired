@@ -205,6 +205,14 @@ document.addEventListener("DOMContentLoaded", function () {
         speakSelected();
     }
     console.log("All selects on page:", document.querySelectorAll('select'));
+
+    // Add event listener for Reset button
+    const resetButton = document.querySelector('button[type="reset"]');
+    if (resetButton) {
+        resetButton.addEventListener('click', function () {
+            resetNavigation();
+        });
+    }
 });
 
 // Updated navigation function with comprehensive selector
@@ -345,11 +353,12 @@ function activateSelectedTab() {
         }
 }}
 
+// Updated resetNavigation function
 function resetNavigation() {
     // Stop any ongoing speech
     window.speechSynthesis.cancel();
 
-    // Find and remove 'selected-tab' class from all elements
+    // Remove 'selected-tab' class from all elements
     const selectedElements = document.querySelectorAll('.selected-tab');
     selectedElements.forEach(el => el.classList.remove('selected-tab'));
 
@@ -377,11 +386,20 @@ function resetNavigation() {
         li[data-description]
     `));
 
+    // Check if interactive elements exist
     if (interactiveElements.length > 0) {
         // Select the first interactive element again
         const firstElement = interactiveElements[0];
         firstElement.classList.add('selected-tab');
-        firstElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+        // Focus on the first element
+        if (firstElement.tagName === 'INPUT' || firstElement.tagName === 'SELECT') {
+            firstElement.focus();
+            console.log(`Focus set on: ${firstElement.tagName} with description: ${firstElement.getAttribute('data-description')}`);
+        } else {
+            firstElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            console.log(`Scrolled into view: ${firstElement.tagName} with description: ${firstElement.getAttribute('data-description')}`);
+        }
 
         // Announce it again
         speakSelected();
@@ -389,7 +407,14 @@ function resetNavigation() {
 }
 
 
-
+function speakText(text) {
+    if ('speechSynthesis' in window) {
+        let utterance = new SpeechSynthesisUtterance(text);
+        speechSynthesis.speak(utterance);
+    } else {
+        console.error("Speech synthesis not supported.");
+    }
+}
 // Function to speak the provided text
 function speak(text) {
     window.speechSynthesis.cancel();

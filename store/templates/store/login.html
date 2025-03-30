@@ -2,43 +2,328 @@
 {% load static %}
 
 {% block title %}Login{% endblock %}
-
+<!--
 {% block extra_css %}
     <link rel="stylesheet" type="text/css" href="{% static 'css/sign-up.css' %}">
 {% endblock extra_css %}
-
+-->
 {% block content %}
+<style>
+    .pulsating-dot {
+        display: inline-block;
+        width: 8px;
+        height: 8px;
+        background-color: red;
+        border-radius: 50%;
+        margin-left: 5px;
+        animation: pulse 1s infinite;
+    }
+    
+    @keyframes pulse {
+        0% {
+            transform: scale(0.8);
+            opacity: 1;
+        }
+        50% {
+            transform: scale(1.2);
+            opacity: 0.8;
+        }
+        100% {
+            transform: scale(0.8);
+            opacity: 1;
+        }
+    }
+    input:focus {
+        outline: none;
+    }
+    
+</style>
+
 <div class="container d-flex justify-content-center align-items-center min-vh-100">
     <div class="col-md-6 col-lg-5 p-4 bg-white shadow rounded">
-        <h2 class="text-center mb-4">Login</h2>
+        <h2 class="text-center mb-4" data-description="Login to Your Account">Login</h2>
 
         {% if messages %}
-            <div class="alert alert-danger text-center" role="alert">
+            <div class="alert alert-danger text-center" role="alert" data-description="{{ message }}">
                 {% for message in messages %}
                     {{ message }}
                 {% endfor %}
             </div>
         {% endif %}
 
-        <form action="{% url 'userauth:login' %}" method="POST">
+        <!-- Voice instruction alert - initially hidden -->
+        <div id="voice-instruction" class="alert alert-info text-center d-none" role="alert" data-description="Voice input instructions">
+            Say the input for this field
+        </div>
+
+        <form action="{% url 'userauth:login' %}" method="POST" data-description="Login form">
             {% csrf_token %}
 
             {% for field in form %}
-                <div class="mb-3">
-                    <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
-                    {{ field }}
-                    <script>document.getElementById("{{ field.id_for_label }}").classList.add("form-control");</script>
+                <div class="mb-3" data-description="Form field group for {{ field.label }}">
+                    <label for="{{ field.id_for_label }}" class="form-label" data-description="{{ field.label }} field label">{{ field.label }}</label>
+                    
+                    <div class="input-group">
+                        {{ field }}
+                        <script>
+                            document.getElementById("{{ field.id_for_label }}").classList.add("form-control");
+                            document.getElementById("{{ field.id_for_label }}").setAttribute("data-description", "{{ field.label }} input field");
+                            
+                            // Check if this is a password field
+                            if ("{{ field.id_for_label }}".toLowerCase().includes("password")) {
+                                // Create a button for toggling password visibility
+                                var passwordToggleBtn = document.createElement("button");
+                                passwordToggleBtn.type = "button";
+                                passwordToggleBtn.className = "btn btn-outline-secondary";
+                                passwordToggleBtn.innerHTML = '<i class="bi bi-eye"></i>';
+                                passwordToggleBtn.setAttribute("data-description", "Toggle password visibility");
+                                passwordToggleBtn.onclick = function() {
+                                    var input = document.getElementById("{{ field.id_for_label }}");
+                                    if (input.type === "password") {
+                                        input.type = "text";
+                                        this.innerHTML = '<i class="bi bi-eye-slash"></i>';
+                                    } else {
+                                        input.type = "password";
+                                        this.innerHTML = '<i class="bi bi-eye"></i>';
+                                    }
+                                };
+                                
+                                // Insert the button after the input field
+                                document.getElementById("{{ field.id_for_label }}").parentNode.insertBefore(
+                                    passwordToggleBtn, 
+                                    document.getElementById("{{ field.id_for_label }}").nextSibling
+                                );
+                            }
+                        </script>
+                        <button type="button" class="btn btn-secondary voice-btn" data-input="{{ field.id_for_label }}" data-description="Voice input button for {{ field.label }}">
+                            🎤
+                        </button>
+                    </div>
+                    
+                    {% if field.errors %}
+                        <div class="text-danger" data-description="Error messages for {{ field.label }}">
+                            {% for error in field.errors %}
+                                <small data-description="Error: {{ error }}">{{ error }}</small><br>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
                 </div>
             {% endfor %}
 
-            <button type="submit" class="btn btn-primary w-100">Login</button>
+            <button type="submit" class="btn btn-primary w-100" data-description="Login button">Login</button>
         </form>
 
-        <p class="text-center mt-3">
-            Don't have an account? <a href="{% url 'userauth:sign-up' %}">Register here</a>
+        <p class="text-center mt-3" data-description="Register link section">
+            Don't have an account? <a href="{% url 'userauth:sign-up' %}" data-description="Go to registration page">Register here</a>
         </p>
     </div>
 </div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        if (!('webkitSpeechRecognition' in window)) {
+            alert("Your browser does not support voice recognition. Please use Chrome.");
+            return;
+        }
+        
+        // Initialize speech synthesis
+        const speechSynthesis = window.speechSynthesis;
+        
+        // Function to speak text aloud
+        function speakText(text, isPassword = false) {
+            // Stop any ongoing speech
+            speechSynthesis.cancel();
+            
+            // Create a new utterance
+            const utterance = new SpeechSynthesisUtterance();
+            
+            // For passwords, we may want to speak it differently
+            if (isPassword) {
+                // Speak each character individually for security
+                let secureText = "";
+                for (let i = 0; i < text.length; i++) {
+                    if (text[i] === '@') {
+                        secureText += "at ";
+                    } else if (text[i] === '.') {
+                        secureText += "dot ";
+                    } else if (text[i] === '_') {
+                        secureText += "underscore ";
+                    } else {
+                        secureText += text[i] + " ";
+                    }
+                }
+                utterance.text = "Your password is: " + secureText;
+            } else {
+                utterance.text = "You entered: " + text;
+            }
+            
+            utterance.rate = 1.0;
+            utterance.pitch = 1.0;
+            utterance.volume = 1.0;
+            
+            speechSynthesis.speak(utterance);
+        }
+    
+        const recognition = new webkitSpeechRecognition();
+        recognition.continuous = false;
+        recognition.interimResults = false;
+        recognition.lang = "en-US";
+        
+        const voiceInstructionElement = document.getElementById('voice-instruction');
+    
+        document.querySelectorAll(".voice-btn").forEach(button => {
+            button.addEventListener("click", function() {
+                const inputField = document.getElementById(this.getAttribute("data-input"));
+                if (!inputField) return;
+                
+                // Store field type for processing
+                const isPassword = inputField.type === "password" || inputField.id.toLowerCase().includes("password");
+                const isEmail = inputField.type === "email" || inputField.id.toLowerCase().includes("email");
+                
+                // Get mic button for visual feedback
+                const micButton = this;
+                
+                // Show voice instruction element with field-specific message
+                voiceInstructionElement.classList.remove('d-none');
+                voiceInstructionElement.textContent = "Say the " + (inputField.labels[0]?.textContent || "input") + " now";
+                
+                // Use text-to-speech to announce it's listening
+                const instructionUtterance = new SpeechSynthesisUtterance("Say the " + 
+                  (inputField.labels[0]?.textContent || "input") + " now");
+                speechSynthesis.speak(instructionUtterance);
+
+                // Add visual indicator that instruction is playing
+                micButton.classList.add('btn-info');
+                micButton.classList.remove('btn-secondary');
+                
+                // Delay mic activation to avoid capturing the instruction
+                setTimeout(() => {
+                    // Change button color to indicate active recording
+                    micButton.classList.remove('btn-info');
+                    micButton.classList.add('btn-danger');
+                    micButton.innerHTML = '🎤 <span class="pulsating-dot"></span>';
+                    
+                    recognition.start();
+                }, 2000); // 2 second delay
+
+                recognition.onresult = function(event) {
+                    // Reset button appearance
+                    micButton.classList.remove('btn-danger');
+                    micButton.classList.add('btn-secondary');
+                    micButton.innerHTML = '🎤';
+                    
+                    let transcript = event.results[0][0].transcript;
+                    
+                    // Remove any trailing periods or spaces that might come from speech recognition
+                    transcript = transcript.trim();
+                    if (transcript.endsWith('.')) {
+                        transcript = transcript.slice(0, -1);
+                    }
+                    
+                    // Process the transcript based on field type
+                    let processedText = transcript;
+                    
+                    // Special handling for email addresses
+                    if (isEmail) {
+                        // Remove spaces before and after "@" symbol
+                        processedText = processedText.replace(/\s+at\s+/gi, '@');
+                        processedText = processedText.replace(/\s+@\s+/g, '@');
+                        
+                        // Remove spaces around periods in email domains
+                        processedText = processedText.replace(/\s+dot\s+/gi, '.');
+                        processedText = processedText.replace(/\s+\.\s+/g, '.');
+                        
+                        // Fix common email entry issues
+                        processedText = processedText.replace(/(\w+)\.(\d+)@/g, '$1$2@'); // Fix things like Anna.123@gmail.com
+                    }
+                    
+                    // Special handling for passwords
+                    if (isPassword) {
+                        // Replace spoken "at" with @ symbol without spaces
+                        processedText = processedText.replace(/\s+at\s+/gi, '@');
+                        processedText = processedText.replace(/\bat\b/gi, '@');
+                        
+                        // Remove spaces between characters and numbers in passwords
+                        processedText = processedText.replace(/(\w+)\s+(\d+)/g, '$1$2'); // "Anna 123" -> "Anna123"
+                        processedText = processedText.replace(/(\d+)\s+(\w+)/g, '$1$2'); // "123 Anna" -> "123Anna"
+                        
+                        // Convert spoken numbers to actual digits
+                        processedText = processedText
+                            .replace(/\bone\b/gi, '1')
+                            .replace(/\btwo\b/gi, '2')
+                            .replace(/\bthree\b/gi, '3')
+                            .replace(/\bfour\b/gi, '4')
+                            .replace(/\bfive\b/gi, '5')
+                            .replace(/\bsix\b/gi, '6')
+                            .replace(/\bseven\b/gi, '7')
+                            .replace(/\beight\b/gi, '8')
+                            .replace(/\bnine\b/gi, '9')
+                            .replace(/\bzero\b/gi, '0')
+                            .replace(/\bexclamation\b/gi, '!')
+                            .replace(/\bhash\b/gi, '#')
+                            .replace(/\bdollar\b/gi, '$')
+                            .replace(/\bpercent\b/gi, '%')
+                            .replace(/\bampersand\b/gi, '&')
+                            .replace(/\basterisk\b/gi, '*')
+                            .replace(/\bunderscore\b/gi, '_')
+                            .replace(/\bplus\b/gi, '+');
+                        
+                        // Remove any remaining spaces in passwords
+                        processedText = processedText.replace(/\s+/g, '');
+                    }
+                    
+                    inputField.value = processedText;
+                    
+                    // Hide the instruction after input is received
+                    voiceInstructionElement.classList.add('d-none');
+                    
+                    // Read back the entered value using text-to-speech
+                    speakText(processedText, isPassword);
+                };
+    
+                recognition.onerror = function(event) {
+                    console.error("Speech recognition error", event);
+                    voiceInstructionElement.classList.add('d-none');
+                    
+                    // Reset button appearance
+                    micButton.classList.remove('btn-danger');
+                    micButton.classList.add('btn-secondary');
+                    micButton.innerHTML = '🎤';
+                    
+                    // Announce the error
+                    const errorUtterance = new SpeechSynthesisUtterance("Voice input failed. Please try again.");
+                    speechSynthesis.speak(errorUtterance);
+                };
+    
+                recognition.onend = function() {
+                    console.log("Speech recognition ended.");
+                    // Hide instructions if still visible
+                    voiceInstructionElement.classList.add('d-none');
+                    
+                    // Reset button appearance
+                    micButton.classList.remove('btn-danger');
+                    micButton.classList.add('btn-secondary');
+                    micButton.innerHTML = '🎤';
+                };
+            });
+        });
+    });
+    
+    // Place this at the very end of your login page, after all other scripts
+    document.addEventListener("DOMContentLoaded", function() {
+        setTimeout(() => {
+            if (document.activeElement && document.activeElement.tagName !== 'BODY') {
+                document.activeElement.blur();
+                console.log('Blurred element:', document.activeElement);
+            }
+            document.body.focus();
+        }, 200); // Increase delay to 200ms or more
+    });
+</script>
+
+<!-- Add Bootstrap Icons for the eye icon -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+
 {% include 'store/voice_control.html' %}
 {% include 'store/footer.html' %}
 {% endblock content %}

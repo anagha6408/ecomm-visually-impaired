@@ -16,83 +16,101 @@
                         {% csrf_token %}
                         
                         <div class="text-center mb-4">
-                            <img src="{{ profile.profile_picture.url|default:'/static/images/default-profile.png' }}" 
+                            <img src="{{ profile.profile_picture.url|default:'/static/images/default-profile.png' }}"
+                                data-description="Current Profile Picture" 
                                  alt="Profile Picture" 
                                  class="img-fluid rounded-circle mb-3" 
                                  id="profileImagePreview"
                                  style="width: 150px; height: 150px; object-fit: cover;">
                             
-                            <div class="mt-2">
-                                <input type="file" 
-                                       class="form-control d-none" 
-                                       id="profilePicture" 
-                                       name="profile_picture"
-                                       accept="image/*">
-                                <label for="profilePicture" 
-                                       class="btn btn-secondary btn-sm"
-                                       data-description="Upload a new profile picture">
-                                    Change Picture
-                                </label>
-                            </div>
+                                 <div class="mt-2">
+                                    <input type="file" 
+                                           class="form-control d-none" 
+                                           id="profilePicture" 
+                                           name="profile_picture"
+                                           accept="image/*">
+                                
+                                           <button type="button" 
+                                           class="btn btn-secondary btn-sm" 
+                                           data-description="Click to change your profile picture"
+                                           id="changePictureButton">
+                                       Change Picture
+                                   </button>
+                                </div>
                         </div>
 
                         <div class="form-group mb-3">
-                            <label for="email">Email Address <small class="text-muted">(Optional)</small></label>
+                            <label for="email" data-description="Enter your email address">Email Address <small class="text-muted">(Optional)</small></label>
                             <input type="email" 
                                    class="form-control" 
                                    id="email" 
                                    name="email" 
                                    value="{{ request.user.email }}"
                                    placeholder="Enter email address" 
-                                   data-description="Enter your email address">
+                                   data-description="Current Email address {{ request.user.email }}, if you want to change it, enter your new email address here">
                         </div>
 
                         <div class="form-group mb-3">
-                            <label for="phone">Phone Number <small class="text-muted">(Optional)</small></label>
+                            <label for="phone" data-description="Enter your phone number">Phone Number <small class="text-muted">(Optional)</small></label>
                             <input type="tel" 
                                    class="form-control" 
                                    id="phone" 
                                    name="phone" 
                                    value="{{ profile.phone|default:'' }}"
-                                   placeholder="Enter phone number" data-description="Enter your phone number">
+                                   placeholder="Enter phone number" 
+                                   data-description="Current phone number {% for digit in profile.phone %}{{ digit }} {% endfor %}, if you want to change, enter your new phone number here">
                         </div>
 
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label for="state">State <small class="text-muted">(Optional)</small></label>
+                                <label for="state" data-description="Enter your state">State <small class="text-muted">(Optional)</small></label>
                                 <input type="text" 
                                        class="form-control" 
                                        id="state" 
                                        name="state" 
                                        value="{{ profile.state|default:'' }}"
-                                       placeholder="Enter state" data-description="Enter your state">
+                                       placeholder="Enter state" 
+                                       data-description="Current State {{ profile.state|default:'' }}, if you want to change, enter your new state here">
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label for="city">City <small class="text-muted">(Optional)</small></label>
+                                <label for="city" data-description="Enter your city">City <small class="text-muted">(Optional)</small></label>
                                 <input type="text" 
                                        class="form-control" 
                                        id="city" 
                                        name="city" 
                                        value="{{ profile.city|default:'' }}"
-                                       placeholder="Enter city" data-description="Enter your city">
+                                       placeholder="Enter city" 
+                                       data-description="Current City {{ profile.city|default:'' }}, if you want to change, enter your new city here">
                             </div>
                         </div>
 
                         <div class="form-group mb-3">
-                            <label for="country">Country <small class="text-muted">(Optional)</small></label>
-                            <select class="form-control" 
-                                    id="country" 
-                                    name="country">
-                                <option value="">Select Country (Optional)</option>
-                                <option value="US" {% if profile.country == 'US' %}selected{% endif %}>United States</option>
-                                <option value="CA" {% if profile.country == 'CA' %}selected{% endif %}>Canada</option>
-                                <!-- Add more countries as needed -->
-                            </select>
+                            <label for="country" data-description="Select your country from below using tab to exit the selection label">Country <small class="text-muted">(Optional)</small></label>
+                            <select class="form-control" id="country" name="country" onchange="speakCountryName()">
+                                <option value="" data-description="No country selected">Select Country (Optional)</option>
+                                <option value="US" {% if profile.country == 'US' %}selected{% endif %} data-description="United States">United States</option>
+                                <option value="CA" {% if profile.country == 'CA' %}selected{% endif %} data-description="Canada">Canada</option>
+                                <option value="GB" {% if profile.country == 'GB' %}selected{% endif %} data-description="United Kingdom">United Kingdom</option>
+                                <option value="AU" {% if profile.country == 'AU' %}selected{% endif %} data-description="Australia">Australia</option>
+                                <option value="IN" {% if profile.country == 'IN' %}selected{% endif %} data-description="India">India</option>
+                                <option value="DE" {% if profile.country == 'DE' %}selected{% endif %} data-description="Germany">Germany</option>
+                                <option value="FR" {% if profile.country == 'FR' %}selected{% endif %} data-description="France">France</option>
+                                <option value="IT" {% if profile.country == 'IT' %}selected{% endif %} data-description="Italy">Italy</option>
+                                <option value="ES" {% if profile.country == 'ES' %}selected{% endif %} data-description="Spain">Spain</option>
+                                <option value="BR" {% if profile.country == 'BR' %}selected{% endif %} data-description="Brazil">Brazil</option>
+                                <option value="JP" {% if profile.country == 'JP' %}selected{% endif %} data-description="Japan">Japan</option>
+                                <option value="CN" {% if profile.country == 'CN' %}selected{% endif %} data-description="China">China</option>
+                                <option value="RU" {% if profile.country == 'RU' %}selected{% endif %} data-description="Russia">Russia</option>
+                                <option value="ZA" {% if profile.country == 'ZA' %}selected{% endif %} data-description="South Africa">South Africa</option>
+                                <option value="MX" {% if profile.country == 'MX' %}selected{% endif %} data-description="Mexico">Mexico</option>
+                                <option value="KR" {% if profile.country == 'KR' %}selected{% endif %} data-description="South Korea">South Korea</option>
+                                <option value="SG" {% if profile.country == 'SG' %}selected{% endif %} data-description="Singapore">Singapore</option>
+                            </select>                            
                         </div>
 
                         <div class="d-flex justify-content-between">
-                            <button type="submit" class="btn btn-primary" data-description="Click here to Save changes"> Save Changes</button>
-                            <a href="{% url 'store:profile' %}" class="btn btn-secondary" data-description="Click here to Cancel">Cancel</a>
+                            <button type="submit" class="btn btn-primary" data-description="Click to save changes">Save Changes</button>
+                            <a href="{% url 'store:profile' %}" class="btn btn-secondary" data-description="Click to cancel changes">Cancel</a>
                         </div>
                     </form>
                 </div>
@@ -102,6 +120,37 @@
 </div>
 
 <script>
+// Preview uploaded profile picture
+document.getElementById('profilePicture').addEventListener('change', function(event) {
+    const file = event.target.files[0];
+    const preview = document.getElementById('profileImagePreview');
+    
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            preview.src = e.target.result;
+        }
+        reader.readAsDataURL(file);
+    }
+});
+
+// Function to read aloud selected country name
+function speakCountryName() {
+    const countrySelect = document.getElementById("country");
+    const selectedOption = countrySelect.options[countrySelect.selectedIndex];
+    const countryName = selectedOption.innerText;
+    
+    if ('speechSynthesis' in window) {
+        const utterance = new SpeechSynthesisUtterance(countryName);
+        utterance.lang = 'en-US';
+        speechSynthesis.speak(utterance);
+    }
+}
+document.getElementById("changePictureButton").addEventListener("click", function() {
+    document.getElementById("profilePicture").click();
+});
+
+// Preview uploaded profile picture
 document.getElementById('profilePicture').addEventListener('change', function(event) {
     const file = event.target.files[0];
     const preview = document.getElementById('profileImagePreview');
@@ -119,4 +168,3 @@ document.getElementById('profilePicture').addEventListener('change', function(ev
 {% include 'store/voice_control.html' %}
 {% include 'store/footer.html' %}
 {% endblock content %}
-```
