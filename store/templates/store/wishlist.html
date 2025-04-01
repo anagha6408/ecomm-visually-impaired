@@ -33,9 +33,15 @@
                                     <form action="{% url 'wishlist:remove' %}" method="POST" class="d-inline">
                                         {% csrf_token %}
                                         <input type="hidden" name="product_id" value="{{ item.product.id }}">
-                                        <button type="submit" class="btn btn-danger" style="border-radius: 10px;" data-description="Remove from wishlist">
+                                        <button type="button" 
+                                        data-action="remove" 
+                                                class="btn btn-danger remove-from-wishlist" 
+                                                data-product-id="{{ item.product.id }}" 
+                                                style="border-radius: 10px;" 
+                                                data-description="Remove from wishlist">
                                             Remove <i class="fa fa-trash"></i>
                                         </button>
+
                                     </form>
                                 </div>
                                 
@@ -61,9 +67,11 @@
     {% endif %}
     console.log("User variable defined as:", user);
     var csrftoken = "{{ csrf_token }}";
+    
 </script>
 <script src="{% static 'js/cartVoice.js' %}"></script>
 <script src="{% static 'js/cart2.js' %}"></script>
+<script src="{% static 'js/wishlist.js' %}"></script>
 {% include 'store/voice_control.html' %}
 {% include 'store/footer.html' %}
 {% endblock content %}
