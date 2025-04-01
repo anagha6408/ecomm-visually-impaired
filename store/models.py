@@ -4,6 +4,7 @@ import os
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.db.models import Avg
 def get_file_path(request,filename):
     original_filename=filename
     nowTime=datetime.datetime.now().strftime('%Y%m%d%H:%M:%S')
@@ -50,6 +51,10 @@ class Product(models.Model):
              return '/static/uploads/' + self.image.name.split('/')[-1]
         except:
             return '/static/images/placeholder.png'
+        
+    def average_rating(self):
+        avg_rating = self.rating_set.aggregate(Avg('rating'))['rating__avg']
+        return round(avg_rating, 1) if avg_rating else 0
     
     def __str__(self):
         return self.name
@@ -96,3 +101,21 @@ class Profile(models.Model):
     class Meta:
         verbose_name = 'Customer Profile'
         verbose_name_plural = 'Customer Profiles'
+
+
+class Rating(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)  # User who rated
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)  # Product being rated
+    rating = models.IntegerField(choices=[(i, i) for i in range(1, 6)])  # Rating from 1 to 5
+    review = models.TextField(blank=True, null=True)  # Optional review text
+    created_at = models.DateTimeField(auto_now_add=True)  # Timestamp
+    product_name = models.CharField(max_length=255, editable=False,default='')  # Store product name at the time of rating
+    class Meta:
+        unique_together = ('user', 'product')  # One rating per user per product
+    def save(self, *args, **kwargs):
+        # Store the product name at the time of rating creation
+        self.product_name = self.product.name  
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.user.username} - {self.product.id} ({self.product.name}): {self.rating} ⭐"

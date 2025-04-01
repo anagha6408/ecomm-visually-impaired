@@ -1,0 +1,318 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Slider with Hover Effects</title>
+    <style>
+        /* Reset and base styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            overflow-x: hidden;
+        }
+        
+        
+        /* Heading styles */
+        .page-title {
+            font-size: 48px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .description {
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto 50px;
+            color: #666;
+        }
+        
+        /* Slider container */
+        .slider-container {
+            position: relative;
+            overflow: hidden;
+            margin: 0 -10px;
+        }
+        
+        /* Products grid becomes a slider */
+        .products-grid {
+            display: flex;
+            transition: transform 0.5s ease;
+            padding: 20px 0;
+        }
+        
+        /* Product card styles */
+        .product-card {
+            flex: 0 0 33.333%; /* Show 3 items at once */
+            padding: 0 10px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .product-card:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            z-index: 1;
+        }
+        
+        .product-image {
+            width: 100%;
+            height: 360px;
+            object-fit: cover;
+            display: block;
+            border-radius: 4px;
+        }
+        
+        .product-info {
+            padding: 15px;
+            background-color: #fff;
+        }
+        
+        .product-title {
+            font-size: 18px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+        
+        .product-description {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 15px;
+        }
+        
+        .discover-button {
+            display: inline-block;
+            padding: 8px 15px;
+            background: none;
+            border: 1px solid #333;
+            color: #333;
+            text-decoration: none;
+            text-transform: uppercase;
+            font-size: 12px;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+        }
+        
+        .discover-button:hover {
+            background: #333;
+            color: #fff;
+        }
+        
+        /* Navigation buttons */
+        .slider-nav {
+            position: absolute;
+            width: 100%;
+            top: 50%;
+            left: 0;
+            transform: translateY(-50%);
+            z-index: 2;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 5px;
+        }
+        
+        .nav-button {
+            background: rgba(255, 255, 255, 0.7);
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .nav-button:hover {
+            background: rgba(255, 255, 255, 0.9);
+        }
+        
+        /* Slider indicators */
+        .slider-indicators {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        
+        .indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #ccc;
+            margin: 0 5px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        
+        .indicator.active {
+            background: #333;
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 992px) {
+            .product-card {
+                flex: 0 0 50%; /* Show 2 items on medium screens */
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .product-card {
+                flex: 0 0 100%; /* Show 1 item on small screens */
+            }
+        }
+    </style>
+</head>
+<body>
+    <br>
+    <div class="container">
+        <h1 class="page-title" data-description="New Collections">New Collections</h1>
+        <p class="description" data-description="Discover the latest trends and must-have styles! Shop our newest arrivals and refresh your wardrobe with our exclusive collection.">
+            Discover the latest trends and must-have styles! Shop our newest arrivals and refresh your wardrobe with our exclusive collection.
+        </p>
+        
+        <div class="slider-container">
+            <div class="products-grid">
+                <!-- Product 1 -->
+                <div class="product-card">
+                    <img src="{% static 'IMG/banner-image-1.jpg' %}" alt="Soft Leather Jacket" class="product-image">
+                    <div class="product-info">
+                        <h2 class="product-title" data-description="Minimalist Chic Oversized Sweater">Minimalist Chic Sweater</h2>
+                        <p class="product-description" data-description="Stay cozy in style with this soft, oversized sweater, featuring a relaxed fit and modern neutral tones. Perfect for layering or standalone wear.">Stay cozy in style with this soft, oversized sweater, featuring a relaxed fit and modern neutral tones.</p>
+                        <a href="#" class="discover-button" data-description="Discover Now">Discover Now</a>
+                    </div>
+                </div>
+                
+                <!-- Product 2 -->
+                <div class="product-card">
+                    <img src="{% static 'IMG/banner-image-2.jpg' %}" alt="Soft Leather Jacket" class="product-image">
+                    <div class="product-info">
+                        <h2 class="product-title" data-description="Classic Trench Coat Duo">Classic Trench Coat Duo</h2>
+                        <p class="product-description"data-description="Elevate your wardrobe with this timeless trench coat, designed for effortless elegance. A staple piece that pairs well with both casual and formal outfits.">Elevate your wardrobe with this timeless trench coat, designed for effortless elegance.</p>
+                        <a href="#" class="discover-button" data-description="Discover Now">Discover Now</a>
+                    </div>
+                </div>
+                
+                <!-- Product 3 -->
+                <div class="product-card">
+                    <img src="{% static 'IMG/banner-image-3.jpg' %}" alt="Soft Leather Jacket" class="product-image">
+                    <div class="product-info">
+                        <h2 class="product-title" data-description="Plaid Blazer Dress">Plaid Blazer Dress</h2>
+                        <p class="product-description" data-description="A sophisticated plaid blazer dress that brings a balance of structure and flow, ideal for office wear or casual outings with a trendy edge.">A sophisticated plaid blazer dress that ideal for office wear or casual outings with a trendy edge.</p>
+                        <a href="#" class="discover-button"data-description="Discover Now">Discover Now</a>
+                    </div>
+                </div>
+                
+                <!-- Product 4 -->
+                <div class="product-card">
+                    <img src="{% static 'IMG/banner-image-4.jpg' %}" alt="Soft Leather Jacket" class="product-image">
+                    <div class="product-info">
+                        <h2 class="product-title" data-description="Faux Fur & Leather Fusion Jacket">Fur & Leather Fusion Jacket</h2>
+                        <p class="product-description" data-description="Elevate your winter fashion with this bold fusion of faux fur and leather. A statement piece that exudes confidence and warmth.">Elevate your winter fashion with this bold fusion of faux fur and leather.</p>
+                        <a href="#" class="discover-button"data-description="Discover Now">Discover Now</a>
+                    </div>
+                </div>
+                
+                <!-- Product 5 -->
+                <div class="product-card">
+                    <img src="{% static 'IMG/banner-image-5.jpg' %}" alt="Soft Leather Jacket" class="product-image">
+                    <div class="product-info">
+                        <h2 class="product-title" data-description="Chic Wool Blend Cape Coat">Chic Wool Blend Cape Coat</h2>
+                        <p class="product-description" data-description="A sophisticated cape coat featuring contrast details for a modern touch. Ideal for layering over both casual and formal outfits.">A sophisticated cape coat featuring contrast details for a modern touch.</p>
+                        <a href="#" class="discover-button"data-description="Discover Now">Discover Now</a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="slider-nav">
+                <button class="nav-button prev">←</button>
+                <button class="nav-button next">→</button>
+            </div>
+            
+            <div class="slider-indicators">
+                <div class="indicator active" data-index="0"></div>
+                <div class="indicator" data-index="1"></div>
+                <div class="indicator" data-index="2"></div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const slider = document.querySelector('.products-grid');
+            const slides = document.querySelectorAll('.product-card');
+            const prevButton = document.querySelector('.prev');
+            const nextButton = document.querySelector('.next');
+            const indicators = document.querySelectorAll('.indicator');
+        
+            let currentIndex = 0;
+            const slideWidth = slides[0].offsetWidth; // Get single slide width
+            const totalSlides = slides.length;
+            const slidesToShow = 3; // Adjust based on your layout
+            const maxIndex = totalSlides - slidesToShow; // Prevent empty space at the end
+        
+            function goToSlide(index) {
+                if (index > maxIndex) {
+                    index = 0; // Loop back to start
+                } else if (index < 0) {
+                    index = maxIndex; // Go to last valid index
+                }
+        
+                currentIndex = index;
+                const offset = currentIndex * slideWidth;
+                slider.style.transform = `translateX(-${offset}px)`;
+        
+                // Update indicators
+                indicators.forEach((indicator, i) => {
+                    indicator.classList.toggle('active', i === currentIndex);
+                });
+            }
+        
+            function nextSlide() {
+                goToSlide(currentIndex + 1);
+            }
+        
+            function prevSlide() {
+                goToSlide(currentIndex - 1);
+            }
+        
+            // Attach event listeners to buttons
+            prevButton.addEventListener('click', prevSlide);
+            nextButton.addEventListener('click', nextSlide);
+        
+            // Indicator clicks
+            indicators.forEach((indicator, index) => {
+                indicator.addEventListener('click', () => {
+                    goToSlide(index);
+                });
+            });
+        
+            // Autoplay
+            let autoplayInterval = setInterval(nextSlide, 3000); // 3 seconds autoplay
+        
+            function stopAutoplay() {
+                clearInterval(autoplayInterval);
+            }
+        
+            function startAutoplay() {
+                autoplayInterval = setInterval(nextSlide, 3000);
+            }
+        
+            // Stop autoplay on hover
+            slider.addEventListener('mouseenter', stopAutoplay);
+            slider.addEventListener('mouseleave', startAutoplay);
+        });
+        
+    </script>
+</body>
+</html>

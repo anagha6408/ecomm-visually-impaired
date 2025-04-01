@@ -73,7 +73,8 @@ function updateUserOrder(productId, action, button) {
         if (data.message) {
             showVoiceAlert(data.message);
         }
-        
+        console.log("Checking total_items:", data.total_items, "cartItems:", data.cartItems);
+        updateCartIndicator(data.total_items || data.cartItems);
         // Check if we need to reload the page
         //if (action === "delete" || (action === "Decrease" && data.quantity === 0)) {
         //    console.log("Item removed, reloading page");
@@ -89,6 +90,9 @@ function updateUserOrder(productId, action, button) {
         if (itemRow) {
             itemRow.remove();
             updateCartSummary(); // Update totals
+            updateCartIndicator(data.total_items || data.cartItems);
+        } else {
+            console.warn(`Product ${productId} not found, skipping removal.`);
         }
         return;
     }
@@ -97,11 +101,6 @@ function updateUserOrder(productId, action, button) {
         if (document.querySelector('.cart-row')) {
             // We're on the cart page
             updateCartUI(productId, action, data.quantity);
-        } else {
-            // Update cart icon indicator
-            updateCartIndicator(data.total_items);
-            // We're on another page (like product view)
-            console.log("Not on cart page, no UI update needed");
         }
     })
     .catch(error => {
@@ -117,11 +116,15 @@ function updateUserOrder(productId, action, button) {
 }
 
 function updateCartIndicator(totalItems) {
-    const cartIndicator = document.querySelector('.cart-total');
+    console.log("Updating cart indicator to:", totalItems);
+    const cartIndicator = document.querySelector('#cart-total');
     if (cartIndicator) {
         cartIndicator.textContent = totalItems;
+    } else {
+        console.error("Cart indicator not found!");
     }
 }
+
 
 function updateCartUI(productId, action, serverQuantity) {
     console.log("Updating cart UI for product:", productId, "Action:", action);

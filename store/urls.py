@@ -19,5 +19,6 @@ urlpatterns = [
     path('search/', views.search, name='search'),
     path('profile/',views.profile,name="profile"),
     path('change_password/', views.change_password, name='change_password'),
+    path('rate_order/<int:order_id>/', views.rate_order, name='rate_order'),
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

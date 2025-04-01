@@ -67,7 +67,6 @@
                                     <th>Product</th>
                                     <th>Quantity</th>
                                     <th>Price</th>
-                                    <th>Subtotal</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -75,7 +74,6 @@
                                 <tr>
                                     <td>{{ item.product.name }}</td>
                                     <td>{{ item.quantity }}</td>
-                                    <td>${{ item.product.price|floatformat:2 }}</td>
                                     <td>${{ item.get_total|floatformat:2 }}</td>
                                 </tr>
                                 {% endfor %}

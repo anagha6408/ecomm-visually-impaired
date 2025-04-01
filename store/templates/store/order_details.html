@@ -2,6 +2,49 @@
 {% load static %}
 
 {% block content %}
+<style>
+    .star-rating {
+        display: flex;
+        flex-direction: row-reverse;
+        justify-content: flex-end;
+    }
+      
+    .star-rating input {
+        display: none;
+    }
+      
+    .star-rating label {
+        cursor: pointer;
+        font-size: 1.5rem;
+        color: #ddd;
+        margin-right: 5px;
+        transition: color 0.2s;
+    }
+      
+    /* Mouse hover behavior */
+    .star-rating label:hover,
+    .star-rating label:hover ~ label {
+        color: #ffc107;  /* Bootstrap's warning color for gold stars */
+    }
+    
+    /* Checked state */
+    .star-rating input:checked ~ label {
+        color: #ffc107;  /* Gold stars */
+    }
+    
+    /* Focus style for keyboard navigation */
+    .star-rating label:focus {
+        outline: 2px dotted #007bff;
+        outline-offset: 2px;
+    }
+    
+    /* Highlighted state for validation */
+    .validation-error {
+        border: 1px solid red;
+        padding: 10px;
+        border-radius: 5px;
+    }
+</style>
 <div class="container mt-4">
     <h2 class="mb-4" data-description="Detailed view of your specific order">Order Details</h2>
 
@@ -32,6 +75,41 @@
                     {{ order.order_status }}
                 </span>
             </p>
+            {% if order.order_status == 'Delivered' %}
+            <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+            
+            <div class="mt-4">
+                <h4 data-description="Rate this product below">Rate this product</h4>
+                <form method="post" action="{% url 'store:rate_order' order.id %}" id="rating-form">
+                    {% csrf_token %}
+                    
+                    {% for item in order.orderitem_set.all %}
+                    <div class="mb-3">
+                        <p data-description="Rate the product {{item.product.name}}"><strong>{{ item.product.name }}</strong></p>
+                        <div class="star-rating" data-description="Star rating selection for {{item.product.name}}">
+                            <input type="radio" name="rating_{{ item.product.id }}" value="5" id="5-{{ item.product.id }}">
+                            <label for="5-{{ item.product.id }}" class="fas fa-star" data-description="5 stars for {{item.product.name}}"></label>
+                            
+                            <input type="radio" name="rating_{{ item.product.id }}" value="4" id="4-{{ item.product.id }}">
+                            <label for="4-{{ item.product.id }}" class="fas fa-star" data-description="4 stars for {{item.product.name}}"></label>
+                            
+                            <input type="radio" name="rating_{{ item.product.id }}" value="3" id="3-{{ item.product.id }}">
+                            <label for="3-{{ item.product.id }}" class="fas fa-star" data-description="3 stars for {{item.product.name}}"></label>
+                            
+                            <input type="radio" name="rating_{{ item.product.id }}" value="2" id="2-{{ item.product.id }}">
+                            <label for="2-{{ item.product.id }}" class="fas fa-star" data-description="2 stars for {{item.product.name}}"></label>
+                            
+                            <input type="radio" name="rating_{{ item.product.id }}" value="1" id="1-{{ item.product.id }}">
+                            <label for="1-{{ item.product.id }}" class="fas fa-star" data-description="1 star for {{item.product.name}}"></label>
+                        </div>
+                    </div>
+                {% endfor %}
+                    
+                    <button type="submit" class="btn btn-primary mt-3" data-description="Submit your product ratings">Submit Ratings</button>
+                </form>
+            </div>
+        {% endif %}        
+
 
             <h5 class="mt-3" data-description="Shipping address and contact information">Shipping Details</h5>
             {% if shipping_address %}
@@ -105,6 +183,176 @@
         </div>
     </div>
 </div>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // First ensure all DOM elements are fully loaded
+        setTimeout(function() {
+            initializeStarRatings();
+        }, 100); // Small delay to ensure everything is ready
+        
+        function initializeStarRatings() {
+            const starRatings = document.querySelectorAll('.star-rating');
+            
+            // Function to apply star colors
+            function applyStarColors(container, selectedValue) {
+                const allLabels = container.querySelectorAll('label');
+                
+                allLabels.forEach(label => {
+                    const value = parseInt(label.getAttribute('for').split('-')[0]);
+                    
+                    // Apply colors directly and immediately
+                    if (value <= selectedValue) {
+                        label.style.color = '#ffc107'; // Gold star color
+                    } else {
+                        label.style.color = '#ddd';    // Default gray
+                    }
+                });
+                
+                // Remove any validation error styling
+                const parent = container.closest('.mb-3');
+                if (parent) {
+                    parent.classList.remove('validation-error');
+                }
+            }
+            
+            // Process each star rating container
+            starRatings.forEach(ratingContainer => {
+                const labels = ratingContainer.querySelectorAll('label');
+                const inputs = ratingContainer.querySelectorAll('input[type="radio"]');
+                
+                // Get the product ID from any label's for attribute
+                const productId = labels[0].getAttribute('for').split('-')[1];
+                
+                // First, handle direct radio button changes
+                inputs.forEach(input => {
+                    // Ensure the change event works properly
+                    input.addEventListener('change', function() {
+                        if (this.checked) {
+                            const value = parseInt(this.value);
+                            applyStarColors(ratingContainer, value);
+                        }
+                    });
+                    
+                    // Initialize any pre-selected ratings
+                    if (input.checked) {
+                        const value = parseInt(input.value);
+                        applyStarColors(ratingContainer, value);
+                    }
+                });
+                
+                // Then set up each label for mouse and keyboard interaction
+                labels.forEach(label => {
+                    // Make labels focusable for keyboard navigation
+                    label.setAttribute('tabindex', '0');
+                    
+                    // Visual feedback for focus
+                    label.addEventListener('focus', function() {
+                        this.style.outline = '2px dotted #007bff';
+                    });
+                    
+                    label.addEventListener('blur', function() {
+                        this.style.outline = 'none';
+                    });
+                    
+                    // Click handler - ensure immediate response
+                    label.addEventListener('click', function(e) {
+                        e.preventDefault(); // Prevent any default action
+                        
+                        const ratingValue = parseInt(this.getAttribute('for').split('-')[0]);
+                        const radioId = this.getAttribute('for');
+                        const radioInput = document.getElementById(radioId);
+                        
+                        if (radioInput) {
+                            radioInput.checked = true;
+                            applyStarColors(ratingContainer, ratingValue);
+                            console.log(`Clicked: ${ratingValue} stars for product ${productId}`);
+                        }
+                    });
+                    
+                    // Important: Make sure keyboard events work
+                    label.addEventListener('keydown', function(event) {
+                        const forAttr = this.getAttribute('for');
+                        const ratingValue = parseInt(forAttr.split('-')[0]);
+                        
+                        if (event.key === 'Enter' || event.key === ' ') {
+                            // Prevent default to avoid page scrolling
+                            event.preventDefault();
+                            event.stopPropagation();
+                            
+                            // Find and check the radio button
+                            const radioInput = document.getElementById(forAttr);
+                            if (radioInput) {
+                                radioInput.checked = true;
+                                applyStarColors(ratingContainer, ratingValue);
+                                console.log(`Keyboard selected: ${ratingValue} stars for product ${productId}`);
+                            }
+                        }
+                        else if (event.key === 'ArrowRight') {
+                            event.preventDefault();
+                            if (ratingValue > 1) {
+                                const nextLabel = ratingContainer.querySelector(`label[for="${ratingValue - 1}-${productId}"]`);
+                                if (nextLabel) nextLabel.focus();
+                            }
+                        }
+                        else if (event.key === 'ArrowLeft') {
+                            event.preventDefault();
+                            if (ratingValue < 5) {
+                                const nextLabel = ratingContainer.querySelector(`label[for="${ratingValue + 1}-${productId}"]`);
+                                if (nextLabel) nextLabel.focus();
+                            }
+                        }
+                    }, true); // Use capturing phase to ensure event is handled
+                });
+                
+                console.log(`Initialized star rating for product ${productId}`);
+            });
+            
+            // Log when all ratings are initialized
+            console.log("All star ratings initialized");
+        }
+        
+        // Handle form validation
+        const ratingForm = document.getElementById('rating-form');
+        if (ratingForm) {
+            ratingForm.addEventListener('submit', function(event) {
+                const productContainers = this.querySelectorAll('.mb-3');
+                let allRated = true;
+                
+                productContainers.forEach(container => {
+                    const inputs = container.querySelectorAll('input[type="radio"]');
+                    let isRated = false;
+                    
+                    inputs.forEach(input => {
+                        if (input.checked) {
+                            isRated = true;
+                        }
+                    });
+                    
+                    if (!isRated && inputs.length > 0) {
+                        allRated = false;
+                        container.classList.add('validation-error');
+                    } else {
+                        container.classList.remove('validation-error');
+                    }
+                });
+                
+                if (!allRated && productContainers.length > 0) {
+                    event.preventDefault();
+                    alert('Please rate all products before submitting.');
+                    
+                    // Focus on the first unrated product's first star
+                    const firstUnrated = ratingForm.querySelector('.validation-error');
+                    if (firstUnrated) {
+                        const firstStar = firstUnrated.querySelector('label');
+                        if (firstStar) {
+                            firstStar.focus();
+                        }
+                    }
+                }
+            });
+        }
+    });
+</script>
 
 {% include 'store/voice_control.html' %}
 {% include 'store/footer.html' %}

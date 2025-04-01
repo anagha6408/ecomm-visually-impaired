@@ -38,14 +38,19 @@ def collectionsview(request,slug):
 		return redirect('collection')
 	
 def productView(request, pro_slug, pro_name):
-		if(Product.objects.filter(slug=pro_slug)):
-			#products=Product.objects.filter(slug=pro_slug).first()
-			products = Product.objects.filter(slug=pro_slug, name=pro_name).first()
-			context={"products":products,"in_stock": products.quantity > 0}
-		else:
-			messages.error(request,"No product found")
-			return redirect("collection")
-		return render(request,"store/productView2.html",context)
+    product = Product.objects.filter(slug=pro_slug, name=pro_name).first()
+    if product:
+        ratings = Rating.objects.filter(product=product)  # Changed 'products' to 'product'
+        context = {
+            "products": product,  # Keep variable name for template compatibility
+            "in_stock": product.quantity > 0,
+            "ratings": ratings
+        }
+        return render(request, "store/productView2.html", context)
+    else:
+        messages.error(request, "No product found")
+        return redirect("collection")
+
 
 # to dynamically display the images from the  products folder in the silder
 def carousel_view(request):
@@ -265,3 +270,25 @@ def order_confirmation_view(request, order_id):
         send_order_confirmation_email(order)
     except Order.DoesNotExist:
         logger.error(f"Order with ID {order_id} not found")
+
+from django.shortcuts import redirect, get_object_or_404
+@login_required
+def rate_order(request, order_id):
+    order = get_object_or_404(Order, id=order_id, user=request.user)
+
+    # Ensure the order is delivered before allowing ratings
+    if order.order_status != 'Delivered':
+        messages.error(request, "You can only rate delivered orders.")
+        return redirect('cart:order_details', order_id=order.id)
+
+    for item in order.orderitem_set.all():
+        rating_value = request.POST.get(f'rating_{item.product.id}')
+        if rating_value:
+            Rating.objects.update_or_create(
+                user=request.user,
+                product=item.product,
+                defaults={'rating': int(rating_value)}
+            )
+
+    messages.success(request, "Your ratings have been submitted.")
+    return redirect('cart:order_details', order_id=order.id)

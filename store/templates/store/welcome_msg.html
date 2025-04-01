@@ -2,15 +2,12 @@
  
 <style>
     #welcome-message {
-        font-size: 2rem; /* Large font size */
-        font-weight: bold; /* Bold text */
-        color: #000; /* Black color for readability */
-        background-color: #f1f1f1; /* Light background for contrast */
-        padding: 20px;
-        border-radius: 10px;
-        margin: 10px;
-        text-align: center;
-        display: none; /* Initially hidden */
+        position: absolute;
+        left: -9999px; /* Moves it off-screen */
+        visibility: hidden; /* Ensures it's not visible */
+        height: 0;
+        width: 0;
+        overflow: hidden;
     }
 </style>
 

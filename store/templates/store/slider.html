@@ -4,43 +4,292 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Carousel Slider</title>
+    <title>Hero Slider</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" type="text/css" href="{% static 'css/slider.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        /* Reset any default margins/padding that might affect full width */
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            overflow-x: hidden;
+        }
+        
+        /* Container reset to ensure no default padding */
+        .container, .container-fluid, .row {
+            padding-left: 0;
+            padding-right: 0;
+            margin-left: 0;
+            margin-right: 0;
+            max-width: 100%;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+        }
+        
+        .hero-section {
+            background-color: #f7f9fc;
+            min-height: 600px;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            padding: 40px 0;
+            overflow: hidden;
+            position: relative;
+            margin: 0;
+            left: 0;
+            right: 0;
+        }
+        
+        .hero-content {
+            padding-left: 15px;
+        }
+        
+        .hero-content h1 {
+            font-size: 48px;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 20px;
+            line-height: 1.2;
+        }
+        
+        .hero-content p {
+            font-size: 18px;
+            color: #666;
+            margin-bottom: 30px;
+        }
+        
+        .btn-shop {
+            background-color: #333;
+            color: white;
+            padding: 12px 30px;
+            font-weight: 600;
+            border: none;
+            border-radius: 4px;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .btn-shop:hover {
+            background-color: #555;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            color: white;
+        }
+        
+        .product-image {
+            max-width: 100%;
+            max-height: 500px;
+            display: block;
+            margin: 0 auto;
+            transition: transform 0.5s ease;
+        }
+        
+        /* Hero Slider Controls */
+        .hero-slide {
+            display: none;
+            animation: fadeEffect 1s;
+            width: 100%;
+            margin: 0;
+            padding: 0;
+            position: absolute;
+            left: 0;
+            right: 0;
+        }
+        
+        .hero-slide.active {
+            display: flex;
+        }
+        
+        @keyframes fadeEffect {
+            from {opacity: 0.4}
+            to {opacity: 1}
+        }
+        
+        .hero-slider-controls {
+            position: absolute;
+            width: 100%;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            justify-content: space-between;
+            padding: 0 15px;
+            z-index: 100;
+        }
+        
+        .hero-control {
+            background-color: rgba(255, 255, 255, 0.7);
+            color: #333;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .hero-control:hover {
+            background-color: rgba(255, 255, 255, 0.9);
+            transform: scale(1.1);
+        }
+        
+        /* Hero Dots */
+        .hero-dots {
+            text-align: center;
+            position: absolute;
+            bottom: 20px;
+            width: 100%;
+        }
+        
+        .hero-dot {
+            display: inline-block;
+            height: 10px;
+            width: 10px;
+            margin: 0 5px;
+            background-color: #bbb;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .hero-dot.active {
+            background-color: #333;
+        }
+        
+        /* Force full width */
+        .row {
+            width: 100%;
+        }
+    </style>
 </head>
 <body>
-    <div id="carouselExampleIndicators" class="carousel slide" data-bs-ride="carousel">
-        <!-- Indicators -->
-        <div class="carousel-indicators">
-            <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
-            <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="1" aria-label="Slide 2"></button>
-            <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="2" aria-label="Slide 3"></button>
-        </div>
-
-        <!-- Slides -->
-        <div class="carousel-inner">
-            <div class="carousel-item active">
-                <img src="{% static 'carousel/bag.jpg' %}" class="d-block w-100" style="height:300px; object-fit:contain;" alt="Bag">
-            </div>
-            <div class="carousel-item">
-                <img src="{% static 'carousel/headphone.jpg' %}" class="d-block w-100" style="height:300px; object-fit:contain;" alt="Headphone">
-            </div>
-            <div class="carousel-item">
-                <img src="{% static 'carousel/watch.jpg' %}" class="d-block w-100" style="height:300px; object-fit:contain;" alt="Watch">
+    <!-- Hero Section with Slider - full width -->
+    <section class="hero-section">
+        <!-- Slide 1 -->
+        <div class="hero-slide active" id="slide1">
+            <div class="container-fluid">
+                <div class="row align-items-center">
+                    <div class="col-md-6 hero-content">
+                        <h1 data-description="YOUR PRODUCTS ARE GREAT.">YOUR PRODUCTS<br>ARE GREAT.</h1>
+                        <p data-description="Discover our exclusive collection of premium watches and accessories.">Discover our exclusive collection of premium watches and accessories.</p>
+                        <a href="{% url 'store:collection' %}" class="btn btn-shop" data-description="Click here to SHOP PRODUCT">SHOP PRODUCT</a>
+                    </div>
+                    
+                    <div class="col-md-6 position-relative">
+                        <img src="{% static 'IMG/banner-image.png' %}" alt="Smart Watch" class="product-image">
+                    </div>
+                </div>
             </div>
         </div>
-
-        <!-- Controls -->
-        <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="prev">
-            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-            <span class="visually-hidden">Previous</span>
-        </button>
-        <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="next">
-            <span class="carousel-control-next-icon" aria-hidden="true"></span>
-            <span class="visually-hidden">Next</span>
-        </button>        
-    </div>
-    <br>
+        
+        <!-- Slide 2 -->
+        <div class="hero-slide" id="slide2">
+            <div class="container-fluid">
+                <div class="row align-items-center">
+                    <div class="col-md-6 hero-content">
+                        <h1 data-description="PREMIUM QUALITY.">PREMIUM<br>QUALITY.</h1>
+                        <p data-description="Experience the finest craftsmanship in every product we offer.">Experience the finest craftsmanship in every product we offer.</p>
+                        <a href="{% url 'store:collection' %}" class="btn btn-shop" data-description="Click here to EXPLORE NOW">EXPLORE NOW</a>
+                    </div>
+                    
+                    <div class="col-md-6 position-relative">
+                        <img src="{% static 'IMG/product-item9.jpg' %}" alt="Premium Products" class="product-image">
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Slide 3 -->
+        <div class="hero-slide" id="slide3">
+            <div class="container-fluid">
+                <div class="row align-items-center">
+                    <div class="col-md-6 hero-content">
+                        <h1 data-description="NEW ARRIVALS.">NEW<br>ARRIVALS.</h1>
+                        <p data-description="Check out our latest collection of trending products just for you.">Check out our latest collection of trending products just for you.</p>
+                        <a href="{% url 'store:collection' %}" class="btn btn-shop" data-description="Click here to VIEW COLLECTION">VIEW COLLECTION</a>
+                    </div>
+                    
+                    <div class="col-md-6 position-relative">
+                        <img src="{% static 'IMG/product-item6.jpg' %}" alt="New Arrivals" class="product-image">
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Slider Controls -->
+        <div class="hero-slider-controls">
+            <div class="hero-control prev" onclick="changeSlide(-1)">
+                <i class="fas fa-chevron-left"></i>
+            </div>
+            <div class="hero-control next" onclick="changeSlide(1)">
+                <i class="fas fa-chevron-right"></i>
+            </div>
+        </div>
+        
+        <!-- Dot Indicators -->
+        <div class="hero-dots">
+            <span class="hero-dot active" onclick="currentSlide(1)"></span>
+            <span class="hero-dot" onclick="currentSlide(2)"></span>
+            <span class="hero-dot" onclick="currentSlide(3)"></span>
+        </div>
+    </section>
+    
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Hero Slider JavaScript
+        let slideIndex = 1;
+        showSlide(slideIndex);
+        
+        // Auto slide every 5 seconds
+        let slideInterval = setInterval(() => {
+            changeSlide(1);
+        }, 5000);
+        
+        function changeSlide(n) {
+            showSlide(slideIndex += n);
+            // Reset the interval when manually changing slides
+            clearInterval(slideInterval);
+            slideInterval = setInterval(() => {
+                changeSlide(1);
+            }, 5000);
+        }
+        
+        function currentSlide(n) {
+            showSlide(slideIndex = n);
+            // Reset the interval when manually selecting a slide
+            clearInterval(slideInterval);
+            slideInterval = setInterval(() => {
+                changeSlide(1);
+            }, 5000);
+        }
+        
+        function showSlide(n) {
+            let i;
+            let slides = document.getElementsByClassName("hero-slide");
+            let dots = document.getElementsByClassName("hero-dot");
+            
+            if (n > slides.length) {slideIndex = 1}
+            if (n < 1) {slideIndex = slides.length}
+            
+            for (i = 0; i < slides.length; i++) {
+                slides[i].classList.remove("active");
+            }
+            
+            for (i = 0; i < dots.length; i++) {
+                dots[i].classList.remove("active");
+            }
+            
+            slides[slideIndex-1].classList.add("active");
+            dots[slideIndex-1].classList.add("active");
+        }
+    </script>
 </body>
 </html>

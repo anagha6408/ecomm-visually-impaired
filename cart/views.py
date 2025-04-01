@@ -112,8 +112,11 @@ def updateItem(request):
         message = "Item quantity decreased!"
     elif action == "delete":
         orderItem.delete()
-        #message = "Item successfully removed from your cart!"
-        return JsonResponse({"message": "Item successfully removed from your cart!"}, safe=False)
+        cart_data = cartData(request)  # Fetch updated cart data
+        return JsonResponse({
+            "message": "Item successfully removed from your cart!",
+            "total_items": cart_data['cartItems'],  # Ensure this is included
+        }, safe=False)
     elif action == "add":
         if orderItem:
             # If item exists, just increase quantity
@@ -134,12 +137,12 @@ def updateItem(request):
 
 
     orderItem.save()
-
+    cart_data = cartData(request)
     if orderItem.quantity <= 0:
         orderItem.delete()
     
     print(f"OrderItem Updated: {orderItem.product.name}, Quantity: {orderItem.quantity}")
-    return JsonResponse({"message": message}, safe=False)
+    return JsonResponse({"message": message , "total_items": cart_data['cartItems'],}, safe=False)
 
 def processOrder(request):
     transaction_id = datetime.datetime.now().timestamp()
@@ -180,8 +183,14 @@ def past_orders(request):
     return render(request, 'store/past_orders.html', {'past_orders': past_orders})
 
 from django.shortcuts import render, get_object_or_404
+from store.models import Rating
 def order_details(request, order_id):
     order = get_object_or_404(Order, id=order_id)
+    rated_items = {}
+    for item in order.orderitem_set.all():
+        rating = Rating.objects.filter(user=request.user, product=item.product).first()
+        if rating:
+            rated_items[item.product.id] = rating.rating  
      # Create a shipping address-like context directly from the order
     shipping_address = {
         'shipping_name': order.full_name,
@@ -194,7 +203,8 @@ def order_details(request, order_id):
     
     context = {
         'order': order,
-        'shipping_address': shipping_address
+        'shipping_address': shipping_address,
+        'rated_items': rated_items
     }
     
     return render(request, 'store/order_details.html', context)

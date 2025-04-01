@@ -1,14 +1,16 @@
 {% extends 'store/main.html' %}
 {% load static %}
 {% block content %}
-<link rel="stylesheet" type="text/css" href="{% static 'css/main.css' %}">
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/checkout.css' %}">
+{% endblock %}
 <div class="container mt-4">
     <div class="row">
         <!-- Left Section: User & Shipping Form -->
         <div class="col-md-6">
             <div class="box-element">
                 <form method="POST" action="{% url 'payment:billing_info' %}">
-                    <h3 data-description="Billing & Shipping Details">Billing & Shipping Details</h3>
+                    <h3 data-description="Checkout page. This page has some special instructions press ALT plus H to hear them.">Checkout</h3>
                     {% csrf_token %}
 
                     {% if user_addresses %}
@@ -47,7 +49,9 @@
 
                     <!-- Accessibility Instructions -->
                     <div class="sr-only" aria-live="polite" id="instructions">
-                        Press Tab to navigate between form fields. Each field has a voice input button you can activate with Enter.
+                        Press Tab to navigate inside and to exit the form fields.
+                        Enter to select from the saved list and use Tabs to skip to Save and continue button.
+                        Each field has a voice input button you can activate with Enter.
                         Press Alt+H at any time to hear these instructions again.
                     </div>
 

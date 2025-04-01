@@ -1,7 +1,7 @@
 {% extends 'store/main.html' %}
 {% load static %}
 {% block content %}
-<link rel="stylesheet" href="{% static 'css/productView.css' %}">
+<link rel="stylesheet" href="{% static 'css/category.css' %}">
 
 <!-- Breadcrumb Navigation -->
 <div class="py-3-primary">
@@ -43,35 +43,66 @@
                             {% else %}
                                 <label class="badge bg-danger" data-description="Out of stock">Out of Stock</label>
                             {% endif %}
-                                <div class="col-md-9">
-                                    <br />
-                                    <button type="button" class="btn btn-primary me-3 float-start update-cart" 
-                                           data-product="{{products.id}}" data-action="add" 
-                                           style="border-radius: 10px;" data-description="Add to cart" 
-                                          >
-                                        Add to Cart <i class="fa fa-shopping-cart"></i>
+
+                            <!-- Collapsible Ratings Section with JavaScript Toggle -->
+                            <div class="mt-3">
+                                <h4>
+                                    Average Rating: {{ products.average_rating|floatformat:1 }} ⭐
+                                    <button class="btn btn-sm btn-outline-secondary ms-2" type="button" 
+                                            id="toggleRatingsBtn"
+                                            data-description="Click to show or hide ratings">
+                                        Show Rating Details
                                     </button>
-                                    <button type="button" class="btn btn-success float-start add-to-wishlist" 
-                                    data-product-id="{{ products.id }}" 
-                                    style="border-radius: 10px;"  data-description="Add to Wishlist">
-                                    Add to Wishlist <i class="fa fa-heart"></i>
-                                </button>
+                                </h4>
                                 
+                                <div id="ratingsSection" style="display: none;">
+                                    <div class="card card-body mt-2">
+                                        {% if ratings %}
+                                            {% for rating in ratings %}
+                                                <div class="mb-2">
+                                                    <p class="mb-0"><strong>{{ rating.user.username }}</strong>: {{ rating.rating }} ⭐</p>
+                                                    {% if rating.review %} 
+                                                        <p class="mb-0">{{ rating.review }}</p>
+                                                    {% endif %}
+                                                </div>
+                                                {% if not forloop.last %}<hr class="my-2">{% endif %}
+                                            {% endfor %}
+                                        {% else %}
+                                            <p>No ratings yet. Be the first to rate this product!</p>
+                                        {% endif %}
+                                    </div>
                                 </div>
+                            </div>
+
+                            <div class="col-md-9">
+                                <br />
+                                <button type="button" class="btn btn-primary me-3 float-start update-cart" 
+                                       data-product="{{products.id}}" data-action="add" 
+                                       style="border-radius: 10px;" data-description="Add to cart" 
+                                      >
+                                    Add to Cart <i class="fa fa-shopping-cart"></i>
+                                </button>
+                                <button type="button" class="btn btn-success float-start add-to-wishlist" 
+                                data-product-id="{{ products.id }}" 
+                                style="border-radius: 10px;"  data-description="Add to Wishlist">
+                                Add to Wishlist <i class="fa fa-heart"></i>
+                            </button>
+                            
                             </div>
                         </div>
                     </div>
-                    
-                    <!-- Product Description -->
-                    <div class="col-md-12 mt-4">
-                        <hr>
-                        <h3 data-description="Product description is Below">Description</h3>
-                        <p class="mt-3" data-description="{{ products.description }}">{{ products.description }}</p>
-                    </div>
+                </div>
+                
+                <!-- Product Description -->
+                <div class="col-md-12 mt-4">
+                    <hr>
+                    <h3 data-description="Product description is Below">Description</h3>
+                    <p class="mt-3" data-description="{{ products.description }}">{{ products.description }}</p>
                 </div>
             </div>
         </div>
     </div>
+</div>
 </div>
 <div id="loginPopup" class="popup-overlay" style="display: none;">
   <script type="text/javascript">
@@ -90,7 +121,27 @@
 <script src="{% static 'js/cart2.js' %}"></script>
 <script src="{% static 'js/wishlist.js' %}"></script>
 
-  </div>
+<!-- JavaScript for Ratings Toggle -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const toggleBtn = document.getElementById('toggleRatingsBtn');
+    const ratingsSection = document.getElementById('ratingsSection');
+    
+    if (toggleBtn && ratingsSection) {
+        toggleBtn.addEventListener('click', function() {
+            if (ratingsSection.style.display === 'none') {
+                ratingsSection.style.display = 'block';
+                toggleBtn.textContent = 'Hide Ratings';
+            } else {
+                ratingsSection.style.display = 'none';
+                toggleBtn.textContent = 'Show Ratings';
+            }
+        });
+    }
+});
+</script>
+
+</div>
 <!-- Include Voice Control Script -->
 {% include 'store/voice_control.html' %}
 {% include 'store/footer.html' %}
