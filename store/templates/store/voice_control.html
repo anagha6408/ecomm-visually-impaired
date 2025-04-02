@@ -9,10 +9,246 @@
     </button>
     <div style="display: flex; align-items: center; gap: 5px;">
         <button onclick="decreaseSpeed()" data-description="decrease Speed">←</button>
-        <span>Speed: <span id="speedValue">1x</span></span>
+        <span>Speed<span id="speedValue"> 1x </span></span>
         <button onclick="increaseSpeed()" data-description="increaseSpeed">→</button>
     </div>
-    <button onclick="resetNavigation()" data-description="Reset Navigation">
+    <button onclick="resetNavigation()" data-description="Reset Navigation Esc key">
         Reset (Esc)
     </button>
+     <!-- New Zoom Controls -->
+     <button onclick="zoomIn()" data-description="Zoom In + key">Zoom In (+)</button>
+     <button onclick="zoomOut()" data-description="Zoom Out - key">Zoom Out (-)</button>
+     <button onclick="resetZoom()" data-description="Reset Zoom 0 key">Reset Zoom</button>
 </div>
+<script>
+    // Create a container for the zoom functionality if it doesn't exist
+function setupZoomContainer() {
+    if (!document.getElementById('zoomContainer')) {
+        // Get all body contents
+        const bodyContents = Array.from(document.body.children);
+        
+        // Create a new container
+        const zoomContainer = document.createElement('div');
+        zoomContainer.id = 'zoomContainer';
+        zoomContainer.style.cssText = 'min-height: 100vh; transform-origin: center top; transition: transform 0.2s ease;';
+        
+        // Move all body contents (except the zoom container itself) into the new container
+        bodyContents.forEach(element => {
+            if (element !== zoomContainer) {
+                zoomContainer.appendChild(element);
+            }
+        });
+        
+        // Add the container to the body
+        document.body.appendChild(zoomContainer);
+    }
+    
+    return document.getElementById('zoomContainer');
+}
+
+let scale = 1; // Default scale level
+
+function zoomIn() {
+    const zoomContainer = setupZoomContainer();
+    scale += 0.1; // Increase zoom
+    zoomContainer.style.transform = `scale(${scale})`;
+    updateZoomIndicator();
+}
+
+function zoomOut() {
+    const zoomContainer = setupZoomContainer();
+    scale = Math.max(0.5, scale - 0.1); // Prevent zooming out too much
+    zoomContainer.style.transform = `scale(${scale})`;
+    updateZoomIndicator();
+}
+
+function resetZoom() {
+    const zoomContainer = setupZoomContainer();
+    scale = 1; // Reset zoom to default
+    zoomContainer.style.transform = "scale(1)";
+    updateZoomIndicator();
+}
+
+// Add a zoom indicator
+function createZoomIndicator() {
+    if (!document.getElementById('zoomIndicator')) {
+        const indicator = document.createElement('div');
+        indicator.id = 'zoomIndicator';
+        indicator.style.cssText = 'position: fixed; bottom: 70px; right: 20px; background: rgba(0,0,0,0.5); color: white; padding: 5px 10px; border-radius: 3px; z-index: 2000; pointer-events: none; opacity: 0; transition: opacity 0.3s ease;';
+        document.body.appendChild(indicator);
+    }
+    return document.getElementById('zoomIndicator');
+}
+
+function updateZoomIndicator() {
+    const indicator = createZoomIndicator();
+    indicator.textContent = `Zoom: ${Math.round(scale * 100)}%`;
+    indicator.style.opacity = '1';
+    
+    // Hide the indicator after 2 seconds
+    clearTimeout(window.zoomTimeout);
+    window.zoomTimeout = setTimeout(() => {
+        indicator.style.opacity = '0';
+    }, 2000);
+}
+
+// Add keyboard shortcuts for zooming
+document.addEventListener("keydown", function(event) {
+    if (event.key === "+" || (event.key === "=" && event.shiftKey)) {
+        zoomIn();
+        event.preventDefault();
+    } else if (event.key === "-") {
+        zoomOut();
+        event.preventDefault();
+    } else if (event.key === "0") {
+        resetZoom();
+        event.preventDefault();
+    }
+});
+
+// Initialize
+document.addEventListener("DOMContentLoaded", setupZoomContainer);
+
+// Page Navigation Functions
+let scrollStep = 100; // Default scroll amount in pixels
+
+// Function to scroll the page up
+function scrollUp() {
+    window.scrollBy({
+        top: -scrollStep,
+        behavior: 'smooth'
+    });
+    showScrollIndicator('↑');
+}
+
+// Function to scroll the page down
+function scrollDown() {
+    window.scrollBy({
+        top: scrollStep,
+        behavior: 'smooth'
+    });
+    showScrollIndicator('↓');
+}
+
+// Function to scroll the page left
+function scrollLeft() {
+    window.scrollBy({
+        left: -scrollStep,
+        behavior: 'smooth'
+    });
+    showScrollIndicator('←');
+}
+
+// Function to scroll the page right
+function scrollRight() {
+    window.scrollBy({
+        left: scrollStep,
+        behavior: 'smooth'
+    });
+    showScrollIndicator('→');
+}
+
+// Function to show scroll indicator
+function showScrollIndicator(text) {
+    // Create or get the scroll indicator
+    let indicator = document.getElementById('scrollIndicator');
+    if (!indicator) {
+        indicator = document.createElement('div');
+        indicator.id = 'scrollIndicator';
+        indicator.style.cssText = 'position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.6); color: white; padding: 15px; border-radius: 50%; font-size: 24px; z-index: 2000; opacity: 0; transition: opacity 0.2s ease; text-align: center; min-width: 50px; min-height: 50px; display: flex; align-items: center; justify-content: center;';
+        document.body.appendChild(indicator);
+    }
+    
+    // Update and show the indicator
+    indicator.textContent = text;
+    indicator.style.opacity = '1';
+    
+    // Hide the indicator after a short delay
+    clearTimeout(window.scrollTimeout);
+    window.scrollTimeout = setTimeout(() => {
+        indicator.style.opacity = '0';
+    }, 800);
+}
+
+// Function to scroll to the top of the page
+function scrollToTop() {
+    window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+    });
+    showScrollIndicator('Top');
+}
+
+// Function to scroll to the bottom of the page
+function scrollToBottom() {
+    window.scrollTo({
+        top: document.body.scrollHeight,
+        behavior: 'smooth'
+    });
+    showScrollIndicator('Bottom');
+}
+
+// Add keyboard shortcuts for navigation
+document.addEventListener("keydown", function(event) {
+    // Vertical navigation with arrow keys
+    if (event.key === "ArrowUp") {
+        scrollUp();
+        event.preventDefault();
+    } else if (event.key === "ArrowDown") {
+        scrollDown();
+        event.preventDefault();
+    } 
+    
+    // Horizontal navigation with Z and X keys instead (shouldn't conflict with voice controls)
+    else if (event.key === "z" || event.key === "Z") {
+        scrollLeft();
+        event.preventDefault();
+    } else if (event.key === "x" || event.key === "X") {
+        scrollRight();
+        event.preventDefault();
+    }
+    
+    // Quick navigation
+    else if (event.key === "Home") {
+        scrollToTop();
+        event.preventDefault();
+    } else if (event.key === "End") {
+        scrollToBottom();
+        event.preventDefault();
+    }
+});
+
+// Add navigation controls to the UI
+function addNavigationControls() {
+    const controls = document.querySelector('.speech-controls');
+    if (controls) {
+        const navSection = document.createElement('div');
+        navSection.style.cssText = 'display: flex; align-items: center; gap: 5px;';
+        
+        // Navigation buttons with keyboard hints
+        navSection.innerHTML = `
+            <button onclick="scrollUp()" data-description="Scroll Up">↑ (Up)</button>
+            <button onclick="scrollDown()" data-description="Scroll Down">↓ (Down)</button>
+            <button onclick="scrollLeft()" data-description="Scroll Left Z key">← (Z)</button>
+            <button onclick="scrollRight()" data-description="Scroll Right X key">→ (X)</button>
+            <button onclick="scrollToTop()" data-description="To Top Home key">Top</button>
+            <button onclick="scrollToBottom()" data-description="To Bottom End Key">Bottom</button>
+        `;
+        
+        // Check if navigation controls are already added
+        if (!document.querySelector('[data-description="Scroll Up"]')) {
+            controls.appendChild(navSection);
+        }
+    }
+}
+
+// Initialize navigation controls when the page loads
+document.addEventListener("DOMContentLoaded", function() {
+    setupZoomContainer();
+    addNavigationControls();
+    
+    // Force focus on document to ensure keyboard events work
+    document.documentElement.focus();
+});
+
+</script>

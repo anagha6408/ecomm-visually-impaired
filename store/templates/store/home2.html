@@ -84,6 +84,11 @@
         }
         
         .product-description {
+            display: -webkit-box;
+            -webkit-line-clamp: 3; /* Limits to 3 lines */
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
             font-size: 14px;
             color: #666;
             margin-bottom: 15px;
@@ -175,14 +180,15 @@
 </head>
 <body>
     <br>
-    <div class="container">
+    <!-- New Collections Section -->
+    <div class="container" id="new-collections">
         <h1 class="page-title" data-description="New Collections">New Collections</h1>
         <p class="description" data-description="Discover the latest trends and must-have styles! Shop our newest arrivals and refresh your wardrobe with our exclusive collection.">
             Discover the latest trends and must-have styles! Shop our newest arrivals and refresh your wardrobe with our exclusive collection.
         </p>
         
         <div class="slider-container">
-            <div class="products-grid">
+            <div class="products-grid" id="new-collections-grid">
                 <!-- Product 1 -->
                 <div class="product-card">
                     <img src="{% static 'IMG/banner-image-1.jpg' %}" alt="Soft Leather Jacket" class="product-image">
@@ -198,7 +204,7 @@
                     <img src="{% static 'IMG/banner-image-2.jpg' %}" alt="Soft Leather Jacket" class="product-image">
                     <div class="product-info">
                         <h2 class="product-title" data-description="Classic Trench Coat Duo">Classic Trench Coat Duo</h2>
-                        <p class="product-description"data-description="Elevate your wardrobe with this timeless trench coat, designed for effortless elegance. A staple piece that pairs well with both casual and formal outfits.">Elevate your wardrobe with this timeless trench coat, designed for effortless elegance.</p>
+                        <p class="product-description" data-description="Elevate your wardrobe with this timeless trench coat, designed for effortless elegance. A staple piece that pairs well with both casual and formal outfits.">Elevate your wardrobe with this timeless trench coat, designed for effortless elegance.</p>
                         <a href="{% url 'store:productView' 'New Collections' 'Classic Trench Coat Duo' %}" class="discover-button" data-description="Discover Now">Discover Now</a>
                     </div>
                 </div>
@@ -209,7 +215,7 @@
                     <div class="product-info">
                         <h2 class="product-title" data-description="Plaid Blazer Dress">Plaid Blazer Dress</h2>
                         <p class="product-description" data-description="A sophisticated plaid blazer dress that brings a balance of structure and flow, ideal for office wear or casual outings with a trendy edge.">A sophisticated plaid blazer dress that ideal for office wear or casual outings with a trendy edge.</p>
-                        <a href="{% url 'store:productView' 'New Collections' 'Plaid Blazer Dress' %}" class="discover-button"data-description="Discover Now">Discover Now</a>
+                        <a href="{% url 'store:productView' 'New Collections' 'Plaid Blazer Dress' %}" class="discover-button" data-description="Discover Now">Discover Now</a>
                     </div>
                 </div>
                 
@@ -219,7 +225,7 @@
                     <div class="product-info">
                         <h2 class="product-title" data-description="Faux Fur & Leather Fusion Jacket">Fur & Leather Fusion Jacket</h2>
                         <p class="product-description" data-description="Elevate your winter fashion with this bold fusion of faux fur and leather. A statement piece that exudes confidence and warmth.">Elevate your winter fashion with this bold fusion of faux fur and leather.</p>
-                        <a href="{% url 'store:productView' 'New Collections' 'Faux Fur & Leather Fusion Jacket' %}" class="discover-button"data-description="Discover Now">Discover Now</a>
+                        <a href="{% url 'store:productView' 'New Collections' 'Faux Fur & Leather Fusion Jacket' %}" class="discover-button" data-description="Discover Now">Discover Now</a>
                     </div>
                 </div>
                 
@@ -229,17 +235,18 @@
                     <div class="product-info">
                         <h2 class="product-title" data-description="Chic Wool Blend Cape Coat">Chic Wool Blend Cape Coat</h2>
                         <p class="product-description" data-description="A sophisticated cape coat featuring contrast details for a modern touch. Ideal for layering over both casual and formal outfits.">A sophisticated cape coat featuring contrast details for a modern touch.</p>
-                        <a href="{% url 'store:productView' 'New Collections' 'Chic Wool Blend Cape Coat' %}" class="discover-button"data-description="Discover Now">Discover Now</a>
+                        <a href="{% url 'store:productView' 'New Collections' 'Chic Wool Blend Cape Coat' %}" class="discover-button" data-description="Discover Now">Discover Now</a>
                     </div>
                 </div>
             </div>
             
+            <!-- Add navigation buttons for first slider -->
             <div class="slider-nav">
                 <button class="nav-button prev">←</button>
                 <button class="nav-button next">→</button>
             </div>
             
-            <div class="slider-indicators">
+            <div class="slider-indicators" id="new-collections-indicators">
                 <div class="indicator active" data-index="0"></div>
                 <div class="indicator" data-index="1"></div>
                 <div class="indicator" data-index="2"></div>
@@ -247,72 +254,149 @@
         </div>
     </div>
     
+    <!-- Special Collection Section -->
+    <div class="container" id="special-collection">
+        <h1 class="page-title" data-description="Special Collection">Special Collection</h1>
+        <p class="description" data-description="Hand-picked special products just for you!">
+            Hand-picked special products just for you!
+        </p>
+    
+        <div class="slider-container">
+            <div class="products-grid" id="special-collection-grid">
+                {% for products in special_products %}
+                    <div class="product-card">
+                        <img src="{{ products.product_image.url }}" alt="{{ products.name }}" class="product-image">
+                        <div class="product-info">
+                            <h2 class="product-title" data-description="{{ products.name }}">{{ products.name }}</h2>
+                            <p class="product-description" data-description="{{ products.description }}">{{ products.description }}</p>
+                            <a href="{% url 'store:productView' 'Special' products.name %}" data-description="Discover Now" class="discover-button">Discover Now</a>
+                        </div>
+                    </div>
+                {% empty %}
+                    <!-- Add this to debug -->
+                    <div>No special products found</div>
+                {% endfor %}
+            </div>
+            
+            <!-- Add navigation buttons for special products slider -->
+            <div class="slider-nav">
+                <button class="nav-button prev-special">←</button>
+                <button class="nav-button next-special">→</button>
+            </div>
+    
+            <div class="slider-indicators" id="special-collection-indicators">
+                {% for product in special_products %}
+                <div class="indicator {% if forloop.first %}active{% endif %}" data-index="{{ forloop.counter0 }}"></div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const slider = document.querySelector('.products-grid');
-            const slides = document.querySelectorAll('.product-card');
-            const prevButton = document.querySelector('.prev');
-            const nextButton = document.querySelector('.next');
-            const indicators = document.querySelectorAll('.indicator');
-        
+    document.addEventListener('DOMContentLoaded', function () {
+        // Function to initialize a slider
+        function initializeSlider(sliderContainer) {
+            const productsGrid = sliderContainer.querySelector('.products-grid');
+            const slides = productsGrid.querySelectorAll('.product-card');
+            
+            // Skip initialization if there are no slides
+            if (slides.length === 0) return;
+            
+            const prevButton = sliderContainer.querySelector('.prev, .prev-special');
+            const nextButton = sliderContainer.querySelector('.next, .next-special');
+            const indicators = sliderContainer.querySelectorAll('.indicator');
+            
             let currentIndex = 0;
-            const slideWidth = slides[0].offsetWidth; // Get single slide width
+            const slideWidth = slides[0].offsetWidth;
             const totalSlides = slides.length;
-            const slidesToShow = 3; // Adjust based on your layout
-            const maxIndex = totalSlides - slidesToShow; // Prevent empty space at the end
-        
+            
+            // Calculate how many slides to show based on screen size
+            let slidesToShow = 3; // Default for desktop
+            if (window.innerWidth <= 992) slidesToShow = 2;
+            if (window.innerWidth <= 576) slidesToShow = 1;
+            
+            // Maximum sliding index to prevent empty space
+            const maxIndex = Math.max(0, totalSlides - slidesToShow);
+            
             function goToSlide(index) {
                 if (index > maxIndex) {
                     index = 0; // Loop back to start
                 } else if (index < 0) {
-                    index = maxIndex; // Go to last valid index
+                    index = maxIndex; // Go to last valid position
                 }
-        
+                
                 currentIndex = index;
                 const offset = currentIndex * slideWidth;
-                slider.style.transform = `translateX(-${offset}px)`;
-        
+                productsGrid.style.transform = `translateX(-${offset}px)`;
+                
                 // Update indicators
                 indicators.forEach((indicator, i) => {
                     indicator.classList.toggle('active', i === currentIndex);
                 });
             }
-        
+            
             function nextSlide() {
                 goToSlide(currentIndex + 1);
             }
-        
+            
             function prevSlide() {
                 goToSlide(currentIndex - 1);
             }
-        
-            // Attach event listeners to buttons
-            prevButton.addEventListener('click', prevSlide);
-            nextButton.addEventListener('click', nextSlide);
-        
-            // Indicator clicks
+            
+            // Attach event listeners to buttons if they exist
+            if (prevButton) prevButton.addEventListener('click', prevSlide);
+            if (nextButton) nextButton.addEventListener('click', nextSlide);
+            
+            // Set up indicator clicks
             indicators.forEach((indicator, index) => {
                 indicator.addEventListener('click', () => {
                     goToSlide(index);
                 });
             });
-        
-            // Autoplay
+            
+            // Set up autoplay
             let autoplayInterval = setInterval(nextSlide, 3000); // 3 seconds autoplay
-        
+            
             function stopAutoplay() {
                 clearInterval(autoplayInterval);
             }
-        
+            
             function startAutoplay() {
                 autoplayInterval = setInterval(nextSlide, 3000);
             }
+            
+            // Pause autoplay on hover
+            productsGrid.addEventListener('mouseenter', stopAutoplay);
+            productsGrid.addEventListener('mouseleave', startAutoplay);
+            
+            // Handle window resize
+            window.addEventListener('resize', function() {
+                // Recalculate slidesToShow and maxIndex
+                if (window.innerWidth <= 576) {
+                    slidesToShow = 1;
+                } else if (window.innerWidth <= 992) {
+                    slidesToShow = 2;
+                } else {
+                    slidesToShow = 3;
+                }
+                
+                const newMaxIndex = Math.max(0, totalSlides - slidesToShow);
+                
+                // If current index is now out of bounds, adjust it
+                if (currentIndex > newMaxIndex) {
+                    currentIndex = newMaxIndex;
+                    goToSlide(currentIndex);
+                }
+            });
+        }
         
-            // Stop autoplay on hover
-            slider.addEventListener('mouseenter', stopAutoplay);
-            slider.addEventListener('mouseleave', startAutoplay);
-        });
+        // Initialize both sliders
+        const newCollectionsSlider = document.querySelector('#new-collections .slider-container');
+        const specialCollectionSlider = document.querySelector('#special-collection .slider-container');
         
+        if (newCollectionsSlider) initializeSlider(newCollectionsSlider);
+        if (specialCollectionSlider) initializeSlider(specialCollectionSlider);
+    });
     </script>
 </body>
 </html>

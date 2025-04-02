@@ -11,8 +11,9 @@ def index(request):
     return HttpResponse("Hello, world. You're at the store app.")
 
 def home(request):
-	context = {}    #to pass data
-	return render(request, 'store/home.html', context)
+    special_products = Product.objects.filter(category__name="Special")
+    context = { 'special_products': special_products,}    #to pass data
+    return render(request, 'store/home.html', context)
 #
 #def cart(request):
 #	context = {}
@@ -292,3 +293,4 @@ def rate_order(request, order_id):
 
     messages.success(request, "Your ratings have been submitted.")
     return redirect('cart:order_details', order_id=order.id)
+

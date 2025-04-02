@@ -2,8 +2,9 @@
 {% block content %}
     {% include 'store/slider.html' %}
     {% include 'store/welcome_msg.html' %}
-    {% include 'store/home2.html' %}
+    {% include 'store/home2.html' with special_products=special_products only %}
     {% include 'store/home_video.html' %}
     {% include 'store/footer.html' %}
     {% include 'store/voice_control.html' %}
 {% endblock content %}
+<!-- voice_control.html -->

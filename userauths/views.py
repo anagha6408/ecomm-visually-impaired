@@ -36,7 +36,6 @@ def login_view(request):
             username = form.cleaned_data.get("username")
             password = form.cleaned_data.get("password")
             user = authenticate(request, username=username, password=password)
-
             if user is not None:
                 login(request, user)
                 messages.success(request, f"Welcome back, {username}!")
@@ -52,6 +51,7 @@ def login_view(request):
     return render(request, "store/login.html", {"form": form})
 
 def logout_view(request):
+    username = request.user.username  # Get username before logout
     logout(request)
-    messages.success(request,("You have been logged out..."))
-    return redirect('store:home')
+    messages.info(request, f"You have been logged out, {username}!")
+    return redirect("store:home")

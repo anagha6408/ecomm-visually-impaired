@@ -1,12 +1,5 @@
 {% extends 'store/main.html' %}
 {% load static %}
-
-{% block title %}Sign Up{% endblock %}
-<!--
-{% block extra_css %}   THIS IS NOT WORKING CHECK FOR LOGIN PAGE TOO
-    <link rel="stylesheet" type="text/css" href="{% static 'css/sign-up.css' %}">
-{% endblock extra_css %}
--->
 {% block content %}
 <style>
     .pulsating-dot {
@@ -324,6 +317,7 @@
 <!-- Add Bootstrap Icons for the eye icon -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
 
-{% include 'store/voice_control.html' %}
+
 {% include 'store/footer.html' %}
+{% include 'store/voice_control.html' %}
 {% endblock content %}

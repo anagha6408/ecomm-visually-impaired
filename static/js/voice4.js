@@ -257,11 +257,9 @@ if (typeof window.voiceNavInitialized === 'undefined') {
                     case 'KeyR':
                         replaySpeech();
                         break;
-                    case 'ArrowDown':
                     case 'ArrowRight':
                         navigateTabs('next');
                         break;
-                    case 'ArrowUp':
                     case 'ArrowLeft':
                         navigateTabs('prev');
                         break;
