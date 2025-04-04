@@ -352,3 +352,7 @@ a:focus, button:focus, input:focus {
     max-width: 150px;
   }
 }
+
+html, body {
+  overflow-x: auto; /* allow horizontal scrolling */
+}

@@ -37,7 +37,7 @@
         <h2 class="text-center mb-4" data-description="Login to Your Account">Login</h2>
 
         {% if messages %}
-            <div class="alert alert-danger text-center" role="alert" data-description="{{ message }}">
+            <div id="voice-alert" class="alert alert-danger text-center" role="alert" data-description="{{ message }}">
                 {% for message in messages %}
                     {{ message }}
                 {% endfor %}
@@ -94,7 +94,7 @@
                     </div>
                     
                     {% if field.errors %}
-                        <div class="text-danger" data-description="Error messages for {{ field.label }}">
+                        <div class="text-danger voice-alert" data-description="Error messages for {{ field.label }}">
                             {% for error in field.errors %}
                                 <small data-description="Error: {{ error }}">{{ error }}</small><br>
                             {% endfor %}
@@ -111,7 +111,43 @@
         </p>
     </div>
 </div>
-
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        // Check for voice-alert ID (which contains the login error message)
+    const voiceAlertElement = document.getElementById("voice-alert");
+    
+    if (voiceAlertElement && voiceAlertElement.textContent.trim().length > 0) {
+        console.log("Found voice alert:", voiceAlertElement.textContent.trim());
+        
+        if ('speechSynthesis' in window) {
+            // Add a slight delay to ensure the page is fully loaded
+            setTimeout(() => {
+                const alertText = voiceAlertElement.textContent.trim();
+                const utterance = new SpeechSynthesisUtterance(alertText);
+                utterance.rate = 1;
+                utterance.pitch = 1;
+                utterance.volume = 1;
+                speechSynthesis.speak(utterance);
+                console.log("Speaking alert:", alertText);
+            }, 500);
+        } else {
+            console.error("Speech synthesis not supported in this browser");
+        }
+    }
+    
+        errorElements.forEach(alertElement => {
+            const alertText = alertElement.textContent.trim();
+            console.log("Alert text:", alertText);
+            if (alertText.length > 0 && 'speechSynthesis' in window) {
+                const utterance = new SpeechSynthesisUtterance(alertText);
+                utterance.rate = 1;
+                utterance.pitch = 1;
+                utterance.volume = 1;
+                speechSynthesis.speak(utterance);
+            }
+        });
+    });
+</script>
 <script>
     document.addEventListener("DOMContentLoaded", function() {
         if (!('webkitSpeechRecognition' in window)) {

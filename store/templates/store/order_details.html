@@ -86,26 +86,30 @@
                     {% for item in order.orderitem_set.all %}
                     <div class="mb-3">
                         <p data-description="Rate the product {{item.product.name}}"><strong>{{ item.product.name }}</strong></p>
-                        <div class="star-rating" data-description="Star rating selection for {{item.product.name}}">
-                            <input type="radio" name="rating_{{ item.product.id }}" value="5" id="5-{{ item.product.id }}">
-                            <label for="5-{{ item.product.id }}" class="fas fa-star" data-description="5 stars for {{item.product.name}}"></label>
+                        <div class="star-rating" role="radiogroup" aria-label="Star rating selection for {{item.product.name}}">
+                            <input type="radio" name="rating_{{ item.product.id }}" value="5" id="5-{{ item.product.id }}" aria-describedby="desc-5-{{ item.product.id }}">
+            <label for="5-{{ item.product.id }}" class="fas fa-star" id="desc-5-{{ item.product.id }}" tabindex="0" role="radio" aria-checked="false" data-description="5 stars for {{ item.product.name }}"> </label>
+                                    
+            <input type="radio" name="rating_{{ item.product.id }}" value="4" id="4-{{ item.product.id }}" aria-describedby="desc-4-{{ item.product.id }}">
+            <label for="4-{{ item.product.id }}" class="fas fa-star" id="desc-4-{{ item.product.id }}" tabindex="0" role="radio" aria-checked="false" data-description="4 stars for {{ item.product.name }}"> </label>
+
                             
-                            <input type="radio" name="rating_{{ item.product.id }}" value="4" id="4-{{ item.product.id }}">
-                            <label for="4-{{ item.product.id }}" class="fas fa-star" data-description="4 stars for {{item.product.name}}"></label>
-                            
-                            <input type="radio" name="rating_{{ item.product.id }}" value="3" id="3-{{ item.product.id }}">
-                            <label for="3-{{ item.product.id }}" class="fas fa-star" data-description="3 stars for {{item.product.name}}"></label>
-                            
-                            <input type="radio" name="rating_{{ item.product.id }}" value="2" id="2-{{ item.product.id }}">
-                            <label for="2-{{ item.product.id }}" class="fas fa-star" data-description="2 stars for {{item.product.name}}"></label>
-                            
-                            <input type="radio" name="rating_{{ item.product.id }}" value="1" id="1-{{ item.product.id }}">
-                            <label for="1-{{ item.product.id }}" class="fas fa-star" data-description="1 star for {{item.product.name}}"></label>
+                        <input type="radio" name="rating_{{ item.product.id }}" value="3" id="3-{{ item.product.id }}">
+                        <label for="3-{{ item.product.id }}" class="fas fa-star" tabindex="0" role="radio" aria-checked="false"
+                            data-description="Rate {{ item.product.name }} 3 stars. Click or press Enter to select."></label>
+                        
+                        <input type="radio" name="rating_{{ item.product.id }}" value="2" id="2-{{ item.product.id }}">
+                        <label for="2-{{ item.product.id }}" class="fas fa-star" tabindex="0" role="radio" aria-checked="false"
+                            data-description="Rate {{ item.product.name }} 2 stars. Click or press Enter to select."></label>
+                        
+                        <input type="radio" name="rating_{{ item.product.id }}" value="1" id="1-{{ item.product.id }}">
+                        <label for="1-{{ item.product.id }}" class="fas fa-star" tabindex="0" role="radio" aria-checked="false"
+                            data-description="Rate {{ item.product.name }} 1 star. Click or press Enter to select."></label>
+    
                         </div>
                     </div>
                 {% endfor %}
-                    
-                    <button type="submit" class="btn btn-primary mt-3" data-description="Submit your product ratings">Submit Ratings</button>
+                    <button type="submit" class="btn btn-primary mt-3" data-description="Click here to add  your product ratings">Click Here</button>
                 </form>
             </div>
         {% endif %}        
@@ -185,6 +189,15 @@
 </div>
 <script>
     // Add this script at the end of your HTML body or after your current script
+    document.querySelectorAll('.star-rating label').forEach(label => {
+        label.addEventListener('focus', () => {
+            const description = label.getAttribute('data-description');
+            if (description) {
+                speak(description); // your custom voice function
+            }
+        });
+    });
+    
 document.addEventListener('DOMContentLoaded', function() {
     console.log("DOM fully loaded, initializing keyboard navigation");
     
@@ -303,7 +316,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 if (!allRated) {
                     e.preventDefault();
-                    alert('Please rate all products before submitting.');
+                    alert('Please select the star rate of the products and click again .');
                     
                     if (firstUnratedContainer) {
                         const firstStarLabel = firstUnratedContainer.querySelector('label');

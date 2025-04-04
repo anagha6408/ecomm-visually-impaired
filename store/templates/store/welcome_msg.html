@@ -20,7 +20,7 @@
     Use Mouse to hover over elements and hear them read aloud navigate in Mouse mode. <br>
     Press the 'R' key to replay the last message. <br>
     Use the 'I' key to increase voice speed and the 'D' key to decrease it. <br>
-    Press the 'Esc' key to exit the current tab and return to the first tab. <br>
+    Press the 'Esc' key whenever to exit the current tab and return to the first tab. <br>
 </div>
 
 
@@ -35,15 +35,44 @@
             speakWelcome(); // Speak the message
         }
     });
-
     function speakWelcome() {
+        const alertElements = document.querySelectorAll("#voice-alert");
         const welcomeMessageElement = document.getElementById("welcome-message");
-        if (welcomeMessageElement) {
+        
+        // Check if there are alerts
+        if (alertElements.length > 0) {
+            // Process alerts first
+            let alertsProcessed = 0;
+            
+            alertElements.forEach(alertElement => {
+                const alertText = alertElement.textContent.trim();
+                if (alertText.length > 0 && 'speechSynthesis' in window) {
+                    const utterance = new SpeechSynthesisUtterance(alertText);
+                    
+                    // When the last alert finishes, speak the welcome message
+                    utterance.onend = function() {
+                        alertsProcessed++;
+                        if (alertsProcessed === alertElements.length && welcomeMessageElement) {
+                            // All alerts processed, now speak welcome message
+                            const welcomeMessage = welcomeMessageElement.textContent.trim();
+                            if (typeof speak === 'function') { 
+                                speak(welcomeMessage); 
+                            }
+                        }
+                    };
+                    
+                    utterance.rate = 1;
+                    utterance.pitch = 1;
+                    utterance.volume = 1;
+                    speechSynthesis.speak(utterance);
+                }
+            });
+        } 
+        // If no alerts, just speak the welcome message directly
+        else if (welcomeMessageElement) {
             const welcomeMessage = welcomeMessageElement.textContent.trim();
             if (typeof speak === 'function') { 
                 speak(welcomeMessage); 
-            } else {
-                console.warn("speak() function is not defined.");
             }
         }
     }

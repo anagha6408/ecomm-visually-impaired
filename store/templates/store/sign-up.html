@@ -37,7 +37,7 @@
         <h2 class="text-center mb-4" data-description="Create an Account">Create an Account</h2>
 
         {% if messages %}
-            <div class="alert alert-success text-center" role="alert" data-description="{{ message }}">
+            <div id="voice-alert" class="alert alert-success text-center" role="alert" data-description="{{ message }}">
                 {% for message in messages %}
                     {{ message }}
                 {% endfor %}
@@ -49,7 +49,7 @@
             Say the input for this field
         </div>
 
-        <form action="" method="POST" data-description="Registration form">
+        <form id="registrationForm" action="" method="POST" data-description="Registration form" onsubmit="return validateForm();" novalidate>
             {% csrf_token %}
 
             {% for field in form %}
@@ -94,7 +94,7 @@
                     </div>
                     
                     {% if field.errors %}
-                        <div class="text-danger" data-description="Error messages for {{ field.label }}">
+                        <div class="text-danger voice-alert" data-description="Error messages for {{ field.label }}">
                             {% for error in field.errors %}
                                 <small data-description="Error: {{ error }}">{{ error }}</small><br>
                             {% endfor %}
@@ -111,6 +111,52 @@
         </p>
     </div>
 </div>
+<script>
+    function validateForm() {
+        const form = document.getElementById('registrationForm');
+        const fields = form.querySelectorAll('input[required]');
+        let allValid = true;
+
+        fields.forEach(field => {
+            if (!field.value.trim()) {
+                allValid = false;
+
+                const fieldLabel = field.labels[0]?.innerText || field.name;
+                const message = `Please fill out the ${fieldLabel} field.`;
+
+                // Speak the validation message
+                if ('speechSynthesis' in window) {
+                    const utterance = new SpeechSynthesisUtterance(message);
+                    utterance.rate = 1;
+                    utterance.pitch = 1;
+                    utterance.volume = 1;
+                    speechSynthesis.speak(utterance);
+                }
+
+                // Focus the first empty field
+                field.focus();
+                return false; // stop after first error
+            }
+        });
+
+        return allValid;
+    }
+    document.addEventListener("DOMContentLoaded", function () {
+        const errorElements = document.querySelectorAll(".voice-alert");
+    
+        errorElements.forEach(alertElement => {
+            const alertText = alertElement.textContent.trim();
+            if (alertText.length > 0 && 'speechSynthesis' in window) {
+                const utterance = new SpeechSynthesisUtterance(alertText);
+                utterance.rate = 1;
+                utterance.pitch = 1;
+                utterance.volume = 1;
+                speechSynthesis.speak(utterance);
+            }
+        });
+    });
+    
+</script>
 
 <script>
     document.addEventListener("DOMContentLoaded", function() {
