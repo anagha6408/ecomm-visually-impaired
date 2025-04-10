@@ -168,6 +168,21 @@
                                 ${{ item.get_total }}
                             </td>
                         </tr>
+                        <tr>
+                            <td  style="border: none;">
+                                <a href="{% url 'cart:past_orders' %}" 
+                                class="btn btn-secondary mt-3" 
+                                data-description="Return to the list of past orders">
+                                 Back to Orders
+                             </a>
+                            </td>
+                            <td colspan="4"  style="border: none;">
+                                <button type="button" class="btn btn-secondary mt-3 update-cart" 
+                    data-product="{{ item.product.id}}" data-action="add" data-description="Click here to buy again" 
+                    >Click here to buy again!<i class="fa fa-shopping-cart"></i>
+            </button>
+                            </td>
+                        </tr>
                         {% empty %}
                         <tr>
                             <td colspan="5" class="text-center" data-description="No items found in this order">
@@ -178,15 +193,22 @@
                     </tbody>
                 </table>
             </div>
-
-            <a href="{% url 'cart:past_orders' %}" 
-               class="btn btn-secondary mt-3" 
-               data-description="Return to the list of past orders">
-                Back to Orders
-            </a>
         </div>
     </div>
 </div>
+<script type="text/javascript">
+    var user = "{{ request.user }}";
+    console.log("User status:", user);
+    {% if request.user.is_authenticated %}
+        user = "{{ request.user.username }}";
+    {% else %}
+        user = "AnonymousUser";
+    {% endif %}
+    console.log("User variable defined as:", user);
+    var csrftoken = "{{ csrf_token }}";
+</script>
+<script src="{% static 'js/cartVoice.js' %}"></script>
+<script src="{% static 'js/cart2.js' %}"></script>
 <script>
     // Add this script at the end of your HTML body or after your current script
     document.querySelectorAll('.star-rating label').forEach(label => {

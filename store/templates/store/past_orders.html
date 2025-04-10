@@ -4,6 +4,26 @@
 {% block content %}
 <div class="container mt-4">
     <h2 class="mb-4" data-description="My past orders page showing all previous purchases">My Past Orders</h2>
+    <form id="orderSearchForm" method="GET" action="{% url 'store:Order_search' %}">
+        <div class="input-group mb-3">
+            <input class="form-control text-dark bg-white border border-dark shadow-sm" 
+       type="search" id="orderSearchInput" name="searched"
+       placeholder="Search for Past Orders..." aria-label="Search"
+       data-description="Type here to Search for Past Orders...else can use voice search by navigating twice more.">
+
+            
+            <button class="btn btn-outline-success" type="submit"
+                    data-description="Click here for manual search of the entered">
+                Search
+            </button>
+            
+            <!-- Voice Search Button - Fixed with type="button" -->
+            <button id="orderVoiceSearchButton" type="button" class="btn btn-outline-secondary"
+                    data-description="Click to search using voice">
+                <i class="fas fa-microphone"></i>
+            </button>
+        </div>
+    </form>
     
     {% if past_orders %}
         <div class="table-responsive">
@@ -59,7 +79,140 @@
         </div>
     {% endif %}
 </div>
-
+<script>
+    // Store the current URL before any navigation
+    const currentPageUrl = window.location.href;
+    const isOrderSearchPage = currentPageUrl.includes('Order_search');
+    
+    document.addEventListener("DOMContentLoaded", function () {
+        const voiceSearchBtn = document.getElementById("orderVoiceSearchButton");
+        const searchInput = document.getElementById("orderSearchInput");
+        const searchForm = document.getElementById("orderSearchForm");
+        
+        // Log for debugging
+        console.log("Voice search for ORDER SEARCH initialized");
+        console.log("Current page URL:", currentPageUrl);
+        console.log("Is Order Search page:", isOrderSearchPage);
+        console.log("Voice button found:", voiceSearchBtn !== null);
+        console.log("Search input found:", searchInput !== null);
+        console.log("Search form found:", searchForm !== null);
+        console.log("Form action:", searchForm ? searchForm.action : "Form not found");
+        
+        // Confirm this is the Order_search page, not the product search
+        if (!searchForm) {
+            console.error("Order search form not found on page");
+            return;
+        }
+        
+        // Check for browser support
+        if ('webkitSpeechRecognition' in window) {
+            console.log("Speech recognition supported");
+            const recognition = new webkitSpeechRecognition();
+            recognition.continuous = false;
+            recognition.interimResults = false;
+            recognition.lang = 'en-US';
+        
+            // Direct event handler attachment
+            voiceSearchBtn.addEventListener('click', handleVoiceClick);
+            
+            function handleVoiceClick(event) {
+                console.log("Order voice button clicked");
+                event.preventDefault();
+                event.stopPropagation();
+                
+                // Create a temporary message
+                const feedbackMsg = document.createElement('div');
+                feedbackMsg.textContent = "Listening for order search...";
+                feedbackMsg.style.position = 'fixed';
+                feedbackMsg.style.top = '50%';
+                feedbackMsg.style.left = '50%';
+                feedbackMsg.style.transform = 'translate(-50%, -50%)';
+                feedbackMsg.style.padding = '15px';
+                feedbackMsg.style.backgroundColor = '#28a745';
+                feedbackMsg.style.color = 'white';
+                feedbackMsg.style.borderRadius = '5px';
+                feedbackMsg.style.zIndex = '9999';
+                document.body.appendChild(feedbackMsg);
+                
+                try {
+                    recognition.start();
+                    console.log("Recognition started for order search");
+                    // Visual feedback
+                    voiceSearchBtn.classList.add('active');
+                    voiceSearchBtn.style.backgroundColor = '#28a745';
+                } catch (e) {
+                    console.error("Error starting recognition:", e);
+                    feedbackMsg.textContent = "Error: " + e.message;
+                    feedbackMsg.style.backgroundColor = '#dc3545';
+                    setTimeout(() => {
+                        document.body.removeChild(feedbackMsg);
+                    }, 3000);
+                }
+                return false;
+            }
+        
+            recognition.onstart = function() {
+                console.log("Order recognition listening started");
+            };
+        
+            recognition.onresult = function (event) {
+                const transcript = event.results[0][0].transcript;
+                console.log("Order search speech recognized: ", transcript);
+                searchInput.value = transcript;
+                
+                // Reset button style
+                voiceSearchBtn.classList.remove('active');
+                voiceSearchBtn.style.backgroundColor = '';
+                
+                // Check and update form action to ensure it points to Order_search
+                if (!searchForm.action.includes('Order_search')) {
+                    console.log("Updating form action to Order_search");
+                    // Get the base URL (domain)
+                    const baseUrl = window.location.origin;
+                    // Set explicit action to Order_search
+                    searchForm.action = baseUrl + "{% url 'store:Order_search' %}";
+                }
+                
+                console.log("Final form action:", searchForm.action);
+                
+                // Submit form for order search
+                console.log("Submitting order search form now");
+                searchForm.submit();
+            };
+        
+            recognition.onerror = function (event) {
+                console.error("Order speech recognition error", event.error);
+                const feedbackMsg = document.querySelector('div[style*="position: fixed"]');
+                if (feedbackMsg) {
+                    feedbackMsg.textContent = "Error: " + event.error;
+                    feedbackMsg.style.backgroundColor = '#dc3545';
+                    setTimeout(() => {
+                        document.body.removeChild(feedbackMsg);
+                    }, 3000);
+                }
+                // Reset button style
+                voiceSearchBtn.classList.remove('active');
+                voiceSearchBtn.style.backgroundColor = '';
+            };
+            
+            recognition.onend = function() {
+                console.log("Order speech recognition ended");
+                const feedbackMsg = document.querySelector('div[style*="position: fixed"]');
+                if (feedbackMsg) {
+                    document.body.removeChild(feedbackMsg);
+                }
+                // Reset button style
+                voiceSearchBtn.classList.remove('active');
+                voiceSearchBtn.style.backgroundColor = '';
+            };
+        } else {
+            console.log("Speech recognition NOT supported");
+            voiceSearchBtn.style.display = "none";
+            alert("Your browser doesn't support speech recognition");
+        }
+    });
+</script>
+    
 {% include 'store/voice_control.html' %}
 {% include 'store/footer.html' %}
 

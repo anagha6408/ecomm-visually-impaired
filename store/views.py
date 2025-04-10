@@ -294,3 +294,26 @@ def rate_order(request, order_id):
     messages.success(request, "Your ratings have been submitted.")
     return redirect('cart:order_details', order_id=order.id)
 
+@login_required
+def Order_search(request):
+    search_query = request.GET.get('searched', '')
+    print("Search query:", search_query)
+    while search_query and search_query[-1] in '.,;:!?"\'':
+        search_query = search_query[:-1]
+        
+    user_orders = Order.objects.filter(user=request.user, complete=True)
+    print("Total orders:", user_orders.count())
+
+    if search_query:
+        filtered_orders = user_orders.filter(
+            Q(transaction_id__icontains=search_query) |
+            Q(order_status__icontains=search_query) |
+            Q(payment_method__icontains=search_query)
+        )
+        print("Filtered orders:", filtered_orders.count())
+        user_orders = filtered_orders
+
+    context = {
+        'past_orders': user_orders.order_by('-date_ordered'),
+    }
+    return render(request, 'store/past_orders.html', context)
