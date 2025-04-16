@@ -1,27 +1,163 @@
 {% load static %}
 <script src="{% static 'js/voice4.js' %}"></script>
-<div class="speech-controls" style="position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); padding: 10px; background: #f5f5f5; border-radius: 5px; z-index: 1000; display: flex; gap: 15px; align-items: center;">
-    <button onclick="toggleSpeech()" id="toggleButton" data-description="Play or Pause">
-        Play/Pause (Space)
-    </button>
-    <button onclick="replaySpeech()" data-description="Replay">
-        Replay (R)
-    </button>
-    <div style="display: flex; align-items: center; gap: 5px;">
-        <button onclick="decreaseSpeed()" data-description="decrease Speed">←</button>
-        <span>Speed<span id="speedValue"> 1x </span></span>
-        <button onclick="increaseSpeed()" data-description="increaseSpeed">→</button>
-    </div>
-    <button onclick="resetNavigation()" data-description="Reset Navigation Esc key">
-        Reset (Esc)
-    </button>
-     <!-- New Zoom Controls -->
-     <button onclick="zoomIn()" data-description="Zoom In + key">Zoom In (+)</button>
-     <button onclick="zoomOut()" data-description="Zoom Out - key">Zoom Out (-)</button>
-     <button onclick="resetZoom()" data-description="Reset Zoom 0 key">Reset Zoom</button>
-</div>
+
 <script>
-    // Create a container for the zoom functionality if it doesn't exist
+// Create an isolated container for the navigation system
+function createIsolatedNavigationContainer() {
+    // Remove any existing isolated container
+    const existingContainer = document.getElementById('isolated-navigation-container');
+    if (existingContainer) {
+        existingContainer.remove();
+    }
+    
+    // Create a new container with reset CSS
+    const container = document.createElement('div');
+    container.id = 'isolated-navigation-container';
+    
+    // Shadow DOM approach - this creates an isolated CSS environment
+    const shadowRoot = container.attachShadow({ mode: 'open' });
+    
+    // Reset CSS for the shadow DOM
+    const style = document.createElement('style');
+    style.textContent = `
+        /* CSS Reset for navigation components */
+        :host {
+            all: initial;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-size: 14px;
+            color: #333;
+        }
+        
+        /* Navigation control styles */
+        .speech-controls {
+            position: fixed !important;
+            bottom: 20px !important;
+            left: 50% !important;
+            transform: translateX(-50%) !important;
+            padding: 10px !important;
+            background: #f5f5f5 !important;
+            border-radius: 5px !important;
+            z-index: 100000 !important; /* Very high z-index to ensure visibility */
+            display: flex !important;
+            gap: 15px !important;
+            align-items: center !important;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3) !important;
+            width: auto !important;
+            min-width: 300px !important;
+            max-width: 90% !important;
+            overflow-x: auto !important;
+        }
+        
+        /* Button styles that can't be overridden */
+        button {
+            padding: 8px 12px !important;
+            background: #4285f4 !important;
+            color: white !important;
+            border: none !important;
+            border-radius: 4px !important;
+            cursor: pointer !important;
+            font-weight: bold !important;
+            font-size: 14px !important;
+            line-height: 1.5 !important;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2) !important;
+            transition: background 0.2s !important;
+            white-space: nowrap !important;
+            min-height: 36px !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+        }
+        
+        button:hover {
+            background: #3367d6 !important;
+        }
+        
+        /* Section for navigation controls */
+        .nav-section {
+            display: flex !important;
+            align-items: center !important;
+            gap: 5px !important;
+        }
+        
+        /* Speed control styles */
+        .speed-control {
+            display: flex !important;
+            align-items: center !important;
+            gap: 5px !important;
+            background: rgba(0,0,0,0.05) !important;
+            padding: 5px 8px !important;
+            border-radius: 4px !important;
+        }
+        
+        /* Indicators */
+        .indicator {
+            position: fixed !important;
+            background: rgba(0,0,0,0.7) !important;
+            color: white !important;
+            padding: 15px !important;
+            border-radius: 10px !important;
+            z-index: 200000 !important;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5) !important;
+            font-size: 16px !important;
+            text-align: center !important;
+        }
+        
+        /* Page indicator */
+        #pageIndicator {
+            top: 50% !important;
+            left: 50% !important;
+            transform: translate(-50%, -50%) !important;
+            min-width: 300px !important;
+        }
+        
+        /* Scroll indicator */
+        #scrollIndicator {
+            top: 50% !important;
+            left: 50% !important;
+            transform: translate(-50%, -50%) !important;
+            min-width: 50px !important;
+            min-height: 50px !important;
+            border-radius: 50% !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            opacity: 0;
+            transition: opacity 0.2s ease !important;
+        }
+        
+        /* Zoom indicator */
+        #zoomIndicator {
+            bottom: 70px !important;
+            right: 20px !important;
+            padding: 5px 10px !important;
+            border-radius: 3px !important;
+            pointer-events: none !important;
+            opacity: 0;
+            transition: opacity 0.3s ease !important;
+        }
+    `;
+    
+    // Add the style to the shadow root
+    shadowRoot.appendChild(style);
+    
+    // Create the navigation controls inside the shadow DOM
+    const controls = document.createElement('div');
+    controls.className = 'speech-controls';
+    shadowRoot.appendChild(controls);
+    
+    // Add the container to the document body
+    document.body.appendChild(container);
+    
+    return { container, shadowRoot, controls };
+}
+
+// Global variables
+let scale = 1; // Default scale level
+let scrollStep = 100; // Default scroll amount in pixels
+let shadowRoot, controls; // Will hold references to our shadow DOM elements
+let speechRate = 1; // Default speech rate
+
+// Create a container for the zoom functionality if it doesn't exist
 function setupZoomContainer() {
     if (!document.getElementById('zoomContainer')) {
         // Get all body contents
@@ -32,9 +168,9 @@ function setupZoomContainer() {
         zoomContainer.id = 'zoomContainer';
         zoomContainer.style.cssText = 'min-height: 100vh; transform-origin: center top; transition: transform 0.2s ease;';
         
-        // Move all body contents (except the zoom container itself) into the new container
+        // Move all body contents (except the zoom container itself and our navigation container) into the new container
         bodyContents.forEach(element => {
-            if (element !== zoomContainer) {
+            if (element !== zoomContainer && element.id !== 'isolated-navigation-container') {
                 zoomContainer.appendChild(element);
             }
         });
@@ -46,8 +182,184 @@ function setupZoomContainer() {
     return document.getElementById('zoomContainer');
 }
 
-let scale = 1; // Default scale level
+// Function to create a button in the isolated container
+function createButton(text, onClick, description = "") {
+    const button = document.createElement('button');
+    button.textContent = text;
+    button.addEventListener('click', onClick);
+    
+    if (description) {
+        button.setAttribute('data-description', description);
+    }
+    
+    return button;
+}
 
+// Function to create indicator elements in the shadow DOM
+function createIndicator(id, initialStyle = {}) {
+    // Remove existing indicator if it exists
+    const existingIndicator = shadowRoot.getElementById(id);
+    if (existingIndicator) {
+        existingIndicator.remove();
+    }
+    
+    // Create new indicator
+    const indicator = document.createElement('div');
+    indicator.id = id;
+    indicator.className = 'indicator';
+    
+    // Apply additional styles
+    Object.keys(initialStyle).forEach(key => {
+        indicator.style[key] = initialStyle[key];
+    });
+    
+    // Add to shadow DOM
+    shadowRoot.appendChild(indicator);
+    
+    return indicator;
+}
+
+// Function to determine current page based on URL patterns
+function getCurrentPage() {
+    const url = window.location.href;
+    const path = window.location.pathname;
+    let pageName = "Unknown Page";
+    
+    // Extract page name from URL patterns based on your Django structure
+    if (path === "/" || path.includes('/store_home/')) {
+        pageName = "Home Page";
+    } else if (path.includes('/cart/')) {
+        pageName = "Shopping Cart";
+    } else if (path.includes('/checkout/')) {
+        pageName = "Checkout Page";
+    } else if (path.includes('/collections/') && path.split('/').filter(Boolean).length > 2) {
+        pageName = "Product Detail Page";
+        // Try to extract product name if available
+        const segments = path.split('/');
+        if (segments.length > 3) {
+            const productSlug = segments[segments.length - 1];
+            if (productSlug) {
+                pageName += `: ${decodeURIComponent(productSlug.replace(/-/g, ' '))}`;
+            }
+        }
+    } else if (path.includes('/collections/') || path.includes('/category/')) {
+        pageName = "Category Collection Page";
+        // Try to extract category name if available
+        const segments = path.split('/');
+        if (segments.length > 2) {
+            const categorySlug = segments[segments.length - 1];
+            if (categorySlug) {
+                pageName += `: ${decodeURIComponent(categorySlug.replace(/-/g, ' '))}`;
+            }
+        }
+    } else if (path.includes('/profile/') || path.includes('/edit_profile/')) {
+        pageName = "User Profile Page";
+    } else if (path.includes('/sign-up/')) {
+        pageName = "Registration Page";
+    } else if (path.includes('/login/')) {
+        pageName = "Login Page";
+    } else if (path.includes('/wishlist/view/')) {
+        pageName = "Wishlist Page";
+    } else if (path.includes('/payment_process') || path.includes('/billing_info')) {
+        pageName = "Payment Page";
+    } else if (path.includes('/past-orders/')) {
+        pageName = "Order History Page";
+    } else if (path.includes('/order/')) {
+        pageName = "Order Details Page";
+    } else if (path.includes('/search/')) {
+        pageName = "Search Results Page";
+        // Try to extract search query if available
+        const searchParams = new URLSearchParams(window.location.search);
+        const query = searchParams.get('q') || searchParams.get('query') || searchParams.get('search');
+        if (query) {
+            pageName += `: "${query}"`;
+        }
+    } else if (path.includes('/change_password/')) {
+        pageName = "Change Password Page";
+    }
+    
+    // Alternative method: try to extract from page title
+    if (pageName === "Unknown Page" && document.title) {
+        // Remove common site name suffixes from title
+        let title = document.title;
+        const siteName = window.location.hostname.replace(/www\.|\.com|\.org|\.net/g, '');
+        title = title.replace(new RegExp(` - ${siteName}$`, 'i'), '');
+        title = title.replace(new RegExp(` | ${siteName}$`, 'i'), '');
+        pageName = title;
+    }
+    
+    // Alternative method: try to find main heading
+    if (pageName === "Unknown Page") {
+        const h1 = document.querySelector('h1');
+        if (h1 && h1.textContent.trim()) {
+            pageName = h1.textContent.trim();
+        }
+    }
+    
+    return pageName;
+}
+
+// Function to announce the current page using speech synthesis
+function announceCurrentPage(pageName) {
+    // Check if speech synthesis is available
+    if ('speechSynthesis' in window) {
+        // Create a new speech synthesis utterance
+        const utterance = new SpeechSynthesisUtterance();
+        utterance.text = `You are currently on the ${pageName}`;
+        utterance.lang = 'en-US';
+        
+        // Use the current speech rate
+        utterance.rate = speechRate;
+        console.log("Speaking with rate:", speechRate);
+        
+        // Cancel any ongoing speech
+        window.speechSynthesis.cancel();
+        
+        // Speak the page name
+        window.speechSynthesis.speak(utterance);
+    } else {
+        console.warn("Speech synthesis not supported in this browser");
+    }
+}
+
+// Function to show current website page
+function showCurrentPage() {
+    const pageName = getCurrentPage();
+    const pathName = window.location.pathname;
+    
+    // Create indicator in shadow DOM
+    const pageIndicator = createIndicator('pageIndicator');
+    
+    // Create the content
+    pageIndicator.innerHTML = `
+        <h3 style="margin-top: 0; margin-bottom: 15px;">Current Page</h3>
+        <div style="font-weight: bold; font-size: 18px; margin-bottom: 15px;">${pageName}</div>
+        <div style="font-size: 14px; opacity: 0.8; margin-bottom: 10px;">Path: ${pathName}</div>
+        <div style="font-size: 14px; opacity: 0.8; margin-top: 10px;">Press ESC to close</div>
+    `;
+    
+    // Announce the current page using speech synthesis
+    announceCurrentPage(pageName);
+    
+    // Add an event listener to remove the indicator when ESC is pressed
+    const closeIndicator = function(e) {
+        if (e.key === "Escape") {
+            pageIndicator.remove();
+            document.removeEventListener('keydown', closeIndicator);
+        }
+    };
+    
+    document.addEventListener('keydown', closeIndicator);
+    
+    // Also automatically remove after 5 seconds
+    setTimeout(() => {
+        if (shadowRoot.getElementById('pageIndicator')) {
+            shadowRoot.getElementById('pageIndicator').remove();
+        }
+    }, 5000);
+}
+
+// Zoom functions
 function zoomIn() {
     const zoomContainer = setupZoomContainer();
     scale += 0.1; // Increase zoom
@@ -69,19 +381,16 @@ function resetZoom() {
     updateZoomIndicator();
 }
 
-// Add a zoom indicator
-function createZoomIndicator() {
-    if (!document.getElementById('zoomIndicator')) {
-        const indicator = document.createElement('div');
-        indicator.id = 'zoomIndicator';
-        indicator.style.cssText = 'position: fixed; bottom: 70px; right: 20px; background: rgba(0,0,0,0.5); color: white; padding: 5px 10px; border-radius: 3px; z-index: 2000; pointer-events: none; opacity: 0; transition: opacity 0.3s ease;';
-        document.body.appendChild(indicator);
-    }
-    return document.getElementById('zoomIndicator');
-}
-
 function updateZoomIndicator() {
-    const indicator = createZoomIndicator();
+    const indicator = shadowRoot.getElementById('zoomIndicator') || 
+                     createIndicator('zoomIndicator', {
+                         bottom: '70px',
+                         right: '20px',
+                         padding: '5px 10px',
+                         borderRadius: '3px',
+                         pointerEvents: 'none'
+                     });
+                     
     indicator.textContent = `Zoom: ${Math.round(scale * 100)}%`;
     indicator.style.opacity = '1';
     
@@ -92,27 +401,7 @@ function updateZoomIndicator() {
     }, 2000);
 }
 
-// Add keyboard shortcuts for zooming
-document.addEventListener("keydown", function(event) {
-    if (event.key === "+" || (event.key === "=" && event.shiftKey)) {
-        zoomIn();
-        event.preventDefault();
-    } else if (event.key === "-") {
-        zoomOut();
-        event.preventDefault();
-    } else if (event.key === "0") {
-        resetZoom();
-        event.preventDefault();
-    }
-});
-
-// Initialize
-document.addEventListener("DOMContentLoaded", setupZoomContainer);
-
-// Page Navigation Functions
-let scrollStep = 100; // Default scroll amount in pixels
-
-// Function to scroll the page up
+// Scroll functions
 function scrollUp() {
     window.scrollBy({
         top: -scrollStep,
@@ -121,7 +410,6 @@ function scrollUp() {
     showScrollIndicator('↑');
 }
 
-// Function to scroll the page down
 function scrollDown() {
     window.scrollBy({
         top: scrollStep,
@@ -130,33 +418,41 @@ function scrollDown() {
     showScrollIndicator('↓');
 }
 
-// Function to scroll the page left
 function scrollLeft() {
-    window.scrollBy({
-        left: -scrollStep,
+    // Get the current scroll position
+    const currentScrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
+    
+    // Force scroll to a new position
+    window.scrollTo({
+        left: Math.max(0, currentScrollLeft - scrollStep),
         behavior: 'smooth'
     });
     showScrollIndicator('←');
 }
 
-// Function to scroll the page right
 function scrollRight() {
-    window.scrollBy({
-        left: scrollStep,
+    // Get the current scroll position
+    const currentScrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
+    
+    // Get maximum possible scroll
+    const maxScrollLeft = document.documentElement.scrollWidth - document.documentElement.clientWidth;
+    
+    // Force scroll to a new position
+    window.scrollTo({
+        left: Math.min(maxScrollLeft, currentScrollLeft + scrollStep),
         behavior: 'smooth'
     });
     showScrollIndicator('→');
 }
 
-// Function to show scroll indicator
 function showScrollIndicator(text) {
-    // Create or get the scroll indicator
-    let indicator = document.getElementById('scrollIndicator');
+    // Create or get the scroll indicator in shadow DOM
+    let indicator = shadowRoot.getElementById('scrollIndicator');
     if (!indicator) {
-        indicator = document.createElement('div');
-        indicator.id = 'scrollIndicator';
-        indicator.style.cssText = 'position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.6); color: white; padding: 15px; border-radius: 50%; font-size: 24px; z-index: 2000; opacity: 0; transition: opacity 0.2s ease; text-align: center; min-width: 50px; min-height: 50px; display: flex; align-items: center; justify-content: center;';
-        document.body.appendChild(indicator);
+        indicator = createIndicator('scrollIndicator', {
+            fontSize: '24px',
+            textAlign: 'center'
+        });
     }
     
     // Update and show the indicator
@@ -170,7 +466,6 @@ function showScrollIndicator(text) {
     }, 800);
 }
 
-// Function to scroll to the top of the page
 function scrollToTop() {
     window.scrollTo({
         top: 0,
@@ -179,7 +474,6 @@ function scrollToTop() {
     showScrollIndicator('Top');
 }
 
-// Function to scroll to the bottom of the page
 function scrollToBottom() {
     window.scrollTo({
         top: document.body.scrollHeight,
@@ -188,67 +482,263 @@ function scrollToBottom() {
     showScrollIndicator('Bottom');
 }
 
-// Add keyboard shortcuts for navigation
-document.addEventListener("keydown", function(event) {
-    // Vertical navigation with arrow keys
-    if (event.key === "ArrowUp") {
-        scrollUp();
-        event.preventDefault();
-    } else if (event.key === "ArrowDown") {
-        scrollDown();
-        event.preventDefault();
-    } 
-    
-    // Horizontal navigation with Z and X keys instead (shouldn't conflict with voice controls)
-    else if (event.key === "z" || event.key === "Z") {
-        scrollLeft();
-        event.preventDefault();
-    } else if (event.key === "x" || event.key === "X") {
-        scrollRight();
-        event.preventDefault();
-    }
-    
-    // Quick navigation
-    else if (event.key === "Home") {
-        scrollToTop();
-        event.preventDefault();
-    } else if (event.key === "End") {
-        scrollToBottom();
-        event.preventDefault();
-    }
-});
+function resetNavigation() {
+    // Reset scroll position
+    window.scrollTo(0, 0);
+    showScrollIndicator('Reset');
+}
 
-// Add navigation controls to the UI
-function addNavigationControls() {
-    const controls = document.querySelector('.speech-controls');
-    if (controls) {
-        const navSection = document.createElement('div');
-        navSection.style.cssText = 'display: flex; align-items: center; gap: 5px;';
-        
-        // Navigation buttons with keyboard hints
-        navSection.innerHTML = `
-            <button onclick="scrollUp()" data-description="Scroll Up">↑ (Up)</button>
-            <button onclick="scrollDown()" data-description="Scroll Down">↓ (Down)</button>
-            <button onclick="scrollLeft()" data-description="Scroll Left Z key">← (Z)</button>
-            <button onclick="scrollRight()" data-description="Scroll Right X key">→ (X)</button>
-            <button onclick="scrollToTop()" data-description="To Top Home key">Top</button>
-            <button onclick="scrollToBottom()" data-description="To Bottom End Key">Bottom</button>
-        `;
-        
-        // Check if navigation controls are already added
-        if (!document.querySelector('[data-description="Scroll Up"]')) {
-            controls.appendChild(navSection);
+// Speed control functions
+function increaseSpeed() {
+    speechRate = Math.min(2, speechRate + 0.1);
+    console.log("Increasing speed to:", speechRate.toFixed(1)); // Debug
+    updateSpeedValue();
+}
+
+function decreaseSpeed() {
+    speechRate = Math.max(0.5, speechRate - 0.1);
+    console.log("Decreasing speed to:", speechRate.toFixed(1)); // Debug
+    updateSpeedValue();
+}
+
+function updateSpeedValue() {
+    const speedValue = shadowRoot.getElementById('speedValue');
+    if (speedValue) {
+        console.log("Updating speed display to:", speechRate.toFixed(1) + "x"); // Debug
+        speedValue.textContent = `${speechRate.toFixed(1)}x `;
+    } else {
+        console.warn("Speed value element not found in shadow DOM");
+        // Try to find it by directly querying the controls
+        const altSpeedValue = controls.querySelector('#speedValue');
+        if (altSpeedValue) {
+            console.log("Found speed value via alternate method");
+            altSpeedValue.textContent = `${speechRate.toFixed(1)}x `;
         }
+    }
+    
+    // Update speech rate for speech synthesis if needed
+    if ('speechSynthesis' in window) {
+        // Store the updated rate in a global variable that speech synthesis can access
+        window.currentSpeechRate = speechRate;
+    }
+    
+    // If your voice4.js has methods to update speed, call them here
+    // For example: window.updateVoiceSpeed(speechRate);
+}
+
+// Speech toggle functions - these need to be adapted to work with your voice4.js
+function toggleSpeech() {
+    // This should call your existing speech toggle function from voice4.js
+    // If your voice4.js exposes a global function, you can call it directly:
+    if (typeof window.toggleSpeech === 'function') {
+        window.toggleSpeech();
+    } else {
+        console.warn("toggleSpeech function not found in voice4.js");
     }
 }
 
-// Initialize navigation controls when the page loads
+function replaySpeech() {
+    // This should call your existing replay function from voice4.js
+    if (typeof window.replaySpeech === 'function') {
+        window.replaySpeech();
+    } else {
+        console.warn("replaySpeech function not found in voice4.js");
+    }
+}
+
+// Function to create horizontal scrollable area if needed
+function ensureHorizontalScrollable() {
+    // Check if horizontal scrolling is needed/possible
+    const bodyWidth = document.body.scrollWidth;
+    const viewportWidth = window.innerWidth;
+    
+    // If the page isn't naturally scrollable horizontally, we might need to make it so
+    if (bodyWidth <= viewportWidth) {
+        console.log("Enabling horizontal scroll capability");
+        // Add a temporary element to make the page wider
+        const testElement = document.createElement('div');
+        testElement.id = 'horizontal-scroll-test';
+        testElement.style.cssText = 'position: absolute; width: 120%; height: 1px; opacity: 0;';
+        document.body.appendChild(testElement);
+    }
+}
+
+// Function to set up all navigation controls in the isolated container
+function setupNavigationControls() {
+    // Clear existing controls
+    controls.innerHTML = '';
+    
+    // Play/Pause button
+    controls.appendChild(createButton('Play/Pause (Space)', toggleSpeech, 'Play or Pause'));
+    
+    // Replay button
+    controls.appendChild(createButton('Replay (R)', replaySpeech, 'Replay'));
+    
+    // Speed controls
+    const speedControl = document.createElement('div');
+    speedControl.className = 'speed-control';
+    
+    speedControl.appendChild(createButton('←', decreaseSpeed, 'decrease Speed'));
+    
+    // Add a label before the value
+    const speedLabel = document.createElement('span');
+    speedLabel.textContent = 'Speed ';
+    speedControl.appendChild(speedLabel);
+    
+    // Then add the value that will be updated
+    const speedValue = document.createElement('span');
+    speedValue.id = 'speedValue';
+    speedValue.textContent = `${speechRate.toFixed(1)}x `;
+    speedControl.appendChild(speedValue);
+    
+    speedControl.appendChild(createButton('→', increaseSpeed, 'increaseSpeed'));
+    
+    controls.appendChild(speedControl);
+    
+    // Reset button
+    controls.appendChild(createButton('Reset (Esc)', resetNavigation, 'Reset Navigation'));
+    
+    // Zoom controls
+    controls.appendChild(createButton('Zoom In (+)', zoomIn, 'Zoom In'));
+    controls.appendChild(createButton('Zoom Out (-)', zoomOut, 'Zoom Out'));
+    controls.appendChild(createButton('Zoom reset', resetZoom, 'Reset Zoom'));
+    
+    // Announce page button
+    controls.appendChild(createButton('? (P)', showCurrentPage, 'Announce Current Page'));
+    
+    // Navigation controls section
+    const navSection = document.createElement('div');
+    navSection.className = 'nav-section';
+    
+    navSection.appendChild(createButton('↑', scrollUp, 'Scroll Up'));
+    navSection.appendChild(createButton('↓', scrollDown, 'Scroll Down'));
+    navSection.appendChild(createButton('← (Z)', scrollLeft, 'Scroll Left'));
+    navSection.appendChild(createButton('→ (X)', scrollRight, 'Scroll Right'));
+    navSection.appendChild(createButton('Top', scrollToTop, 'To Top'));
+    navSection.appendChild(createButton('Bottom', scrollToBottom, 'To Bottom'));
+    
+    controls.appendChild(navSection);
+}
+
+// Add keyboard shortcuts for navigation and controls
+function setupKeyboardShortcuts() {
+    document.addEventListener("keydown", function(event) {
+        // Vertical navigation with arrow keys
+        if (event.key === "ArrowUp") {
+            scrollUp();
+            event.preventDefault();
+        } else if (event.key === "ArrowDown") {
+            scrollDown();
+            event.preventDefault();
+        } 
+        
+        // Horizontal navigation with Z and X keys
+        else if (event.key === "z" || event.key === "Z") {
+            scrollLeft();
+            event.preventDefault();
+        } else if (event.key === "x" || event.key === "X") {
+            scrollRight();
+            event.preventDefault();
+        }
+        
+        // Quick navigation
+        else if (event.key === "Home") {
+            scrollToTop();
+            event.preventDefault();
+        } else if (event.key === "End") {
+            scrollToBottom();
+            event.preventDefault();
+        } else if (event.key === "Escape") {
+            resetNavigation();
+            event.preventDefault();
+        } 
+        // Page identification - using 'p' for page information
+        else if (event.key === "p" || event.key === "P") {
+            showCurrentPage();
+            event.preventDefault();
+        }
+        // Zoom controls
+        else if (event.key === "+" || (event.key === "=" && event.shiftKey)) {
+            zoomIn();
+            event.preventDefault();
+        } else if (event.key === "-") {
+            zoomOut();
+            event.preventDefault();
+        } else if (event.key === "0") {
+            resetZoom();
+            event.preventDefault();
+        }
+        // Speech controls - space for play/pause, r for replay
+        else if (event.key === " ") {
+            toggleSpeech();
+            event.preventDefault();
+        } else if (event.key === "r" || event.key === "R") {
+            replaySpeech();
+            event.preventDefault();
+        }
+    }, true); // Added 'true' for the capture phase to ensure this handler runs first
+}
+
+// Setup URL change detection for page announcements
+function setupURLChangeDetection() {
+    // Monitor for URL changes (for single-page applications)
+    let lastUrl = location.href;
+    new MutationObserver(() => {
+        const url = location.href;
+        if (url !== lastUrl) {
+            lastUrl = url;
+            setTimeout(() => {
+                const pageName = getCurrentPage();
+                announceCurrentPage(pageName);
+            }, 1000);
+        }
+    }).observe(document, {subtree: true, childList: true});
+}
+
+// Initialize when the page loads
 document.addEventListener("DOMContentLoaded", function() {
+    // Create the isolated container and get references
+    const navContainer = createIsolatedNavigationContainer();
+    shadowRoot = navContainer.shadowRoot;
+    controls = navContainer.controls;
+    
+    // Setup the navigation system
     setupZoomContainer();
-    addNavigationControls();
+    setupNavigationControls();
+    setupKeyboardShortcuts();
+    ensureHorizontalScrollable();
+    setupURLChangeDetection();
+    
+    // Announce the page on initial load with a delay
+    setTimeout(() => {
+        const pageName = getCurrentPage();
+        announceCurrentPage(pageName);
+    }, 1000);
     
     // Force focus on document to ensure keyboard events work
     document.documentElement.focus();
 });
 
+// Make sure the navigation system is initialized even if DOMContentLoaded has already fired
+if (document.readyState === "complete" || document.readyState === "interactive") {
+    setTimeout(() => {
+        // Create the isolated container and get references
+        const navContainer = createIsolatedNavigationContainer();
+        shadowRoot = navContainer.shadowRoot;
+        controls = navContainer.controls;
+        
+        // Setup the navigation system
+        setupZoomContainer();
+        setupNavigationControls();
+        setupKeyboardShortcuts();
+        ensureHorizontalScrollable();
+        setupURLChangeDetection();
+        
+        // Announce the page on initial load with a delay
+        setTimeout(() => {
+            const pageName = getCurrentPage();
+            announceCurrentPage(pageName);
+        }, 1000);
+    }, 0);
+}
 </script>
