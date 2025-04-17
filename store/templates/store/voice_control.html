@@ -226,7 +226,11 @@ function getCurrentPage() {
     let pageName = "Unknown Page";
     
     // Extract page name from URL patterns based on your Django structure
-    if (path === "/" || path.includes('/store_home/')) {
+    if (path.includes('/cart/past-orders/')) {
+        pageName = "Order History Page";
+    } else if (path.includes('/cart/order/')) {
+        pageName = "Order Details Page";
+    } else if (path === "/" || path.includes('/store_home/')) {
         pageName = "Home Page";
     } else if (path.includes('/cart/')) {
         pageName = "Shopping Cart";
@@ -252,8 +256,10 @@ function getCurrentPage() {
                 pageName += `: ${decodeURIComponent(categorySlug.replace(/-/g, ' '))}`;
             }
         }
-    } else if (path.includes('/profile/') || path.includes('/edit_profile/')) {
+    } else if (path.includes('/profile/')) {
         pageName = "User Profile Page";
+    } else if (path.includes('/edit_profile/')) {
+        pageName = "Edit User Profile Page";
     } else if (path.includes('/sign-up/')) {
         pageName = "Registration Page";
     } else if (path.includes('/login/')) {
@@ -262,10 +268,6 @@ function getCurrentPage() {
         pageName = "Wishlist Page";
     } else if (path.includes('/payment_process') || path.includes('/billing_info')) {
         pageName = "Payment Page";
-    } else if (path.includes('/past-orders/')) {
-        pageName = "Order History Page";
-    } else if (path.includes('/order/')) {
-        pageName = "Order Details Page";
     } else if (path.includes('/search/')) {
         pageName = "Search Results Page";
         // Try to extract search query if available
@@ -308,9 +310,10 @@ function announceCurrentPage(pageName) {
         utterance.text = `You are currently on the ${pageName}`;
         utterance.lang = 'en-US';
         
-        // Use the current speech rate
-        utterance.rate = speechRate;
-        console.log("Speaking with rate:", speechRate);
+        // Use the current speech rate from voice4.js if available
+        const currentSpeed = typeof window.speechSpeed !== 'undefined' ? window.speechSpeed : speechRate;
+        utterance.rate = currentSpeed;
+        console.log("Speaking with rate:", currentSpeed);
         
         // Cancel any ongoing speech
         window.speechSynthesis.cancel();
@@ -488,79 +491,65 @@ function resetNavigation() {
     showScrollIndicator('Reset');
 }
 
-// Speed control functions
-function increaseSpeed() {
-    speechRate = Math.min(2, speechRate + 0.1);
-    console.log("Increasing speed to:", speechRate.toFixed(1)); // Debug
-    updateSpeedValue();
-}
-
-function decreaseSpeed() {
-    speechRate = Math.max(0.5, speechRate - 0.1);
-    console.log("Decreasing speed to:", speechRate.toFixed(1)); // Debug
-    updateSpeedValue();
-}
-
-function updateSpeedValue() {
-    const speedValue = shadowRoot.getElementById('speedValue');
-    if (speedValue) {
-        console.log("Updating speed display to:", speechRate.toFixed(1) + "x"); // Debug
-        speedValue.textContent = `${speechRate.toFixed(1)}x `;
-    } else {
-        console.warn("Speed value element not found in shadow DOM");
-        // Try to find it by directly querying the controls
-        const altSpeedValue = controls.querySelector('#speedValue');
-        if (altSpeedValue) {
-            console.log("Found speed value via alternate method");
-            altSpeedValue.textContent = `${speechRate.toFixed(1)}x `;
-        }
-    }
-    
-    // Update speech rate for speech synthesis if needed
-    if ('speechSynthesis' in window) {
-        // Store the updated rate in a global variable that speech synthesis can access
-        window.currentSpeechRate = speechRate;
-    }
-    
-    // If your voice4.js has methods to update speed, call them here
-    // For example: window.updateVoiceSpeed(speechRate);
-}
-
-// Speech toggle functions - these need to be adapted to work with your voice4.js
-function toggleSpeech() {
-    // This should call your existing speech toggle function from voice4.js
-    // If your voice4.js exposes a global function, you can call it directly:
+// Function to connect with voice4.js functions
+function UI_toggleSpeech() {
+    // Call function from voice4.js
     if (typeof window.toggleSpeech === 'function') {
         window.toggleSpeech();
-    } else {
-        console.warn("toggleSpeech function not found in voice4.js");
+        // Update UI after toggling
+        setTimeout(updateSpeedValue, 50);
     }
 }
 
 function replaySpeech() {
-    // This should call your existing replay function from voice4.js
     if (typeof window.replaySpeech === 'function') {
-        window.replaySpeech();
-    } else {
-        console.warn("replaySpeech function not found in voice4.js");
+        //window.replaySpeech();
     }
 }
 
-// Function to create horizontal scrollable area if needed
-function ensureHorizontalScrollable() {
-    // Check if horizontal scrolling is needed/possible
-    const bodyWidth = document.body.scrollWidth;
-    const viewportWidth = window.innerWidth;
-    
-    // If the page isn't naturally scrollable horizontally, we might need to make it so
-    if (bodyWidth <= viewportWidth) {
-        console.log("Enabling horizontal scroll capability");
-        // Add a temporary element to make the page wider
-        const testElement = document.createElement('div');
-        testElement.id = 'horizontal-scroll-test';
-        testElement.style.cssText = 'position: absolute; width: 120%; height: 1px; opacity: 0;';
-        document.body.appendChild(testElement);
+function UI_increaseSpeed() {
+    if (typeof window.increaseSpeed === 'function') {
+        window.increaseSpeed();
+        // Update UI after changing speed
+        setTimeout(updateSpeedValue, 50);
+    } else {
+        // Fallback implementation
+        speechRate = Math.min(2, speechRate + 0.1);
+        updateSpeedValue();
     }
+}
+
+function UI_decreaseSpeed() {
+    if (typeof window.decreaseSpeed === 'function') {
+        window.decreaseSpeed();
+        // Update UI after changing speed
+        setTimeout(updateSpeedValue, 50);
+    } else {
+        // Fallback implementation
+        speechRate = Math.max(0.5, speechRate - 0.1);
+        updateSpeedValue();
+    }
+}
+
+// Update the speed value display in the UI
+function updateSpeedValue() {
+    // Get the speed value element from the shadow DOM
+    const speedValueElement = shadowRoot.getElementById('speedValue');
+    if (speedValueElement) {
+        // Get current speed from voice4.js if available, otherwise use local speechRate
+        const currentSpeed = typeof window.speechSpeed !== 'undefined' ? 
+            window.speechSpeed : speechRate;
+            
+        // Update the display with formatted speed
+        speedValueElement.textContent = parseFloat(currentSpeed).toFixed(1) + 'x';
+        //console.log("Updated speed display to:", currentSpeed);
+    }
+}
+
+// Setup periodic sync with voice4.js
+function setupSpeedSyncInterval() {
+    // Check and update speed value every second to keep in sync
+    setInterval(updateSpeedValue, 1000);
 }
 
 // Function to set up all navigation controls in the isolated container
@@ -569,7 +558,7 @@ function setupNavigationControls() {
     controls.innerHTML = '';
     
     // Play/Pause button
-    controls.appendChild(createButton('Play/Pause (Space)', toggleSpeech, 'Play or Pause'));
+    controls.appendChild(createButton('Play/Pause (Space)', UI_toggleSpeech, 'Play or Pause'));
     
     // Replay button
     controls.appendChild(createButton('Replay (R)', replaySpeech, 'Replay'));
@@ -578,7 +567,7 @@ function setupNavigationControls() {
     const speedControl = document.createElement('div');
     speedControl.className = 'speed-control';
     
-    speedControl.appendChild(createButton('←', decreaseSpeed, 'decrease Speed'));
+    speedControl.appendChild(createButton('←', UI_decreaseSpeed, 'Decrease Speed'));
     
     // Add a label before the value
     const speedLabel = document.createElement('span');
@@ -588,10 +577,15 @@ function setupNavigationControls() {
     // Then add the value that will be updated
     const speedValue = document.createElement('span');
     speedValue.id = 'speedValue';
-    speedValue.textContent = `${speechRate.toFixed(1)}x `;
+    
+    // Initialize with current speed from voice4.js if available
+    const initialSpeed = typeof window.speechSpeed !== 'undefined' ? 
+        window.speechSpeed : speechRate;
+    speedValue.textContent = `${initialSpeed.toFixed(1)}x`;
+    
     speedControl.appendChild(speedValue);
     
-    speedControl.appendChild(createButton('→', increaseSpeed, 'increaseSpeed'));
+    speedControl.appendChild(createButton('→', UI_increaseSpeed, 'Increase Speed'));
     
     controls.appendChild(speedControl);
     
@@ -670,10 +664,15 @@ function setupKeyboardShortcuts() {
         }
         // Speech controls - space for play/pause, r for replay
         else if (event.key === " ") {
-            toggleSpeech();
+            // Use the voice4.js function if available
+            if (typeof window.toggleSpeech === 'function') {
+                window.toggleSpeech();
+            }
             event.preventDefault();
         } else if (event.key === "r" || event.key === "R") {
-            replaySpeech();
+            if (typeof window.replaySpeech === 'function') {
+                window.replaySpeech();
+            }
             event.preventDefault();
         }
     }, true); // Added 'true' for the capture phase to ensure this handler runs first
@@ -687,12 +686,30 @@ function setupURLChangeDetection() {
         const url = location.href;
         if (url !== lastUrl) {
             lastUrl = url;
-            setTimeout(() => {
+            // Uncommenting this would announce the page on URL changes
+            /*setTimeout(() => {
                 const pageName = getCurrentPage();
                 announceCurrentPage(pageName);
-            }, 1000);
+            }, 1000);*/
         }
     }).observe(document, {subtree: true, childList: true});
+}
+
+// Function to ensure horizontal scrollable area if needed
+function ensureHorizontalScrollable() {
+    // Check if horizontal scrolling is needed/possible
+    const bodyWidth = document.body.scrollWidth;
+    const viewportWidth = window.innerWidth;
+    
+    // If the page isn't naturally scrollable horizontally, we might need to make it so
+    if (bodyWidth <= viewportWidth) {
+        console.log("Enabling horizontal scroll capability");
+        // Add a temporary element to make the page wider
+        const testElement = document.createElement('div');
+        testElement.id = 'horizontal-scroll-test';
+        testElement.style.cssText = 'position: absolute; width: 120%; height: 1px; opacity: 0;';
+        document.body.appendChild(testElement);
+    }
 }
 
 // Initialize when the page loads
@@ -708,12 +725,13 @@ document.addEventListener("DOMContentLoaded", function() {
     setupKeyboardShortcuts();
     ensureHorizontalScrollable();
     setupURLChangeDetection();
+    setupSpeedSyncInterval(); // Keep UI in sync with voice4.js
     
     // Announce the page on initial load with a delay
-    setTimeout(() => {
+    {% comment %} setTimeout(() => {
         const pageName = getCurrentPage();
         announceCurrentPage(pageName);
-    }, 1000);
+    }, 1000); {% endcomment %}
     
     // Force focus on document to ensure keyboard events work
     document.documentElement.focus();
@@ -733,6 +751,7 @@ if (document.readyState === "complete" || document.readyState === "interactive")
         setupKeyboardShortcuts();
         ensureHorizontalScrollable();
         setupURLChangeDetection();
+        setupSpeedSyncInterval(); // Keep UI in sync with voice4.js
         
         // Announce the page on initial load with a delay
         setTimeout(() => {

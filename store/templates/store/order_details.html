@@ -169,18 +169,14 @@
                             </td>
                         </tr>
                         <tr>
-                            <td  style="border: none;">
-                                <a href="{% url 'cart:past_orders' %}" 
-                                class="btn btn-secondary mt-3" 
-                                data-description="Return to the list of past orders">
-                                 Back to Orders
-                             </a>
-                            </td>
-                            <td colspan="4"  style="border: none;">
-                                <button type="button" class="btn btn-secondary mt-3 update-cart" 
-                    data-product="{{ item.product.id}}" data-action="add" data-description="Click here to buy again" 
-                    >Click here to buy again!<i class="fa fa-shopping-cart"></i>
-            </button>
+                            <td colspan="5" style="text-align:center; padding-top:10px;">
+                                <button type="button" class="btn btn-secondary update-cart" 
+                                        data-product="{{ item.product.id }}" 
+                                        data-action="add" 
+                                        data-description="Click here to buy again" 
+                                        style="max-width: 250px;">
+                                    Click here to buy again! <i class="fa fa-shopping-cart"></i>
+                                </button>
                             </td>
                         </tr>
                         {% empty %}
@@ -192,6 +188,13 @@
                         {% endfor %}
                     </tbody>
                 </table>
+                <div class="text-left">
+                    <a href="{% url 'cart:past_orders' %}" 
+                       class="btn btn-secondary mt-3" 
+                       data-description="Return to the list of past orders">
+                        Back to Order History
+                    </a>
+                </div>
             </div>
         </div>
     </div>

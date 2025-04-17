@@ -1,0 +1,65 @@
+{% load static %}
+
+<div class="voice-search-container my-4">
+    <div class="card">
+        <div class="card-body">
+            <h4>Voice Search & Filter</h4>
+            <p>Click the microphone button and try saying:</p>
+            <ul>
+                <li>"Show products under 500"</li>
+                <li>"Find items over 1000"</li>
+                <li>"Show trending products"</li>
+            </ul>
+            
+            <form id="searchForm" method="get" action="{% url 'store:search' %}">
+                <div class="input-group">
+                    <input type="text" id="searchInput" name="searched" class="form-control" 
+                           placeholder="Say something or type here...">
+                    <button type="button" id="voiceSearchBtn" class="btn btn-primary">
+                        <i class="fa fa-microphone"></i> Speak
+                    </button>
+                    <button type="submit" class="btn btn-success">
+                        <i class="fa fa-search"></i> Search
+                    </button>
+                </div>
+            </form>
+            
+            <!-- Active filters display -->
+            {% if min_price or max_price or trending %}
+            <div class="active-filters mt-3">
+                <h5>Active Filters:</h5>
+                <div class="d-flex flex-wrap">
+                    {% if min_price %}
+                    <span class="badge bg-info me-2 mb-2">
+                        Min Price: ₹{{ min_price }}
+                        <a href="?{% for key, value in request.GET.items %}{% if key != 'min_price' %}{{ key }}={{ value }}&{% endif %}{% endfor %}" 
+                           class="text-white ms-1">&times;</a>
+                    </span>
+                    {% endif %}
+                    
+                    {% if max_price %}
+                    <span class="badge bg-info me-2 mb-2">
+                        Max Price: ₹{{ max_price }}
+                        <a href="?{% for key, value in request.GET.items %}{% if key != 'max_price' %}{{ key }}={{ value }}&{% endif %}{% endfor %}" 
+                           class="text-white ms-1">&times;</a>
+                    </span>
+                    {% endif %}
+                    
+                    {% if trending %}
+                    <span class="badge bg-danger me-2 mb-2">
+                        Trending Products
+                        <a href="?{% for key, value in request.GET.items %}{% if key != 'trending' %}{{ key }}={{ value }}&{% endif %}{% endfor %}" 
+                           class="text-white ms-1">&times;</a>
+                    </span>
+                    {% endif %}
+                    
+                    <a href="{% url 'store:search' %}{% if query %}?searched={{ query }}{% endif %}" 
+                       class="btn btn-sm btn-outline-secondary mb-2">Clear All Filters</a>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script src="{% static 'js/voice-search.js' %}"></script>

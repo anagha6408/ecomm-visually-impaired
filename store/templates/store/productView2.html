@@ -38,11 +38,14 @@
                             <hr>
                             
                             <!-- Stock Status -->
-                            {% if in_stock %}
+                            {% if products.quantity > 2 %}
                                 <label class="badge bg-success" data-description="In stock">In Stock</label>
+                            {% elif products.quantity > 0 %}
+                                <label class="badge bg-warning text-dark" data-description="Limited stock">Limited</label>
                             {% else %}
                                 <label class="badge bg-danger" data-description="Out of stock">Out of Stock</label>
                             {% endif %}
+
 
                             <!-- Collapsible Ratings Section with JavaScript Toggle -->
                             <div class="mt-3">

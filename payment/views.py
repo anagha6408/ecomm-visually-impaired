@@ -186,7 +186,12 @@ def payment_success(request):
         # IMPORTANT: Mark the order as complete
         order.complete = True
         order.save()
-        
+        # Decrease product stock after successful payment
+        for item in items:
+            product = item.product
+            product.quantity -= item.quantity
+            product.save()
+
         # Get the selected shipping address from session instead of most recent
         selected_address_id = request.session.get('selected_address_id')
         if selected_address_id:
@@ -315,6 +320,12 @@ def paypal_success(request):
         
         # Save the order
         order.save()
+        # Decrease product stock after successful payment
+        for item in items:
+            product = item.product
+            product.quantity -= item.quantity
+            product.save()
+
         send_order_confirmation_email(order)
         
         # Clear cart and session data - ONLY ONCE

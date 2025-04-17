@@ -80,36 +80,109 @@ from django.db.models import Q
 import re  # Import regex
 
 def search(request):
-    query = request.GET.get('searched', '').strip()
+    # Get search query and strip whitespace
+    query = request.GET.get('searched', '') or request.GET.get('q', '')
+    if query:
+        query = query.strip()
 
-    if not query:
-        messages.error(request, "Please enter a search term.")
-        return redirect('store:home')
+    # Get explicit filter parameters from GET
+    min_price = request.GET.get('min_price')
+    max_price = request.GET.get('max_price')
+    trending = request.GET.get('trending')
 
-    # Remove trailing punctuation (like periods, commas, etc.)
-    query = re.sub(r'[^\w\s]', '', query)  
+    # Try extracting price from natural language in the query
+    if query:
+        lowered_query = query.lower()
 
-    # Debugging output
-    print(f"Cleaned Search Query: {query}")
+        # Pattern: under/below/less than <number>
+        match_under = re.search(r'(under|below|less than)\s+(\d+)', lowered_query)
+        if match_under:
+            max_price = match_under.group(2)
+            print(f"Extracted max price from query: {max_price}")
 
-    # Search across multiple fields
-    searched = Product.objects.filter(
-        Q(name__icontains=query) |
-        Q(description__icontains=query) |
-        Q(small_description__icontains=query) |
-        Q(category__name__icontains=query) |
-        Q(tag__icontains=query) |
-        Q(meta_title__icontains=query) |
-        Q(meta_keywords__icontains=query) |
-        Q(meta_description__icontains=query)
-    ).distinct()
+        # Pattern: over/above/greater than <number>
+        match_over = re.search(r'(over|above|greater than)\s+(\d+)', lowered_query)
+        if match_over:
+            min_price = match_over.group(2)
+            print(f"Extracted min price from query: {min_price}")
 
-    print(f"Results Found: {searched.count()}")  # Debugging output
+        # Pattern: between <num1> and <num2>
+        match_between = re.search(r'between\s+(\d+)\s+(and|-)\s+(\d+)', lowered_query)
+        if match_between:
+            min_price = match_between.group(1)
+            max_price = match_between.group(3)
+            print(f"Extracted price range from query: {min_price} - {max_price}")
 
-    if not searched.exists():
-        messages.warning(request, f'No results found for "{query}".')
+    # Print debug info
+    print(f"Search query: '{query}'")
+    print(f"Min price: {min_price}, Max price: {max_price}, Trending: {trending}")
 
-    return render(request, 'store/search.html', {'searched': searched, 'query': query})
+    # Start with all available products
+    products = Product.objects.filter(status=False)  # status=False means "visible" or "active"
+
+    # Apply search keyword filters
+    if query:
+        # Remove price-related phrases to extract clean search keywords
+        cleaned_query = query.lower()
+        cleaned_query = re.sub(r'(under|below|less than|over|above|greater than|between)\s+\d+(\s+(and|-)\s+\d+)?', '', cleaned_query)
+        cleaned_query = re.sub(r'[^\w\s]', '', cleaned_query).strip()
+
+        # Remove meaningless generic terms
+        generic_words = {'show', 'products', 'items', 'find'}
+        filtered_words = [word for word in cleaned_query.split() if word not in generic_words]
+        cleaned_query = ' '.join(filtered_words)
+
+        print(f"Cleaned search keywords: '{cleaned_query}'")
+
+        if cleaned_query:
+            products = products.filter(
+                Q(name__icontains=cleaned_query) |
+                Q(description__icontains=cleaned_query) |
+                Q(small_description__icontains=cleaned_query) |
+                Q(category__name__icontains=cleaned_query) |
+                Q(tag__icontains=cleaned_query) |
+                Q(meta_title__icontains=cleaned_query) |
+                Q(meta_keywords__icontains=cleaned_query) |
+                Q(meta_description__icontains=cleaned_query)
+            )
+
+
+    # Apply price filters
+    if min_price:
+        try:
+            min_price_float = float(min_price)
+            print(f"Applying min price filter: {min_price_float}")
+            products = products.filter(selling_price__gte=min_price_float)
+        except (ValueError, TypeError):
+            print(f"Invalid min price: {min_price}")
+
+    if max_price:
+        try:
+            max_price_float = float(max_price)
+            print(f"Applying max price filter: {max_price_float}")
+            products = products.filter(selling_price__lte=max_price_float)
+        except (ValueError, TypeError):
+            print(f"Invalid max price: {max_price}")
+
+    # Apply trending filter
+    if trending and trending.lower() in ('true', 'yes', '1'):
+        products = products.filter(trending=True)
+
+    # Ensure distinct results
+    searched = products.distinct()
+
+    print(f"Found {searched.count()} products")
+
+    # Build context for the template
+    context = {
+        'searched': searched,
+        'query': query,
+        'min_price': min_price,
+        'max_price': max_price,
+        'trending': trending
+    }
+
+    return render(request, 'store/search.html', context)
 
 from django.contrib.auth.decorators import login_required
 @login_required(login_url='userauth:login')

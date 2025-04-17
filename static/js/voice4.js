@@ -2,7 +2,7 @@ if (typeof window.voiceNavInitialized === 'undefined') {
     window.voiceNavInitialized = true;
 
     let currentUtterance = null;
-    let speechSpeed = 1;
+    window.speechSpeed = 1;
     let isPaused = false;
     let isKeyboardMode = false;
     console.log("Voicewwww.js loaded");
@@ -570,3 +570,10 @@ if (typeof window.voiceNavInitialized === 'undefined') {
     document.head.appendChild(style);
 
 }
+
+// In the second file (voice4.js), expose these functions globally:
+window.toggleSpeech = toggleSpeech;
+window.replaySpeech = replaySpeech;
+window.increaseSpeed = increaseSpeed;
+window.decreaseSpeed = decreaseSpeed;
+window.speechSpeed = speechSpeed; // expose the speed variable
