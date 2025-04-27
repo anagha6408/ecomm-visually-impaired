@@ -264,6 +264,8 @@
                         
                         // Fix common email entry issues
                         processedText = processedText.replace(/(\w+)\.(\d+)@/g, '$1$2@'); // Fix things like Anna.123@gmail.com
+                    }else if (inputField.id.toLowerCase().includes("username")) {
+                        processedText = processedText.toLowerCase();
                     }
                     
                     // Special handling for passwords
