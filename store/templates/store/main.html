@@ -63,13 +63,13 @@
                     <form id="searchForm" method="GET" action="{% url 'store:search' %}">
                         <input class="form-control" type="search" id="searchInput" name="searched" placeholder="Search for products..." aria-label="Search" data-description="Type here to Search for products...else  can use voice search by navigating twice more.">
                         <button class="btn btn-outline-success" type="submit" data-description="Click here for manual search of the entered">Search</button>
-                        <!-- Voice Search Button -->
+                        <!-- Voice Search Button -->&nbsp;
                         <button type="button" class="btn" id="voiceSearchBtn" data-description="Click to search using voice">
                             <i class="fas fa-microphone"></i>
                         </button>
                          
                     </form>
-
+                    
                     <div class="form-inline">
                         {% if request.user.is_authenticated %}
                             <a href="{% url 'userauth:logout' %}" class="btn btn-danger" data-description="Click to Logout">
